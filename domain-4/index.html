@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدومين 4: هندسة البرومبت والمخرجات المنظمة — CCAF مرجع</title>
+  <meta name="description" content="Domain 4 overview: Prompt Engineering &amp; Structured Output — explicit criteria, few-shot prompting, tool use schemas, validation loops, batch processing, and multi-pass review for the CCAF exam.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-900 via-amber-800 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-12 space-y-6">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></span>
+      </div>
+
+      <div class="space-y-4">
+        <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-mono">
+          <i data-lucide="braces" class="w-4 h-4 text-amber-300"></i>
+          <span>Domain 4</span>
+        </div>
+        <h1 class="text-3xl md:text-5xl font-bold text-balance leading-tight">
+          <span class="lang-ar">هندسة البرومبت والمخرجات المنظمة</span>
+          <span class="lang-en">Prompt Engineering &amp; Structured Output</span>
+        </h1>
+        <p class="text-amber-100/90 text-lg max-w-3xl leading-relaxed">
+          <span class="lang-ar">كيف تكتب برومبتات دقيقة بمعايير صريحة، تضمن مخرجات ملتزمة بسكيما محددة، تبني حلقات تحقق وإعادة، وتوزع الشغل بين المعالجة الفورية والدفعات — عشان يصير Claude مكوّن موثوق داخل أنظمة الإنتاج.</span>
+          <span class="lang-en">How to write precise prompts with explicit criteria, guarantee schema-compliant output, build validation and retry loops, and split work between real-time and batch — so Claude becomes a dependable component inside production systems.</span>
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-300/40 rounded-xl px-4 py-2 font-semibold">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-amber-300"></i>
+          <span class="lang-ar">20% من المحتوى المحتسب</span>
+          <span class="lang-en">20% of scored content</span>
+        </span>
+        <span class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-4 py-2 font-semibold">
+          <i data-lucide="list-checks" class="w-4 h-4 text-amber-300"></i>
+          <span class="lang-ar">تقريباً 12 من 60 سؤال</span>
+          <span class="lang-en">~12 of 60 questions</span>
+        </span>
+      </div>
+
+      <div class="flex flex-wrap gap-2 text-xs font-mono" dir="ltr">
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">explicit criteria</span>
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">few-shot</span>
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">tool_use + JSON schema</span>
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">validation &amp; retry</span>
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">Batches API</span>
+        <span class="bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">multi-pass review</span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <span class="text-amber-200/80 flex items-center gap-1.5">
+          <i data-lucide="clapperboard" class="w-4 h-4"></i>
+          <span class="lang-ar">السيناريوهات اللي تختبر هذا الدومين:</span>
+          <span class="lang-en">Exam scenarios that lean on this domain:</span>
+        </span>
+        <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5">
+          <span class="font-mono text-amber-300">S5</span>
+          <span class="lang-ar"> — Claude Code في CI</span>
+          <span class="lang-en"> — Claude Code for CI</span>
+        </span>
+        <span class="bg-white/10 border border-white/20 rounded-lg px-3 py-1.5">
+          <span class="font-mono text-amber-300">S6</span>
+          <span class="lang-ar"> — استخراج البيانات المنظمة</span>
+          <span class="lang-en"> — Structured Data Extraction</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Domain summary ===== -->
+    <section id="summary" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="scan-text" class="w-5 h-5"></i></span>
+        <span class="lang-ar">ملخص الدومين</span><span class="lang-en">Domain summary</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>هذا الدومين يقيس شي واحد جوهري: هل تقدر تحوّل Claude من "مساعد يتكلم زين" إلى <b>مكوّن هندسي متوقع السلوك</b> داخل خط إنتاج؟ الأسئلة تدور حول خمس مهارات: كتابة معايير مراجعة صريحة بدل التعليمات الغامضة (لأن "كن متحفظاً" ما تحسّن الدقة)، استخدام أمثلة <span dir="ltr" class="font-mono">few-shot</span> للحالات الغامضة، فرض مخرجات منظمة عبر <span dir="ltr" class="font-mono">tool_use</span> مع JSON schemas، بناء حلقات تحقق وإعادة بتغذية راجعة عن الأخطاء، واختيار <span dir="ltr" class="font-mono">Message Batches API</span> للشغل غير العاجل ومعماريات المراجعة متعددة المرور للجودة.</p>
+        <p>العقلية اللي يكافئها الاختبار: تعامل مع النموذج كمكوّن له <b>عقد واضح</b> — عرّف المدخلات والمخرجات (معايير وسكيما)، صمّم للفشل (حقول nullable، تحقق، إعادة بمعلومات محددة)، احترم الاقتصاديات (دفعات بنص السعر للشغل الليلي)، ولا تخلي المولّد يحكم على شغله بنفسه. كل خيار "اطلب من النموذج يكون أدق" أو "جرّب مرة ثانية بدون تغيير" هو غالباً الجواب الخطأ.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>This domain measures one core thing: can you turn Claude from "an assistant that talks well" into an <b>engineering component with predictable behavior</b> inside a production pipeline? Questions revolve around five skills: writing explicit review criteria instead of vague instructions (because "be conservative" does not improve precision), using <span class="font-mono">few-shot</span> examples for ambiguous cases, enforcing structured output via <span class="font-mono">tool_use</span> with JSON schemas, building validation-and-retry loops with error feedback, and choosing the <span class="font-mono">Message Batches API</span> for latency-tolerant work plus multi-pass review architectures for quality.</p>
+        <p>The mindset it rewards: treat the model as a component with a <b>clear contract</b> — define inputs and outputs (criteria and schemas), design for failure (nullable fields, validation, retries with specific errors), respect the economics (half-price batches for overnight work), and never let the generator grade its own work. Any option shaped like "ask the model to be more accurate" or "just retry with no changes" is usually the wrong answer.</p>
+      </div>
+    </section>
+
+    <!-- ===== TOPIC TREE ===== -->
+    <section id="topic-tree" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="network" class="w-5 h-5"></i></span>
+        <span class="lang-ar">شجرة المواضيع</span><span class="lang-en">Topic tree</span>
+      </h2>
+      <p class="text-surface-600">
+        <span class="lang-ar">ست مهام رسمية تحت هذا الدومين — كل وحدة لها صفحة درس كاملة. ابدأ من 4.1 وامشِ بالترتيب، أو ادخل مباشرة على الموضوع اللي تحس أنه أضعف عندك.</span>
+        <span class="lang-en">Six official task statements under this domain — each has its own full lesson page. Start at 4.1 and go in order, or jump straight to your weakest topic.</span>
+      </p>
+
+      <!-- Root node -->
+      <div class="bg-gradient-to-bl from-amber-700 to-amber-900 text-white rounded-2xl p-5 flex items-center gap-4 shadow-md">
+        <span class="w-12 h-12 rounded-xl bg-white/15 border border-white/25 flex items-center justify-center shrink-0"><i data-lucide="braces" class="w-6 h-6 text-amber-200"></i></span>
+        <div>
+          <p class="font-mono text-amber-200 text-xs">DOMAIN 4 — 20%</p>
+          <p class="font-bold text-lg leading-snug"><span class="lang-ar">هندسة البرومبت والمخرجات المنظمة</span><span class="lang-en">Prompt Engineering &amp; Structured Output</span></p>
+        </div>
+      </div>
+
+      <!-- Branches: trunk (border-s) + horizontal connectors, all logical so it flips with dir -->
+      <div class="ms-9 border-s-2 border-amber-300 space-y-5 pb-1">
+
+        <!-- 4.1 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-1-explicit-criteria.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.1</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">معايير صريحة بدل التعليمات الغامضة</span>
+                  <span class="lang-en">Explicit criteria over vague instructions</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن كتابة معايير مراجعة تصنيفية ترفع الدقة، وليش الإيجابيات الكاذبة تدمر ثقة المطورين.</span>
+              <span class="lang-en">Master categorical review criteria that raise precision, and why false positives destroy developer trust.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">false positives</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">severity criteria</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">report vs skip</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4.2 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-2-few-shot.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.2</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">الأمثلة الموجهة Few-shot</span>
+                  <span class="lang-en">Few-shot prompting</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن بناء 2-4 أمثلة مستهدفة للحالات الغامضة تعرض التفكير، وتثبّت تنسيق المخرجات وتقلل الهلوسة.</span>
+              <span class="lang-en">Master building 2-4 targeted examples for ambiguous cases that show reasoning, lock output format, and reduce hallucination.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">2-4 examples</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">ambiguous cases</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">format demo</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">null extraction</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4.3 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-3-structured-output.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.3</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">المخرجات المنظمة عبر Tool Use والسكيما</span>
+                  <span class="lang-en">Structured output via tool use &amp; JSON schemas</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن أوثق طريقة لضمان مخرجات ملتزمة بالسكيما: أدوات الاستخراج، أوضاع tool_choice الثلاثة، وتصميم حقول تمنع التلفيق.</span>
+              <span class="lang-en">Master the most reliable route to schema-compliant output: extraction tools, the three tool_choice modes, and field design that prevents fabrication.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">tool_use</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">tool_choice</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">nullable</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">enum + other</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4.4 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-4-validation-retry.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.4</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">حلقات التحقق والإعادة والتغذية الراجعة</span>
+                  <span class="lang-en">Validation, retry &amp; feedback loops</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن إعادة المحاولة بتغذية راجعة عن الأخطاء، ومتى الإعادة ما تنفع، وحقول التصحيح الذاتي مثل calculated_total.</span>
+              <span class="lang-en">Master retry-with-error-feedback, when retries cannot help, and self-correction fields like calculated_total.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">error feedback</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">retry limits</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">conflict_detected</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4.5 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-5-batch-processing.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.5</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">استراتيجيات المعالجة بالدفعات</span>
+                  <span class="lang-en">Efficient batch processing strategies</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن متى تستخدم Message Batches API (توفير 50%، نافذة 24 ساعة)، حساب تكرار الإرسال، وإعادة إرسال الفاشل فقط.</span>
+              <span class="lang-en">Master when to use the Message Batches API (50% savings, 24-hour window), submission-frequency math, and resubmitting only failures.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">50% savings</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">24h window</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">custom_id</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4.6 -->
+        <div class="relative ps-8 pt-1">
+          <span class="absolute start-0 top-9 w-8 border-t-2 border-amber-300" aria-hidden="true"></span>
+          <a href="4-6-multipass-review.html" class="group block bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-5 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <span class="font-mono text-sm font-bold bg-amber-100 text-amber-800 rounded-lg px-2.5 py-1">4.6</span>
+                <h3 class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+                  <span class="lang-ar">معماريات المراجعة متعددة النسخ والمرور</span>
+                  <span class="lang-en">Multi-instance &amp; multi-pass review architectures</span>
+                </h3>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-amber-600 rtl:rotate-0 ltr:rotate-180 transition-colors shrink-0"></i>
+            </div>
+            <p class="text-sm text-surface-600 leading-relaxed">
+              <span class="lang-ar">تتقن ليش النسخة المستقلة تمسك أخطاء أكثر من المراجعة الذاتية، وتقسيم المراجعات الكبيرة لمرور لكل ملف + مرور تكاملي.</span>
+              <span class="lang-en">Master why an independent instance catches more than self-review, and splitting big reviews into per-file plus integration passes.</span>
+            </p>
+            <div class="flex flex-wrap gap-1.5 text-[11px] font-mono" dir="ltr">
+              <span class="bg-surface-100 rounded px-2 py-0.5">independent instance</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">per-file pass</span>
+              <span class="bg-surface-100 rounded px-2 py-0.5">confidence</span>
+            </div>
+          </a>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">شجرة المواضيع: جذر الدومين يتفرع لست مهام رسمية — كل بطاقة تفتح صفحة الدرس</span>
+        <span class="lang-en">Topic tree: the domain root branches into six official task statements — each card opens the lesson page</span>
+      </p>
+    </section>
+
+    <!-- ===== How it shows up on the exam ===== -->
+    <section id="exam-patterns" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center"><i data-lucide="crosshair" class="w-5 h-5"></i></span>
+        <span class="lang-ar">كيف يظهر في الاختبار</span><span class="lang-en">How it shows up on the exam</span>
+      </h2>
+      <p class="text-surface-600">
+        <span class="lang-ar">أسئلة هذا الدومين تجي بسيناريوهات CI واستخراج بيانات، والمشتتات لها أنماط ثابتة تقدر تتعلم ترفضها:</span>
+        <span class="lang-en">This domain's questions arrive wrapped in CI and data-extraction scenarios, and the distractors follow fixed patterns you can learn to reject:</span>
+      </p>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-3 bg-red-50/60 border border-red-100 rounded-xl p-4">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div class="text-sm leading-relaxed">
+            <span class="lang-ar">خيارات التعليمات الغامضة: "كن متحفظاً"، "بلّغ عن النتائج عالية الثقة فقط" — تخسر دائماً أمام المعايير التصنيفية الصريحة (بلّغ عن X وY، تجاهل Z).</span>
+            <span class="lang-en">Vague-instruction options: "be conservative", "only report high-confidence findings" — these always lose to explicit categorical criteria (report X and Y, skip Z).</span>
+          </div>
+        </li>
+        <li class="flex items-start gap-3 bg-red-50/60 border border-red-100 rounded-xl p-4">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div class="text-sm leading-relaxed">
+            <span class="lang-ar">خيارات "حوّل كل شي للدفعات عشان التوفير" — أي workflow حاجب (مثل فحص قبل الدمج) لازم يبقى synchronous مهما كان التوفير مغرياً.</span>
+            <span class="lang-en">"Switch everything to batch for the savings" options — any blocking workflow (like a pre-merge check) must stay synchronous no matter how tempting the discount.</span>
+          </div>
+        </li>
+        <li class="flex items-start gap-3 bg-red-50/60 border border-red-100 rounded-xl p-4">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div class="text-sm leading-relaxed">
+            <span class="lang-ar">خيارات "أعد المحاولة بقوة أكثر" لما تكون المعلومة أصلاً غير موجودة في المستند — الإعادة تصلح أخطاء التنسيق والهيكل، ما تخلق معلومات من العدم.</span>
+            <span class="lang-en">"Retry harder" options when the information simply is not in the document — retries fix format and structural errors, they do not conjure missing information.</span>
+          </div>
+        </li>
+        <li class="flex items-start gap-3 bg-red-50/60 border border-red-100 rounded-xl p-4">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div class="text-sm leading-relaxed">
+            <span class="lang-ar">خيارات "نموذج أقوى / نافذة سياق أكبر" لتغطية مشكلة معمارية — تشتت الانتباه في مراجعة 14 ملف حله تقسيم المرور، مو ترقية النموذج.</span>
+            <span class="lang-en">"Bigger model / larger context window" options papering over an architecture problem — attention dilution across a 14-file review is solved by splitting passes, not upgrading the model.</span>
+          </div>
+        </li>
+        <li class="flex items-start gap-3 bg-red-50/60 border border-red-100 rounded-xl p-4">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 shrink-0 mt-0.5"></i>
+          <div class="text-sm leading-relaxed">
+            <span class="lang-ar">خيارات "خل نفس الجلسة تراجع شغلها بعناية أكبر" — النموذج يحتفظ بسياق تفكيره وقت التوليد فيدافع عن قراراته؛ الصح نسخة مستقلة بدون هذا السياق.</span>
+            <span class="lang-en">"Have the same session review its work more carefully" options — the model keeps its generation reasoning context and defends its decisions; the right answer is an independent instance without that context.</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Domain quiz ===== -->
+    <section id="quiz" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="swords" class="w-5 h-5"></i></span>
+        <span class="lang-ar">اختبار الدومين — 7 أسئلة سيناريو</span><span class="lang-en">Domain quiz — 7 scenario questions</span>
+      </h2>
+
+      <!-- Score tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap sticky top-16 z-30 shadow-sm">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="check-check" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 — 4.1 explicit criteria -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">مراجع الكود الآلي في CI عندكم يغرق الـ PRs بتعليقات أسلوبية أغلبها إيجابيات كاذبة، والمطورون بدأوا يتجاهلون كل تعليقاته حتى الصحيحة عن الثغرات. وش أفضل تصرف فوري؟</p>
+            <p class="lang-en">Your CI code reviewer floods PRs with style comments that are mostly false positives, and developers have started ignoring all of its comments — including accurate security findings. What is the best immediate action?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف للبرومبت "كن متحفظاً وبلّغ فقط عن النتائج اللي ثقتك فيها عالية".</span>
+            <span class="lang-en">Add "be conservative and only report findings you are highly confident about" to the prompt.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">عطّل فئة التعليقات الأسلوبية مؤقتاً لاستعادة الثقة، واشتغل على تحسين معاييرها قبل إرجاعها.</span>
+            <span class="lang-en">Temporarily disable the style category to restore trust, and refine its criteria before re-enabling it.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">رقِّ لنموذج أعلى فئة عشان تقل الإيجابيات الكاذبة تلقائياً.</span>
+            <span class="lang-en">Upgrade to a higher-tier model so false positives drop automatically.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">ألزم المطورين بالرد على كل تعليق حتى لا يتجاهلون المراجع.</span>
+            <span class="lang-en">Require developers to respond to every comment so they cannot ignore the reviewer.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الفئة عالية الإيجابيات الكاذبة تقوّض الثقة حتى بالفئات الدقيقة. التعطيل المؤقت يوقف النزيف، وتحسين المعايير يرجّع الفئة لما تصير موثوقة. "كن متحفظاً" تعليمات غامضة ما ترفع الدقة، وترقية النموذج ما تعالج غياب المعايير.</span>
+              <span class="lang-en">Correct. A high false-positive category undermines trust even in the accurate categories. Temporarily disabling stops the bleeding while you refine the criteria, then re-enable once reliable. "Be conservative" is vague and does not improve precision, and a model upgrade does not fix missing criteria.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: عطّل الفئة عالية الإيجابيات الكاذبة مؤقتاً وحسّن معاييرها. التعليمات الغامضة مثل "كن متحفظاً" ما تحسّن الدقة، وترقية النموذج أو إلزام المطورين بالرد يعالجون العرض مو السبب.</span>
+              <span class="lang-en">The answer is B: temporarily disable the high false-positive category and refine its criteria. Vague instructions like "be conservative" do not improve precision, and upgrading the model or forcing developer responses treats the symptom, not the cause.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 — 4.2 few-shot -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">كتبت تعليمات تفصيلية دقيقة لمراجع الكود عن التنسيق المطلوب (الموقع، المشكلة، الشدة، الإصلاح المقترح)، لكن المخرجات ما زالت غير متسقة: أحياناً ينسى الشدة وأحياناً يغيّر الترتيب. وش الحل الأكثر فعالية؟</p>
+            <p class="lang-en">You wrote detailed, precise instructions for your code reviewer about the required format (location, issue, severity, suggested fix), but output is still inconsistent: sometimes severity is missing, sometimes the order changes. What is the most effective fix?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">وسّع التعليمات: اشرح كل حقل بفقرة كاملة وأضف تحذيرات من نسيانه.</span>
+            <span class="lang-en">Expand the instructions: explain each field in a full paragraph and add warnings against omitting it.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">خفّض temperature إلى صفر عشان يثبت التنسيق.</span>
+            <span class="lang-en">Lower the temperature to zero so the format stabilizes.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">أضف أمثلة few-shot توضح المخرجات المطلوبة بالتنسيق الكامل حرفياً.</span>
+            <span class="lang-en">Add few-shot examples that literally demonstrate the desired output in the complete format.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">قسّم المراجعة على عدة استدعاءات، استدعاء لكل حقل من حقول التنسيق.</span>
+            <span class="lang-en">Split the review into multiple calls, one call per format field.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. لما التعليمات التفصيلية وحدها تنتج مخرجات غير متسقة، الأمثلة الموجهة هي الأداة الأكثر فعالية: النموذج يقلّد التنسيق اللي شافه أفضل بكثير من وصف التنسيق. المزيد من الشرح يزيد الضجيج، وtemperature ما يعالج فهم التنسيق.</span>
+              <span class="lang-en">Correct. When detailed instructions alone produce inconsistent output, few-shot examples are the most effective tool: the model imitates a format it has seen far better than a described one. More prose adds noise, and temperature does not fix format understanding.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: أمثلة few-shot تعرض التنسيق الكامل. الدليل الرسمي يعتبرها الأسلوب الأكثر فعالية لمخرجات متسقة لما تفشل التعليمات التفصيلية — النموذج يقلّد ما يشاهده. توسيع الشرح أو تصفير temperature أو تقسيم الاستدعاءات كلها لا تعالج المشكلة.</span>
+              <span class="lang-en">The answer is C: few-shot examples showing the full format. The guide calls them the most effective technique for consistent output when detailed instructions fail — the model imitates what it sees. Longer prose, zero temperature, or per-field calls do not address the problem.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 — 4.3 tool_choice any -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">نظام استخراج يستقبل مستندات متنوعة (فواتير، عقود، إيصالات) وعندك أداة استخراج لكل نوع. تحتاج ضمان 100% أن كل استدعاء يرجع مخرجات منظمة عبر أداة، مع ترك حرية اختيار الأداة المناسبة للنموذج. وش الإعداد الصحيح؟</p>
+            <p class="lang-en">An extraction system receives mixed documents (invoices, contracts, receipts) and you have one extraction tool per type. You need a 100% guarantee that every call returns structured output through a tool, while letting the model pick the right tool. What is the correct setting?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "auto"}</span> — النموذج يعرف متى يستدعي الأداة.</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "auto"}</span> — the model knows when to call a tool.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "any"}</span> — لازم يستدعي أداة، ويختار المناسبة منها.</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "any"}</span> — it must call a tool, and chooses the right one.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "tool", "name": "extract_invoice"}</span> لكل المستندات.</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "tool", "name": "extract_invoice"}</span> for all documents.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">بدون أدوات: اطلب في البرومبت إخراج JSON صالح والتزام صارم بالسكيما.</span>
+            <span class="lang-en">No tools: ask in the prompt for valid JSON and strict schema adherence.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. <span dir="ltr" class="font-mono">"any"</span> يضمن استدعاء أداة (مخرجات منظمة مضمونة) مع حرية اختيار الأداة — مثالي لما يكون نوع المستند غير معروف. <span dir="ltr" class="font-mono">"auto"</span> يسمح برد نصي بدون أداة، والأداة المفروضة تحشر العقود في سكيما الفواتير.</span>
+              <span class="lang-en">Correct. <span class="font-mono">"any"</span> guarantees a tool call (structured output guaranteed) while leaving tool selection free — ideal when the document type is unknown. <span class="font-mono">"auto"</span> allows a plain-text reply with no tool, and a forced tool would squeeze contracts into the invoice schema.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: <span dir="ltr" class="font-mono">"any"</span> = لازم أداة لكن باختياره. <span dir="ltr" class="font-mono">"auto"</span> ما يضمن (ممكن يرد نص حر)، وفرض أداة واحدة خطأ لأن نوع المستند متغير، وطلب JSON في البرومبت يرجع أخطاء syntax اللي جاء tool_use أصلاً ليمنعها.</span>
+              <span class="lang-en">The answer is B: <span class="font-mono">"any"</span> = must call a tool, its choice. <span class="font-mono">"auto"</span> gives no guarantee (a free-text reply is allowed), forcing one tool is wrong because document types vary, and prompt-requested JSON brings back the syntax errors tool use exists to eliminate.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q4 — 4.3/4.4 syntax vs semantic -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">4</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">فريقك انتقل من "اطلب JSON في البرومبت" إلى tool_use بسكيما صارمة، وزميل يقترح إلغاء طبقة التحقق البرمجية لأن "السكيما تضمن كل شي". وش تقول له؟</p>
+            <p class="lang-en">Your team moved from "ask for JSON in the prompt" to tool_use with a strict schema, and a teammate proposes removing the programmatic validation layer because "the schema guarantees everything". What do you tell him?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">معه حق — سكيما tool_use الصارمة تمنع كل أنواع الأخطاء في المخرجات.</span>
+            <span class="lang-en">He is right — a strict tool_use schema prevents every kind of output error.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">السكيما تلغي أخطاء الـ syntax فقط؛ الأخطاء الدلالية (بنود لا تجمع للإجمالي، قيم في حقول خاطئة) ما زالت ممكنة ولازم تحقق برمجي.</span>
+            <span class="lang-en">The schema eliminates syntax errors only; semantic errors (line items that do not sum to the total, values in the wrong fields) remain possible and still need programmatic validation.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">السكيما ما تنفع أصلاً — الأفضل الرجوع لطلب JSON في البرومبت مع أمثلة.</span>
+            <span class="lang-en">The schema is pointless anyway — better to go back to prompt-requested JSON with examples.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">أبقِ التحقق لكن فقط للتأكد من أن JSON قابل للتحليل (parse).</span>
+            <span class="lang-en">Keep validation but only to confirm the JSON parses.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. tool_use يضمن بنية صالحة ملتزمة بالسكيما (لا أخطاء syntax)، لكنه لا يمنع الأخطاء الدلالية: مجاميع غلط، قيم بمواضع خاطئة. التحقق البرمجي (مثل مقارنة مجموع البنود بالإجمالي) يبقى ضرورياً — وهو أساس حلقة الإعادة في 4.4.</span>
+              <span class="lang-en">Correct. tool_use guarantees valid, schema-compliant structure (no syntax errors), but it cannot prevent semantic errors: wrong sums, values in the wrong fields. Programmatic validation (like comparing the line-item sum to the total) remains essential — it is the foundation of the 4.4 retry loop.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B. القاعدة الذهبية: tool_use يلغي أخطاء الـ syntax ولا يلغي الأخطاء الدلالية. فحص قابلية التحليل فقط (D) بلا فائدة لأن tool_use يضمنها أصلاً — التحقق المطلوب هو الدلالي: المجاميع، تطابق الحقول، التعارضات.</span>
+              <span class="lang-en">The answer is B. The golden rule: tool_use eliminates syntax errors, not semantic ones. Parse-only validation (D) is useless since tool_use already guarantees parseability — the validation you need is semantic: sums, field placement, conflicts.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q5 — 4.4 retry limits -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">5</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">نظام استخراج فواتير يفشل التحقق دائماً على حقل <span dir="ltr" class="font-mono">po_number</span> لمجموعة موردين معينة. بعد الفحص اتضح أن رقم أمر الشراء عند هؤلاء الموردين موجود فقط في نظام مشتريات خارجي، مو في ملف الفاتورة نفسه. النظام حالياً يعيد المحاولة 3 مرات مع رسائل الخطأ. وش التقييم الصحيح؟</p>
+            <p class="lang-en">An invoice extraction system keeps failing validation on the <span class="font-mono">po_number</span> field for a certain group of vendors. Investigation shows those vendors' PO numbers exist only in an external procurement system, not in the invoice file itself. The system currently retries 3 times with error messages. What is the correct assessment?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">ارفع عدد المحاولات إلى 5 مع رسائل خطأ أكثر تفصيلاً.</span>
+            <span class="lang-en">Raise the retry count to 5 with more detailed error messages.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">حسّن برومبت الاستخراج بأمثلة few-shot لاستخراج po_number.</span>
+            <span class="lang-en">Improve the extraction prompt with few-shot examples for extracting po_number.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">الإعادة هنا بلا فائدة لأن المعلومة غائبة عن المصدر — خلّ الحقل nullable وكمّله من نظام المشتريات في خطوة لاحقة.</span>
+            <span class="lang-en">Retries are pointless here because the information is absent from the source — make the field nullable and enrich it from the procurement system in a later step.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">اجعل الحقل required بوصف أقوى حتى يجتهد النموذج في إيجاده.</span>
+            <span class="lang-en">Keep the field required with a stronger description so the model tries harder to find it.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الإعادة تصلح أخطاء التنسيق والهيكل، لكنها عاجزة لما تكون المعلومة غير موجودة أصلاً في المستند. الإبقاء على required مع الإلحاح يدفع النموذج للتلفيق — والحقل nullable + إثراء من المصدر الصحيح هو التصميم السليم.</span>
+              <span class="lang-en">Correct. Retries fix format and structural errors, but they are powerless when the information simply is not in the document. Keeping the field required while pushing harder drives the model to fabricate — nullable plus enrichment from the right source is the sound design.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C. القاعدة: الإعادة تنفع لأخطاء التنسيق والهيكل، ولا تنفع إطلاقاً لما تكون المعلومة موجودة فقط في مستند خارجي غير مقدَّم. المزيد من المحاولات أو الأمثلة أو الإلحاح كلها تدور بنفس الحلقة الفارغة — أو أسوأ، تدفع للتلفيق.</span>
+              <span class="lang-en">The answer is C. The rule: retries help with format and structural errors, and never help when the information exists only in an external document that was not provided. More retries, examples, or pressure just spin the same empty loop — or worse, push toward fabrication.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q6 — 4.5 batch vs sync -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">6</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">عندكم ثلاثة أحمال عمل على Claude: (1) فحص أمني حاجب يمنع الدمج قبل اكتماله، (2) توليد اختبارات ليلي تُراجع نتائجه الصباح، (3) تدقيق أسبوعي للديون التقنية. المدير يبغى أقصى توفير عبر Message Batches API. وش التوزيع الصحيح؟</p>
+            <p class="lang-en">You run three Claude workloads: (1) a blocking security check that gates merges, (2) nightly test generation reviewed the next morning, (3) a weekly technical-debt audit. Your manager wants maximum savings via the Message Batches API. What is the correct split?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">حوّل الثلاثة للدفعات مع polling — غالباً تخلص أسرع بكثير من 24 ساعة.</span>
+            <span class="lang-en">Move all three to batch with polling — batches usually finish much faster than 24 hours.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">الدفعات للتوليد الليلي والتدقيق الأسبوعي؛ الفحص الحاجب يبقى synchronous.</span>
+            <span class="lang-en">Batch for the nightly generation and weekly audit; the blocking check stays synchronous.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">حوّل الفحص الحاجب للدفعات مع fallback للـ synchronous إذا تأخرت الدفعة.</span>
+            <span class="lang-en">Move the blocking check to batch with a synchronous fallback if the batch runs late.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">أبقِ الثلاثة synchronous — نتائج الدفعات ترجع بترتيب عشوائي يصعب الربط.</span>
+            <span class="lang-en">Keep all three synchronous — batch results come back unordered and are hard to correlate.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. القاعدة: الدفعات (توفير 50%، نافذة حتى 24 ساعة، بدون SLA مضمون) للشغل المتسامح مع التأخير وغير الحاجب؛ وأي workflow يوقف المطورين لازم يبقى synchronous. "غالباً أسرع" مو ضمان، والربط مو مشكلة لوجود custom_id.</span>
+              <span class="lang-en">Correct. The rule: batch (50% savings, up to 24-hour window, no guaranteed SLA) for latency-tolerant, non-blocking work; any workflow that blocks developers stays synchronous. "Usually faster" is not a guarantee, and correlation is a non-issue thanks to custom_id.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B. الفحص الحاجب لا يتحمل نافذة 24 ساعة بدون SLA؛ والشغل الليلي والأسبوعي مثالي للدفعات بنص التكلفة. خيار "الترتيب العشوائي" مغالطة لأن custom_id يربط كل طلب بنتيجته، وخيار الـ fallback تعقيد بلا داعي.</span>
+              <span class="lang-en">The answer is B. A blocking check cannot tolerate a 24-hour window with no SLA; the nightly and weekly jobs are ideal batch candidates at half cost. The "unordered results" option is a misconception because custom_id correlates every request with its result, and the fallback option is needless complexity.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q7 — 4.6 independent review -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">7</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">وكيل يولّد كود ثم تطلب منه في نفس الجلسة "راجع كودك بدقة وصحح أي أخطاء". يرجع لك: "الكود سليم" — مع أن فيه ثغرة واضحة. وش التفسير والحل؟</p>
+            <p class="lang-en">An agent generates code, then in the same session you ask it to "carefully review your code and fix any bugs". It replies "the code is correct" — despite an obvious flaw. What is the explanation and the fix?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">البرومبت ضعيف — اطلب المراجعة بصياغة أشد وكرر كلمة "بدقة".</span>
+            <span class="lang-en">The prompt is weak — demand the review in stronger wording and repeat "carefully".</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">فعّل extended thinking في نفس الجلسة عشان يتعمق في المراجعة.</span>
+            <span class="lang-en">Enable extended thinking in the same session so it reviews more deeply.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">النموذج محتفظ بسياق تفكيره وقت التوليد فيميل يبرر قراراته — مرّر الكود لنسخة مستقلة ما عندها هذا السياق.</span>
+            <span class="lang-en">The model retains its generation reasoning context and tends to justify its decisions — pass the code to an independent instance without that context.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">أعد التوليد من الصفر بنموذج أعلى فئة بدل أي مراجعة.</span>
+            <span class="lang-en">Regenerate from scratch with a higher-tier model instead of any review.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. هذي حدود المراجعة الذاتية: نفس الجلسة تحمل سياق التوليد وتبريراته، فتقل احتمالية تشكيكها بقراراتها. النسخة المستقلة (بدون سياق سابق) أفعل من تعليمات المراجعة الذاتية ومن extended thinking في كشف المشاكل الدقيقة.</span>
+              <span class="lang-en">Correct. This is the self-review limitation: the same session carries its generation context and its justifications, making it less likely to question its own decisions. An independent instance (no prior context) beats self-review instructions and extended thinking at catching subtle issues.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C. المشكلة معمارية مو صياغية: سياق التوليد يجعل النموذج يدافع عن شغله. لا الصياغة الأشد ولا extended thinking يكسران هذا الانحياز — النسخة المستقلة النظيفة هي الحل المعتمد في الدليل.</span>
+              <span class="lang-en">The answer is C. The problem is architectural, not phrasing: generation context makes the model defend its work. Neither stronger wording nor extended thinking breaks that bias — a clean independent instance is the guide's answer.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Prev / Next pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="../domain-3/index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-violet-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-violet-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-violet-700 transition-colors"><span class="lang-ar">الدومين 3: إعدادات Claude Code وسير العمل</span><span class="lang-en">Domain 3: Claude Code Configuration &amp; Workflows</span></p>
+        </div>
+      </a>
+      <a href="../domain-5/index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-rose-700 transition-colors"><span class="lang-ar">الدومين 5: إدارة السياق والموثوقية</span><span class="lang-en">Domain 5: Context Management &amp; Reliability</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-rose-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

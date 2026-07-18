@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.6 معماريات المراجعة متعددة النسخ والمرور — CCAF مرجع</title>
+  <meta name="description" content="Task 4.6: Design multi-instance and multi-pass review architectures — self-review limitations, independent review instances, per-file plus cross-file passes, and confidence self-reporting for calibrated routing.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">المراجعة متعددة المرور</span><span class="lang-en">Multi-pass review</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.6</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">معماريات المراجعة متعددة النسخ والمرور</span>
+            <span class="lang-en">Multi-instance &amp; multi-pass review architectures</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن أخطر مراجع للكود هو اللي كتبه: سياق التوليد يدافع عن قراراته — والجودة الحقيقية تجي من نسخة مستقلة ومرور مقسّم بذكاء.</span>
+            <span class="lang-en">Why this matters: the most dangerous reviewer of code is its author — generation context defends its own decisions, and real quality comes from an independent instance and intelligently split passes.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">حدود المراجعة الذاتية: النموذج يحتفظ بسياق تفكيره من التوليد فتقل احتمالية تشكيكه بقراراته في نفس الجلسة</span><span class="lang-en">Self-review limitations: the model retains its generation reasoning context, making it less likely to question its own decisions in the same session</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش نسخة المراجعة المستقلة (بدون سياق سابق) أفعل في كشف المشاكل الدقيقة من تعليمات المراجعة الذاتية ومن extended thinking</span><span class="lang-en">Why an independent review instance (no prior context) beats self-review instructions and extended thinking at catching subtle issues</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">استخدام نسخة Claude ثانية مستقلة لمراجعة الكود المولّد بدون سياق تفكير المولّد</span><span class="lang-en">Using a second independent Claude instance to review generated code without the generator's reasoning context</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">المراجعة متعددة المرور: تقسيم المراجعات الكبيرة إلى مرور محلي لكل ملف + مرور تكاملي لتدفق البيانات بين الملفات، لتفادي تشتت الانتباه والنتائج المتناقضة</span><span class="lang-en">Multi-pass review: splitting large reviews into per-file local passes + a cross-file integration pass for data flow, avoiding attention dilution and contradictory findings</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">مرور تحقق يصرّح فيه النموذج بدرجة ثقته مع كل نتيجة لتوجيه المراجعة توجيهاً معايراً (routing)</span><span class="lang-en">Verification passes where the model self-reports confidence alongside each finding to enable calibrated review routing</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تمييز هذا كله عن فخ 4.1: الثقة كحقل بيانات للتوجيه مشروعة — الثقة كفلتر برومبت غامض ("عالي الثقة فقط") فاشلة</span><span class="lang-en">Distinguishing all this from the 4.1 trap: confidence as a data field for routing is legitimate — confidence as a vague prompt filter ("high-confidence only") fails</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: Why self-review falls short ===== -->
+    <section id="self-review" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">ليش المراجعة الذاتية قاصرة</span><span class="lang-en">Why self-review falls short</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>تطلب من وكيل ولّد كوداً: "الحين راجع كودك بعناية واكتشف الأخطاء". يبدو منطقياً — لكنه ضعيف بنيوياً. السبب مو كسل النموذج، بل <b>سياق التوليد نفسه</b>: في نفس الجلسة، النموذج ما زال يحمل سلسلة التفكير اللي أوصلته لكل قرار — "اخترت هذا الشرط لأن..." — فلما يراجع، يقرأ الكود عبر عدسة تبريراته. القرار الغلط يجي ومعه مبرره جاهزاً، فيبدو صحيحاً. النتيجة: "الكود سليم" فوق ثغرة واضحة.</p>
+        <p>البديل المعتمد في الدليل: <b>نسخة مراجعة مستقلة</b> — استدعاء جديد (أو جلسة جديدة) يستلم الكود ومعايير المراجعة <b>فقط</b>، بدون أي سياق من التوليد. هذي النسخة ما عندها التزام نفسي تجاه القرارات، فتقرأ الكود كما هو مكتوب، لا كما قُصد — وتكتشف المشاكل الدقيقة اللي عمي عنها المولّد. والدليل صريح في التراتبية: النسخة المستقلة أفعل من تعليمات المراجعة الذاتية <b>ومن extended thinking</b> — التفكير الأطول داخل نفس السياق المنحاز يعمّق التبرير، ما يكسره.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>You ask an agent that just generated code: "now review your code carefully and find the bugs". Sounds reasonable — but it is structurally weak. The cause is not model laziness; it is <b>generation context itself</b>: in the same session, the model still carries the chain of reasoning behind every decision — "I chose this condition because..." — so when it reviews, it reads the code through the lens of its own justifications. A wrong decision arrives with its excuse pre-attached, so it looks right. The result: "the code is correct" sitting on top of an obvious flaw.</p>
+        <p>The guide's endorsed alternative: an <b>independent review instance</b> — a fresh call (or session) receiving <b>only</b> the code and the review criteria, with zero generation context. That instance has no psychological commitment to the decisions, so it reads the code as written, not as intended — and catches the subtle issues the generator was blind to. The guide is explicit about the ranking: the independent instance beats self-review instructions <b>and extended thinking</b> — longer thinking inside the same biased context deepens the justification; it does not break it.</p>
+      </div>
+
+      <!-- Diagram 1: self vs independent review -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[780px] mx-auto space-y-4">
+          <p class="text-center font-mono text-xs text-surface-400">SELF-REVIEW vs INDEPENDENT REVIEW</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-red-300">
+                <i data-lucide="user-x" class="w-4 h-4"></i> SAME SESSION (SELF-REVIEW)
+              </div>
+              <div class="bg-red-900/40 rounded-lg p-2.5 font-mono text-[10px] text-red-100/90 leading-relaxed">
+                context window contains:<br>
+                - the generated code<br>
+                - the REASONING that produced it<br>
+                - every decision's justification
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-red-100/90">
+                <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> reads code through its own excuses</div>
+                <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> unlikely to question its decisions</div>
+                <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> extended thinking deepens the bias</div>
+              </div>
+            </div>
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-emerald-300">
+                <i data-lucide="user-check" class="w-4 h-4"></i> FRESH INSTANCE (INDEPENDENT)
+              </div>
+              <div class="bg-emerald-900/40 rounded-lg p-2.5 font-mono text-[10px] text-emerald-100/90 leading-relaxed">
+                context window contains:<br>
+                - the code (as text)<br>
+                - the review criteria<br>
+                - NOTHING else
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-emerald-100/90">
+                <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> reads what the code DOES, not what was meant</div>
+                <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> no commitment to prior decisions</div>
+                <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> catches the subtle issues</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">الفرق كله في محتوى نافذة السياق: المراجع الذاتي يحمل تبريراته، والمستقل يحمل الكود والمعايير فقط</span>
+        <span class="lang-en">The whole difference is context-window content: the self-reviewer carries its justifications, the independent one carries only code and criteria</span>
+      </p>
+
+      <!-- Code: independent instance -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">نسخة مراجعة مستقلة: استدعاء نظيف يستلم الكود والمعايير فقط:</span>
+          <span class="lang-en">An independent review instance: a clean call receiving only code and criteria:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python"># Instance A generated the code (its session holds all the reasoning).
+generated_diff = generator_session.result_diff
+
+# Instance B reviews with a FRESH call: no generation context crosses over.
+review = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=4096,
+    system=REVIEW_CRITERIA,        # explicit report/skip criteria (see 4.1)
+    messages=[{
+        "role": "user",
+        "content": f"Review this diff against the criteria:\n\n{generated_diff}",
+    }],
+)
+# Instance B never saw WHY the code was written this way —
+# so it evaluates what the code actually does.</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">الاستقلالية هنا <b>خاصية معمارية</b> مو تعليمة: تتحقق بفصل نوافذ السياق (استدعاء/جلسة جديدة)، لا بكتابة "راجع بموضوعية" داخل نفس الجلسة الملوثة بسياق التوليد.</div>
+          <div class="lang-en">Independence here is an <b>architectural property</b>, not an instruction: it is achieved by separating context windows (a fresh call/session), not by writing "review objectively" inside the same session contaminated with generation context.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: Multi-pass review for large changes ===== -->
+    <section id="multi-pass" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">المراجعة متعددة المرور للتغييرات الكبيرة</span><span class="lang-en">Multi-pass review for large changes</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>مشكلة ثانية مختلفة تظهر مع <b>الحجم</b>: PR يعدّل 14 ملفاً، ومراجعة "مرور واحد" على كل الملفات معاً تطلع بنتائج مختلة — تعليقات عميقة على أول ملفين وسطحية على الباقي، أخطاء واضحة تنفلت، وأسوأ شي: <b>نتائج متناقضة</b> — نفس النمط يُرفض في ملف ويُمرَّر في ملف ثاني بنفس الـ PR. هذا <b>تشتت الانتباه</b> (attention dilution): جودة الانتباه تتوزع وتضعف مع كثرة المحتوى المتزامن، ونافذة سياق أكبر ما تحل المشكلة — تكديس أكثر لنفس الانتباه المشتت.</p>
+        <p>علاج الدليل: <b>قسّم المراجعة لمرورين متخصصين</b>. المرور الأول <b>محلي لكل ملف</b>: كل ملف يُراجع وحده باهتمام كامل للمشاكل المحلية (منطق، معالجة أخطاء، أمان الملف نفسه) — عمق متسق لكل ملف بلا استثناء. المرور الثاني <b>تكاملي عبر الملفات</b>: يركز حصرياً على تدفق البيانات بين الملفات، توافق الواجهات، والعقود بين الوحدات. كل مرور له تركيز واحد واضح، فتختفي التناقضات ويثبت العمق.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>A second, different problem appears with <b>scale</b>: a PR touches 14 files, and a single-pass review over all of them produces lopsided results — deep comments on the first two files and shallow ones on the rest, obvious bugs slipping through, and worst of all: <b>contradictory findings</b> — the same pattern flagged in one file and approved in another within the same PR. This is <b>attention dilution</b>: attention quality spreads thin across too much simultaneous content, and a larger context window does not fix it — it just piles more onto the same diluted attention.</p>
+        <p>The guide's remedy: <b>split the review into two specialized passes</b>. Pass one is <b>per-file local</b>: each file reviewed alone with full attention on local issues (logic, error handling, file-level security) — consistent depth for every file, no exceptions. Pass two is <b>cross-file integration</b>: focused exclusively on data flow between files, interface compatibility, and inter-module contracts. Each pass has one clear focus, so contradictions vanish and depth holds steady.</p>
+      </div>
+
+      <!-- Diagram 2: multi-pass pipeline -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[620px] max-w-[780px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">MULTI-PASS REVIEW PIPELINE (14-FILE PR)</p>
+          <div class="bg-red-950/50 border border-red-500/40 rounded-xl p-3 text-center font-mono text-[11px] text-red-200">
+            single pass over 14 files -&gt; attention dilution: uneven depth, missed bugs, contradictory findings
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-emerald-400"></i></div>
+          <div class="bg-surface-800 border-2 border-sky-500/50 rounded-xl p-4 space-y-2.5">
+            <p class="font-mono text-xs font-bold text-sky-300 text-center">PASS 1 — PER-FILE LOCAL ANALYSIS</p>
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+              <span class="bg-sky-900/50 border border-sky-500/40 rounded-lg px-2.5 py-1.5 font-mono text-[10px] text-sky-100">file01.py</span>
+              <span class="bg-sky-900/50 border border-sky-500/40 rounded-lg px-2.5 py-1.5 font-mono text-[10px] text-sky-100">file02.py</span>
+              <span class="bg-sky-900/50 border border-sky-500/40 rounded-lg px-2.5 py-1.5 font-mono text-[10px] text-sky-100">file03.py</span>
+              <span class="font-mono text-[10px] text-surface-400">... x14, one focused call each</span>
+            </div>
+            <p class="font-mono text-[10px] text-sky-200/80 text-center">full attention per file -&gt; consistent depth, local issues (logic, error handling)</p>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i></div>
+          <div class="bg-surface-800 border-2 border-violet-500/50 rounded-xl p-4 space-y-2">
+            <p class="font-mono text-xs font-bold text-violet-300 text-center">PASS 2 — CROSS-FILE INTEGRATION</p>
+            <p class="font-mono text-[10px] text-violet-200/80 text-center leading-relaxed">data flow across files - interface compatibility - contracts between modules<br>one pass, one focus: how the pieces fit together</p>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i></div>
+          <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-3 text-center font-mono text-[11px] text-emerald-200">
+            merged findings: consistent depth + integration issues caught, no contradictions
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">خط المراجعة: مرور محلي مركّز لكل ملف، ثم مرور تكاملي واحد لتدفق البيانات — كل مرور بتركيز واحد</span>
+        <span class="lang-en">The review pipeline: a focused local pass per file, then one integration pass for data flow — each pass with a single focus</span>
+      </p>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar"><b>سعة السياق غير جودة الانتباه.</b> نافذة أكبر تستوعب الملفات الـ 14 كلها — لكنها لا ترفع جودة الانتباه الموزع عليها. الحل تقسيم الشغل، مو توسيع الوعاء.</div>
+          <div class="lang-en"><b>Context capacity is not attention quality.</b> A bigger window can hold all 14 files — but it does not raise the quality of the attention spread across them. The fix is splitting the work, not widening the container.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">من سؤال رسمي (مراجعة 14 ملفاً غير متسقة): المشتتات هي (1) "ألزم المطورين بتقسيم الـ PRs" — يرمي العبء عليهم بدون تحسين النظام؛ (2) "نموذج أعلى بنافذة سياق أكبر" — سوء فهم لأن سعة السياق لا تعالج جودة الانتباه؛ (3) "ثلاث مراجعات كاملة وخذ ما يتفق عليه اثنان" — التصويت <b>يكبت</b> الأخطاء الحقيقية اللي تنكشف بشكل متقطع. الصحيح دائماً: مرور لكل ملف + مرور تكاملي منفصل.</div>
+          <div class="lang-en">From an official question (the inconsistent 14-file review): the distractors are (1) "make developers split their PRs" — shifts the burden without improving the system; (2) "a higher-tier model with a larger context window" — a misunderstanding, capacity does not fix attention quality; (3) "three full-review runs, keep findings two agree on" — consensus voting <b>suppresses</b> real bugs that surface intermittently. The correct answer is always: per-file passes + a separate integration pass.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: Confidence self-reporting for routing ===== -->
+    <section id="confidence-routing" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">التصريح بالثقة لتوجيه المراجعة</span><span class="lang-en">Confidence self-reporting for routing</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>الأداة الثالثة في معمارية المراجعة: <b>مرور تحقق يصرّح فيه النموذج بدرجة ثقته مع كل نتيجة</b> كحقل بيانات مهيكل. الفكرة مو فلترة النتائج — الفكرة <b>توجيهها (routing) توجيهاً معايراً</b>: النتيجة عالية الثقة (0.9) تنشر تلقائياً كتعليق على الـ PR، والمتوسطة (0.6) تروح لطابور فرز بشري، والمنخفضة (0.3) تُسجَّل للتحليل بدون إزعاج أحد. كل نتيجة تاخذ المسار المناسب لموثوقيتها — ومع الوقت تقارن الثقة المصرّحة بقرارات المطورين فتعاير النظام.</p>
+        <p>وهنا لازم توقف عند تمييز يحبه الاختبار، لأنه يبدو تناقضاً مع 4.1 وهو ليس كذلك: في 4.1 قلنا "بلّغ عن النتائج عالية الثقة فقط" تعليمة <b>فلترة غامضة</b> فاشلة — تطلب من النموذج يقمع نتائج داخلياً بمعيار غير معرّف، فلا تتحسن الدقة. هنا العكس تماماً: النموذج <b>يبلّغ عن كل شي</b> حسب معاييره التصنيفية، والثقة تطلع <b>كحقل بيانات صريح</b>، والتوجيه قرار برمجي خارجي بعتبات تضبطها أنت وتعايرها بالبيانات. الفرق: قمع داخلي غامض مقابل توجيه خارجي معاير.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>The third tool in the review architecture: <b>a verification pass where the model self-reports confidence alongside each finding</b> as a structured data field. The idea is not filtering findings — it is <b>calibrated routing</b>: a high-confidence finding (0.9) auto-posts as a PR comment, a medium one (0.6) goes to a human triage queue, a low one (0.3) is logged for analysis without bothering anyone. Every finding takes the path its reliability deserves — and over time you compare self-reported confidence against developer verdicts to calibrate the system.</p>
+        <p>Pause here for a distinction the exam loves, because it looks like a contradiction with 4.1 and is not: in 4.1, "only report high-confidence findings" was a failed <b>vague filtering</b> instruction — asking the model to internally suppress findings by an undefined bar, improving nothing. Here it is the exact opposite: the model <b>reports everything</b> per its categorical criteria, confidence emerges <b>as an explicit data field</b>, and routing is an external programmatic decision with thresholds you set and calibrate with data. The difference: vague internal suppression versus calibrated external routing.</p>
+      </div>
+
+      <!-- Diagram 3: confidence routing flow -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[760px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">CONFIDENCE-BASED ROUTING — REPORT ALL, ROUTE BY DATA</p>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl p-3.5 text-center max-w-[440px] mx-auto">
+            <p class="font-mono text-[11px] text-surface-100">verification pass emits EVERY finding<br>+ "confidence": 0.0 - 1.0 (a structured field)</p>
+          </div>
+          <div class="flex justify-center gap-14">
+            <i data-lucide="arrow-down-left" class="w-5 h-5 text-surface-500"></i>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i>
+            <i data-lucide="arrow-down-right" class="w-5 h-5 text-surface-500"></i>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-3.5 text-center space-y-1">
+              <p class="font-mono text-xs font-bold text-emerald-200">&gt;= 0.8</p>
+              <i data-lucide="message-square-plus" class="w-5 h-5 text-emerald-300 mx-auto"></i>
+              <p class="font-mono text-[10px] text-emerald-100/80 leading-relaxed">auto-post as<br>PR comment</p>
+            </div>
+            <div class="bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-3.5 text-center space-y-1">
+              <p class="font-mono text-xs font-bold text-amber-200">0.5 - 0.8</p>
+              <i data-lucide="users" class="w-5 h-5 text-amber-300 mx-auto"></i>
+              <p class="font-mono text-[10px] text-amber-100/80 leading-relaxed">human triage<br>queue</p>
+            </div>
+            <div class="bg-surface-800 border-2 border-surface-600 rounded-xl p-3.5 text-center space-y-1">
+              <p class="font-mono text-xs font-bold text-surface-300">&lt; 0.5</p>
+              <i data-lucide="archive" class="w-5 h-5 text-surface-400 mx-auto"></i>
+              <p class="font-mono text-[10px] text-surface-400 leading-relaxed">log only —<br>calibration data</p>
+            </div>
+          </div>
+          <div class="bg-surface-800/70 border border-surface-600 rounded-xl p-3 text-center font-mono text-[10px] text-surface-300">
+            NOT the 4.1 trap: nothing is suppressed inside the model — thresholds live in YOUR code and get calibrated
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">التوجيه بالثقة: النموذج يبلّغ عن الكل والعتبات في كودك أنت — نشر تلقائي أو فرز بشري أو تسجيل فقط</span>
+        <span class="lang-en">Confidence routing: the model reports everything and the thresholds live in your code — auto-post, human triage, or log only</span>
+      </p>
+
+      <!-- Code: finding with confidence -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">نتيجة تحقق بحقل الثقة + منطق التوجيه الخارجي:</span>
+          <span class="lang-en">A verification finding with the confidence field + the external routing logic:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">finding = {
+    "location": "billing/rates.py:88",
+    "issue": "currency conversion applied twice on refunds",
+    "severity": "high",
+    "detected_pattern": "double conversion in refund path",
+    "confidence": 0.55,          # self-reported, structured — not a filter
+}
+
+# routing happens OUTSIDE the model, with calibratable thresholds
+def route(finding: dict) -&gt; None:
+    c = finding["confidence"]
+    if c &gt;= 0.8:
+        post_pr_comment(finding)          # trusted enough to publish
+    elif c &gt;= 0.5:
+        send_to_triage_queue(finding)     # a human decides
+    else:
+        log_for_calibration(finding)      # data, not noise</code></pre>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">عاير العتبات بالبيانات: قارن دورياً ثقة النتائج بمصيرها عند المطورين (قُبلت/رُفضت). إذا كانت نتائج الـ 0.9 تُرفض كثيراً فالثقة المصرّحة متضخمة — عدّل العتبات أو حسّن برومبت التحقق.</div>
+          <div class="lang-en">Calibrate thresholds with data: periodically compare finding confidence against developer verdicts (accepted/dismissed). If 0.9 findings get dismissed often, self-reported confidence is inflated — adjust thresholds or improve the verification prompt.</div>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">لا تخلط بين الآليتين في الاختبار: "أضف للبرومبت: بلّغ عن الثقة العالية فقط" = فخ 4.1 (فلترة غامضة). "أضف حقل confidence لكل نتيجة ووجّهها برمجياً" = مهارة 4.6 المشروعة. الصياغة الأولى قمع، والثانية بيانات.</div>
+          <div class="lang-en">Do not mix the two mechanisms on the exam: "add to the prompt: only report high confidence" = the 4.1 trap (vague filtering). "Add a confidence field to each finding and route programmatically" = the legitimate 4.6 skill. The first phrasing is suppression; the second is data.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: المؤلف ودار النشر</span><span class="lang-en">Real-life example: the author and the publishing house</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>اسأل أي مؤلف: راجع مخطوطتك بنفسك عشرين مرة، وبتظل الأخطاء تعبر. مو لأنه مهمل — لأنه يقرأ <b>ما قصد كتابته</b>، لا ما كُتب فعلاً. عينه تكمّل الناقص وتصحح الخطأ تلقائياً لأن القصة كلها حية في ذهنه (سياق التوليد). عشان كذا دور النشر ما تعتمد أبداً على مراجعة المؤلف لنفسه، وتسلّم المخطوطة <b>لمحرر مستقل</b> ما شارك في الكتابة — يقرأ النص كما هو على الورق، فيصطاد ما عمي عنه صاحبه.</p>
+        <p>والدار المحترفة تقسم المراجعة مرورين: <b>تدقيق فصل بفصل</b> (لغة، صياغة، سلاسة — المرور المحلي لكل ملف) ثم <b>مرور استمرارية على الكتاب كاملاً</b>: هل عمر البطلة في الفصل 12 يطابق الفصل 3؟ هل الخط الزمني متسق؟ (المرور التكاملي عبر الملفات). ومع كل ملاحظة، المحرر يكتب هامشاً بدرجة يقينه: "خطأ قاطع — يُصحح فوراً" أو "أظنها سهواً — تُعرض على المؤلف" — فتتوزع الملاحظات بين تصحيح مباشر وقائمة نقاش: هذا توجيه الثقة بعينه.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>Ask any author: proofread your own manuscript twenty times, and errors still slip through. Not carelessness — the author reads <b>what they meant to write</b>, not what is actually written. The eye auto-completes and auto-corrects because the whole story lives in their head (generation context). That is why publishing houses never rely on author self-review and hand the manuscript to an <b>independent editor</b> who took no part in the writing — reading the text as it sits on the page, catching what its owner is blind to.</p>
+        <p>A professional house also splits the review into two passes: <b>chapter-by-chapter copyediting</b> (language, phrasing, flow — the per-file local pass) and then <b>a continuity pass across the whole book</b>: does the heroine's age in chapter 12 match chapter 3? Is the timeline consistent? (the cross-file integration pass). And with each note, the editor writes a margin mark of certainty: "definite error — fix immediately" or "probably an oversight — raise with the author" — notes split between direct fixes and a discussion list: confidence routing in the flesh.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>سؤالان رسميان يدوران في هذا الفلك (المولّد يمدح شغله، ومراجعة الـ 14 ملفاً). القواعد:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>مولّد يراجع نفسه ويقول "كل شي تمام"؟ الجواب: نسخة مستقلة بدون سياق التوليد — مو صياغة أقوى ولا extended thinking.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>مراجعة كبيرة غير متسقة/متناقضة؟ الجواب: مرور لكل ملف + مرور تكاملي منفصل — مو نموذج أكبر ولا تصويت ثلاثي ولا ترحيل العبء للمطورين.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>توجيه النتائج حسب موثوقيتها؟ الجواب: حقل confidence مهيكل + عتبات توجيه خارجية.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد أي خيار يحل مشكلة معمارية (انحياز السياق، تشتت الانتباه) بتعليمات أشد أو موارد أكبر.</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>Two official questions orbit this topic (the self-praising generator, and the 14-file review). The rules:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>A generator reviewing itself and saying "all good"? Answer: an independent instance without generation context — not stronger wording, not extended thinking.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>A large review that is inconsistent/contradictory? Answer: per-file passes + a separate integration pass — not a bigger model, not triple-run voting, not offloading onto developers.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Routing findings by reliability? Answer: a structured confidence field + external routing thresholds.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate any option solving an architectural problem (context bias, attention dilution) with sterner instructions or bigger resources.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">ليش النسخة المستقلة تكشف مشاكل أكثر من نفس الجلسة اللي ولّدت الكود، حتى مع تعليمات مراجعة ممتازة؟</p>
+            <p class="lang-en">Why does an independent instance catch more issues than the same session that generated the code, even with excellent review instructions?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">لأن النسخة الجديدة تحصل على حصة حوسبة أعلى من الجلسات الطويلة.</span>
+            <span class="lang-en">Because a fresh instance gets a larger compute allocation than long sessions.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">لأن الجلسة المولدة تحتفظ بسياق تفكيرها وتبريرات قراراتها، فتميل لتأكيد صحتها — والنسخة النظيفة تقرأ الكود بلا هذا الانحياز.</span>
+            <span class="lang-en">Because the generating session retains its reasoning context and decision justifications, tending to confirm them — while the clean instance reads the code without that bias.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">لأن جلسة التوليد تكون قد استهلكت أغلب نافذة السياق فلا مساحة للمراجعة.</span>
+            <span class="lang-en">Because the generation session has used most of the context window, leaving no room for review.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">لأن النسخة المستقلة تستخدم دائماً نموذجاً مختلفاً أقوى.</span>
+            <span class="lang-en">Because the independent instance always uses a different, stronger model.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. المسألة انحياز سياق مو موارد: سياق التوليد يجعل النموذج أقل ميلاً للتشكيك بقراراته. النسخة المستقلة تشوف الكود والمعايير فقط، فتحكم على ما هو مكتوب فعلاً — حتى بنفس النموذج بالضبط.</span>
+              <span class="lang-en">Correct. It is context bias, not resources: generation context makes the model less likely to question its own decisions. The independent instance sees only code and criteria, judging what is actually written — even with the exact same model.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: العلة سياق التفكير المحتفظ به من التوليد — النموذج يدافع عن قراراته. لا علاقة للأمر بحصص حوسبة أو امتلاء نافذة أو نموذج أقوى؛ الاستقلالية معمارية وتنفع حتى بنفس النموذج.</span>
+              <span class="lang-en">The answer is B: the cause is retained generation reasoning context — the model defends its decisions. It has nothing to do with compute shares, window exhaustion, or a stronger model; independence is architectural and works even with the same model.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">مراجعة PR من 12 ملفاً بمرور واحد تنتج: عمقاً متفاوتاً بين الملفات، وأخطاء مفقودة، ونمطاً يُرفض في ملف ويُقبل في آخر. وش إعادة الهيكلة الصحيحة؟</p>
+            <p class="lang-en">A single-pass review of a 12-file PR produces uneven depth across files, missed bugs, and a pattern rejected in one file but approved in another. What is the right restructuring?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">انتقل لنموذج بنافذة سياق أكبر ليعطي الملفات الـ 12 انتباهاً كافياً.</span>
+            <span class="lang-en">Move to a larger-context model so the 12 files get adequate attention.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">شغّل ثلاث مراجعات كاملة واعتمد النتائج المتفق عليها في اثنتين على الأقل.</span>
+            <span class="lang-en">Run three full reviews and keep findings at least two agree on.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">قسّمها: تحليل محلي لكل ملف على حدة، ثم مرور تكاملي منفصل لتدفق البيانات بين الملفات.</span>
+            <span class="lang-en">Split it: per-file local analysis, then a separate integration pass for cross-file data flow.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">ألزم الفريق بتقسيم كل PR إلى 3-4 ملفات قبل تشغيل المراجعة الآلية.</span>
+            <span class="lang-en">Require the team to split every PR into 3-4 files before the automated review runs.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. التقسيم يعالج السبب الجذري — تشتت الانتباه: عمق متسق لكل ملف في المرور المحلي، ومشاكل التكامل تلتقط في مرورها المخصص. النافذة الأكبر لا ترفع جودة الانتباه، والتصويت يكبت الأخطاء المكتشفة بشكل متقطع، وإلزام المطورين يرحّل العبء بلا تحسين.</span>
+              <span class="lang-en">Correct. Splitting addresses the root cause — attention dilution: consistent per-file depth in the local pass, integration issues caught in their dedicated pass. A bigger window does not raise attention quality, voting suppresses intermittently-caught bugs, and mandating smaller PRs offloads the burden without improving anything.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: مرور محلي لكل ملف + مرور تكاملي منفصل — جواب السؤال الرسمي المطابق في الدليل. سعة السياق لا تعالج جودة الانتباه، والتصويت الثلاثي يقمع أخطاء حقيقية، وترحيل العبء للمطورين ليس تحسيناً للنظام.</span>
+              <span class="lang-en">The answer is C: per-file local passes + a separate integration pass — the matching official question's answer in the guide. Context capacity does not fix attention quality, triple voting suppresses real bugs, and offloading to developers is not a system improvement.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">تبغى النتائج عالية الموثوقية تُنشر تلقائياً على الـ PR، والمشكوك فيها تمر على إنسان أولاً. وش التصميم الصحيح؟</p>
+            <p class="lang-en">You want high-reliability findings auto-posted to the PR, and doubtful ones to pass through a human first. What is the right design?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف للبرومبت: "لا تبلّغ إلا عن النتائج اللي ثقتك فيها عالية جداً".</span>
+            <span class="lang-en">Add to the prompt: "only report findings you are very highly confident about".</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">اطلب حقل confidence مهيكلاً مع كل نتيجة، ووجّه النتائج برمجياً بعتبات: نشر تلقائي / فرز بشري / تسجيل.</span>
+            <span class="lang-en">Request a structured confidence field with every finding, and route findings programmatically with thresholds: auto-post / human triage / log.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">انشر كل النتائج تلقائياً واترك المطورين يميزون الموثوق من غيره.</span>
+            <span class="lang-en">Auto-post everything and let developers sort the reliable from the rest.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">مرّر كل نتيجة على ثلاث نسخ مستقلة وانشر فقط ما تجمع عليه الثلاث.</span>
+            <span class="lang-en">Run every finding past three independent instances and post only unanimous ones.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الثقة كحقل بيانات + توجيه خارجي بعتبات قابلة للمعايرة = مهارة 4.6. الخيار A هو فخ الفلترة الغامضة من 4.1، وC يدفن المطورين بالضجيج، وD يضاعف التكلفة ثلاثاً ويكبت النتائج الصحيحة غير المجمع عليها.</span>
+              <span class="lang-en">Correct. Confidence as a data field + external routing with calibratable thresholds = the 4.6 skill. Option A is the 4.1 vague-filtering trap, C buries developers in noise, and D triples cost while suppressing correct non-unanimous findings.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: التصريح بالثقة كحقل مهيكل مع توجيه برمجي معاير — هذا "calibrated review routing" من الدليل. التعليمة الغامضة قمع داخلي (فخ 4.1)، والنشر الشامل والإجماع الثلاثي كلاهما تطرف بلا معايرة.</span>
+              <span class="lang-en">The answer is B: self-reported confidence as a structured field with calibrated programmatic routing — the guide's "calibrated review routing". The vague instruction is internal suppression (the 4.1 trap), and blanket posting or triple unanimity are both uncalibrated extremes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">المراجعة الذاتية قاصرة بنيوياً: سياق التوليد يدفع النموذج لتبرير قراراته بدل التشكيك فيها.</span><span class="lang-en">Self-review is structurally limited: generation context pushes the model to justify its decisions rather than question them.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">النسخة المستقلة (كود + معايير فقط، بدون سياق سابق) تكشف المشاكل الدقيقة أكثر من تعليمات المراجعة الذاتية ومن extended thinking.</span><span class="lang-en">An independent instance (code + criteria only, no prior context) catches subtle issues better than self-review instructions and extended thinking.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">المراجعات الكبيرة: مرور محلي لكل ملف + مرور تكاملي منفصل — يعالج تشتت الانتباه والنتائج المتناقضة؛ النافذة الأكبر لا تعالجها.</span><span class="lang-en">Large reviews: per-file local passes + a separate integration pass — fixing attention dilution and contradictory findings; a bigger window does not.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">التصريح بالثقة كحقل مهيكل + عتبات توجيه خارجية = routing معاير: نشر تلقائي، فرز بشري، أو تسجيل.</span><span class="lang-en">Self-reported confidence as a structured field + external thresholds = calibrated routing: auto-post, human triage, or log.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">فرّق دائماً: "بلّغ عن الثقة العالية فقط" في البرومبت = فخ 4.1؛ حقل confidence للتوجيه البرمجي = مهارة 4.6.</span><span class="lang-en">Always distinguish: "only report high confidence" in the prompt = the 4.1 trap; a confidence field for programmatic routing = the 4.6 skill.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="4-5-batch-processing.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.5 استراتيجيات المعالجة بالدفعات</span><span class="lang-en">4.5 Batch processing strategies</span></p>
+        </div>
+      </a>
+      <a href="../domain-5/index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-rose-700 transition-colors"><span class="lang-ar">الدومين 5: إدارة السياق والموثوقية</span><span class="lang-en">Domain 5: Context Management &amp; Reliability</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-rose-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.5 استراتيجيات المعالجة بالدفعات — CCAF مرجع</title>
+  <meta name="description" content="Task 4.5: Design efficient batch processing strategies — Message Batches API 50% savings, 24-hour window, custom_id correlation, submission-frequency math for SLAs, and resubmitting only failures.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">المعالجة بالدفعات</span><span class="lang-en">Batch processing</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.5</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">استراتيجيات المعالجة بالدفعات</span>
+            <span class="lang-en">Efficient batch processing strategies</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن نص السعر إغراء كبير — والمهندس المعماري الحقيقي يعرف بالضبط أي الأحمال تتحمل نافذة 24 ساعة بدون SLA، وأيها يحرم عليها الانتظار.</span>
+            <span class="lang-en">Why this matters: half price is a big temptation — the real architect knows exactly which workloads tolerate a 24-hour window with no SLA, and which must never wait.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">أرقام Message Batches API الثلاثة: توفير 50%، نافذة معالجة حتى 24 ساعة، وبدون SLA مضمون للاستجابة</span><span class="lang-en">The Message Batches API's three numbers: 50% cost savings, up to a 24-hour processing window, and no guaranteed latency SLA</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">مطابقة الـ API لمتطلبات الكمون: synchronous للفحوص الحاجبة قبل الدمج، والدفعات للتقارير الليلية والتدقيقات الأسبوعية وتوليد الاختبارات الليلي</span><span class="lang-en">Matching API to latency requirements: synchronous for blocking pre-merge checks, batch for overnight reports, weekly audits, and nightly test generation</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">القيد التقني: الدفعات لا تدعم multi-turn tool calling داخل الطلب الواحد (لا تنفيذ أدوات وإرجاع نتائجها أثناء الطلب)</span><span class="lang-en">The technical constraint: batches do not support multi-turn tool calling within a single request (no executing tools mid-request and returning results)</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">حقول custom_id لربط كل طلب بنتيجته — والرد على خرافة "ترتيب النتائج العشوائي"</span><span class="lang-en">custom_id fields correlating each request with its result — and debunking the "random result ordering" myth</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">حساب تكرار الإرسال من قيود SLA: نوافذ إرسال كل 4 ساعات لضمان SLA قدره 30 ساعة مع معالجة دفعات تصل 24 ساعة</span><span class="lang-en">Computing submission frequency from SLA constraints: 4-hour submission windows to guarantee a 30-hour SLA with up-to-24-hour batch processing</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">معالجة الفشل: إعادة إرسال المستندات الفاشلة فقط (بتحديد custom_id) مع التعديل المناسب، وتجريب البرومبت على عينة قبل معالجة الأحجام الكبيرة</span><span class="lang-en">Failure handling: resubmitting only failed documents (identified by custom_id) with fitting modifications, and refining the prompt on a sample before processing large volumes</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: Economics and constraints ===== -->
+    <section id="economics" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">اقتصاديات Batches API وقيوده</span><span class="lang-en">Batches API economics &amp; constraints</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>احفظ أرقام <span dir="ltr" class="font-mono">Message Batches API</span> الثلاثة كأنها رقم جوالك: <b>توفير 50%</b> من التكلفة، <b>نافذة معالجة تصل إلى 24 ساعة</b>، و<b>بدون SLA مضمون</b> للكمون. الصفقة واضحة: تتنازل عن السرعة المضمونة مقابل نص السعر. أغلب الدفعات تخلص أسرع بكثير من 24 ساعة — لكن "غالباً أسرع" <b>ليست ضمانة</b>، وهنا يصطاد الاختبار من يبني workflow حاجباً على أمنية.</p>
+        <p>وفيه قيد تقني يغيب عن البال: الدفعة <b>لا تدعم multi-turn tool calling داخل الطلب الواحد</b> — ما تقدر تنفذ أداة في منتصف الطلب وترجع نتيجتها ليكمل النموذج. يعني وكيل يستكشف ويجرب وينادي أدوات بالتناوب مو مرشحاً للدفعات؛ أما استخراج بأداة واحدة مفروضة (استدعاء tool_use واحد يمثل المخرج، بدون تنفيذ فعلي) فيشتغل تماماً. وكل طلب في الدفعة يحمل <b><span dir="ltr" class="font-mono">custom_id</span></b> من عندك — هو الخيط اللي يربط كل نتيجة بطلبها، لأن النتائج قد ترجع بأي ترتيب.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Memorize the <span class="font-mono">Message Batches API</span>'s three numbers like your phone number: <b>50% cost savings</b>, a <b>processing window of up to 24 hours</b>, and <b>no guaranteed latency SLA</b>. The deal is plain: you trade guaranteed speed for half price. Most batches finish far sooner than 24 hours — but "usually faster" <b>is not a guarantee</b>, and that is where the exam catches anyone building a blocking workflow on a wish.</p>
+        <p>One technical constraint is easy to forget: a batch <b>does not support multi-turn tool calling within a single request</b> — you cannot execute a tool mid-request and return its result for the model to continue. So an agent that explores, iterates, and alternates tool calls is not a batch candidate; a forced single-tool extraction (one tool_use call that IS the output, nothing actually executed) works perfectly. And every request in the batch carries your <b><span class="font-mono">custom_id</span></b> — the thread tying each result back to its request, since results may return in any order.</p>
+      </div>
+
+      <!-- Diagram 1: sync vs batch decision panels -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[780px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">SYNCHRONOUS OR BATCH? WHO IS WAITING?</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-sky-950/60 border-2 border-sky-500/50 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-sky-300">
+                <i data-lucide="timer" class="w-4 h-4"></i> SYNCHRONOUS API
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-sky-100/90">
+                <div class="bg-sky-900/40 rounded-lg px-2.5 py-1.5">a HUMAN or PIPELINE is blocked waiting</div>
+                <div class="bg-sky-900/40 rounded-lg px-2.5 py-1.5">pre-merge checks gating developers</div>
+                <div class="bg-sky-900/40 rounded-lg px-2.5 py-1.5">interactive agents, live chat</div>
+                <div class="bg-sky-900/40 rounded-lg px-2.5 py-1.5">full price — predictable latency</div>
+              </div>
+            </div>
+            <div class="bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-amber-300">
+                <i data-lucide="moon" class="w-4 h-4"></i> MESSAGE BATCHES API
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-amber-100/90">
+                <div class="bg-amber-900/40 rounded-lg px-2.5 py-1.5">NOBODY is waiting on the result</div>
+                <div class="bg-amber-900/40 rounded-lg px-2.5 py-1.5">overnight reports, weekly audits</div>
+                <div class="bg-amber-900/40 rounded-lg px-2.5 py-1.5">nightly test generation</div>
+                <div class="bg-amber-900/40 rounded-lg px-2.5 py-1.5">50% off — up to 24h, no SLA</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-red-950/50 border border-red-500/40 rounded-xl p-3 text-center font-mono text-[11px] text-red-200">
+            batch constraint: NO multi-turn tool calling inside a request — no mid-request tool execution + result return
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">القرار كله في سؤال واحد: في أحد ينتظر النتيجة الآن؟ نعم = synchronous، لا = دفعات بنص السعر</span>
+        <span class="lang-en">The whole decision in one question: is anyone waiting on the result right now? Yes = synchronous, no = batch at half price</span>
+      </p>
+
+      <!-- Code: batch submission -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">إرسال دفعة استخراج ليلية — كل طلب بـ custom_id خاص:</span>
+          <span class="lang-en">Submitting a nightly extraction batch — each request with its own custom_id:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+batch = client.messages.batches.create(
+    requests=[
+        {
+            "custom_id": f"invoice-{doc.id}",     # your correlation key
+            "params": {
+                "model": "claude-sonnet-4-5",
+                "max_tokens": 2048,
+                "tools": [record_invoice_tool],
+                "tool_choice": {"type": "tool", "name": "record_invoice"},
+                "messages": [{"role": "user",
+                              "content": f"Extract the invoice data:\n\n{doc.text}"}],
+            },
+        }
+        for doc in tonight_documents          # thousands of docs, one batch
+    ]
+)
+print(batch.id, batch.processing_status)      # poll until "ended"</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">الاختيار بين synchronous والدفعات <b>قرار كمون مو قرار تكلفة</b>: حدد أولاً من ينتظر النتيجة، وبعدها التوفير يجي لوحده. من يبدأ من التوفير ينتهي بمطورين محبوسين على دفعة معلقة.</div>
+          <div class="lang-en">Choosing between synchronous and batch is <b>a latency decision, not a cost decision</b>: first determine who waits on the result, and the savings follow. Whoever starts from the savings ends with developers stuck behind a pending batch.</div>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">لا ترسل مهام وكيلة (استكشاف + أدوات بالتناوب) للدفعات — قيد "لا multi-turn tool calling" يكسرها. الدفعات لطلبات مكتملة المدخلات: استخراج، تصنيف، تلخيص، توليد اختبارات لكود مرفق.</div>
+          <div class="lang-en">Do not send agentic tasks (exploration + alternating tool calls) to batches — the "no multi-turn tool calling" constraint breaks them. Batches are for input-complete requests: extraction, classification, summarization, test generation for attached code.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: Matching workloads ===== -->
+    <section id="workloads" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">أي الأحمال تناسب الدفعات</span><span class="lang-en">Which workloads fit batch</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>القاعدة من الدليل حرفياً: الدفعات مناسبة للأحمال <b>غير الحاجبة والمتسامحة مع الكمون</b> — تقارير الديون التقنية الليلية، التدقيقات الأسبوعية، توليد الاختبارات الليلي — وغير مناسبة إطلاقاً للتدفقات <b>الحاجبة</b> مثل فحوص ما قبل الدمج اللي يقف عندها المطور منتظراً. السؤال الحاسم مو "كم نوفر؟" بل "من يجلس ينتظر؟". مطور محبوس ساعة على فحص أغلى بكثير من أي توفير API.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>The guide's rule verbatim: batch fits <b>non-blocking, latency-tolerant</b> workloads — nightly technical-debt reports, weekly audits, nightly test generation — and is flat-out inappropriate for <b>blocking</b> flows like pre-merge checks where a developer stands waiting. The deciding question is not "how much do we save?" but "who sits waiting?". A developer stuck an hour behind a check costs far more than any API discount.</p>
+      </div>
+
+      <!-- Comparison table (bilingual, duplicated per language) -->
+      <div class="lang-ar overflow-x-auto">
+        <table class="w-full text-sm bg-white rounded-2xl border border-surface-200 overflow-hidden">
+          <thead class="bg-surface-100 text-surface-700">
+            <tr>
+              <th class="text-start p-3.5 font-bold">الحمل</th>
+              <th class="text-start p-3.5 font-bold">حاجب؟</th>
+              <th class="text-start p-3.5 font-bold">الاختيار</th>
+              <th class="text-start p-3.5 font-bold">ليش</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr>
+              <td class="p-3.5">فحص أمني قبل الدمج</td>
+              <td class="p-3.5 text-red-600 font-bold">نعم</td>
+              <td class="p-3.5"><span dir="ltr" class="font-mono text-sky-700">synchronous</span></td>
+              <td class="p-3.5 text-surface-600">المطور واقف ينتظر — نافذة 24 ساعة بدون SLA غير مقبولة</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">تقرير ديون تقنية ليلي</td>
+              <td class="p-3.5 text-emerald-600 font-bold">لا</td>
+              <td class="p-3.5"><span dir="ltr" class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">يُقرأ صباحاً — الليل كله نافذة متاحة ونص السعر مكسب صافي</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">توليد اختبارات ليلي</td>
+              <td class="p-3.5 text-emerald-600 font-bold">لا</td>
+              <td class="p-3.5"><span dir="ltr" class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">لا أحد ينتظره وقت التنفيذ — مثال الدليل النموذجي</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">تدقيق جودة أسبوعي</td>
+              <td class="p-3.5 text-emerald-600 font-bold">لا</td>
+              <td class="p-3.5"><span dir="ltr" class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">أفق زمني بالأيام — أوسع تسامح ممكن مع الكمون</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">وكيل دعم تفاعلي</td>
+              <td class="p-3.5 text-red-600 font-bold">نعم</td>
+              <td class="p-3.5"><span dir="ltr" class="font-mono text-sky-700">synchronous</span></td>
+              <td class="p-3.5 text-surface-600">عميل على الخط + يحتاج multi-turn tool calling أصلاً</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto">
+        <table class="w-full text-sm bg-white rounded-2xl border border-surface-200 overflow-hidden">
+          <thead class="bg-surface-100 text-surface-700">
+            <tr>
+              <th class="text-start p-3.5 font-bold">Workload</th>
+              <th class="text-start p-3.5 font-bold">Blocking?</th>
+              <th class="text-start p-3.5 font-bold">Choice</th>
+              <th class="text-start p-3.5 font-bold">Why</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr>
+              <td class="p-3.5">Pre-merge security check</td>
+              <td class="p-3.5 text-red-600 font-bold">Yes</td>
+              <td class="p-3.5"><span class="font-mono text-sky-700">synchronous</span></td>
+              <td class="p-3.5 text-surface-600">A developer stands waiting — a 24h window with no SLA is unacceptable</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">Nightly tech-debt report</td>
+              <td class="p-3.5 text-emerald-600 font-bold">No</td>
+              <td class="p-3.5"><span class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">Read in the morning — the whole night is the window, half price is pure gain</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">Nightly test generation</td>
+              <td class="p-3.5 text-emerald-600 font-bold">No</td>
+              <td class="p-3.5"><span class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">Nobody waits at run time — the guide's canonical example</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">Weekly quality audit</td>
+              <td class="p-3.5 text-emerald-600 font-bold">No</td>
+              <td class="p-3.5"><span class="font-mono text-amber-700">batch</span></td>
+              <td class="p-3.5 text-surface-600">A horizon measured in days — maximum latency tolerance</td>
+            </tr>
+            <tr>
+              <td class="p-3.5">Interactive support agent</td>
+              <td class="p-3.5 text-red-600 font-bold">Yes</td>
+              <td class="p-3.5"><span class="font-mono text-sky-700">synchronous</span></td>
+              <td class="p-3.5 text-surface-600">A customer is live — and it needs multi-turn tool calling anyway</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar">اختصار للاختبار: الكلمات "overnight/nightly/weekly" = دفعات. الكلمات "blocking/pre-merge/gate/ينتظر" = synchronous. نادراً ما يحتاج السؤال أكثر من هذي الخريطة.</div>
+          <div class="lang-en">Exam shortcut: the words "overnight/nightly/weekly" = batch. The words "blocking/pre-merge/gate/waiting" = synchronous. Questions rarely need more than this mapping.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">من سؤال رسمي في الدليل: المشتتات الثلاثة الكلاسيكية هي (1) "حوّل الكل للدفعات مع polling — غالباً تخلص بسرعة": الاعتماد على "غالباً" في تدفق حاجب خطأ؛ (2) "أبقِ الكل synchronous لأن ترتيب نتائج الدفعات مشكلة": خرافة — <span dir="ltr" class="font-mono">custom_id</span> يحلها؛ (3) "دفعات مع timeout يرجع للـ synchronous": تعقيد بلا داعي والحل الأبسط هو مطابقة كل API لحالته.</div>
+          <div class="lang-en">From an official guide question: the three classic distractors are (1) "move everything to batch with polling — it usually finishes fast": relying on "usually" for a blocking flow is wrong; (2) "keep everything synchronous because batch result ordering is a problem": a myth — <span class="font-mono">custom_id</span> solves it; (3) "batch with a timeout fallback to synchronous": needless complexity when the simple fix is matching each API to its use case.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: SLA math and failure handling ===== -->
+    <section id="sla-math" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">حساب التكرار ومعالجة الفشل</span><span class="lang-en">Submission-frequency math &amp; failure handling</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>افرض أنك وعدت عملاءك بمعالجة كل مستند خلال <b>30 ساعة</b> من وصوله (SLA)، والدفعة قد تأخذ حتى <b>24 ساعة</b>. كم مرة ترسل دفعة؟ الحساب: أسوأ حالة لمستند = زمن انتظاره قبل دخول دفعة + زمن معالجة الدفعة. لو أرسلت كل <b>4 ساعات</b>، أسوأ مستند (وصل لحظة انطلاق الدفعة السابقة) ينتظر 4 ساعات ثم يعالَج بحد أقصى 24: المجموع <b>28 ساعة ≤ 30</b> — مع هامش ساعتين لاسترجاع النتائج ومعالجتها. الإرسال كل 6 ساعات يعطيك 30 ساعة بالضبط: تحقيق نظري للـ SLA بهامش صفر — أي تأخير ثانية يكسره، ولذلك نوافذ الـ 4 ساعات هي الجواب الهندسي.</p>
+        <p>وعند اكتمال الدفعة بيطلع فيها فاشلون — مستند تجاوز حد السياق، طلب رفضته الفلاتر. القاعدة: <b>أعد إرسال الفاشل فقط</b>، معرّفاً بـ <span dir="ltr" class="font-mono">custom_id</span>، <b>مع التعديل المناسب</b> لسبب فشله (مستند طويل؟ قسّمه chunks). إعادة الدفعة كاملة تدفع ثمن الناجحين مرتين. وقبل هذا كله، قاعدة الذهب للأحجام الكبيرة: <b>جرّب البرومبت على عينة صغيرة أولاً</b> — اكتشاف عيب في البرومبت بعد معالجة 100 ألف مستند يعني إعادة مكلفة كان يمنعها اختبار على 200 مستند.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Suppose you promised customers every document is processed within <b>30 hours</b> of arrival (the SLA), and a batch may take up to <b>24 hours</b>. How often do you submit? The math: a document's worst case = its wait before entering a batch + the batch's processing time. Submitting every <b>4 hours</b>, the unluckiest document (arriving just after the previous batch left) waits 4 hours then processes in at most 24: total <b>28 hours, at or under 30</b> — with a two-hour margin for retrieving and handling results. Submitting every 6 hours yields exactly 30: a zero-margin theoretical fit that one second of delay breaks — which is why 4-hour windows are the engineering answer.</p>
+        <p>When the batch ends, some requests will have failed — a document exceeded the context limit, a request was filtered. The rule: <b>resubmit only the failures</b>, identified by <span class="font-mono">custom_id</span>, <b>with modifications fitting the failure cause</b> (long document? chunk it). Resubmitting the whole batch pays for the successes twice. And before any of this, the golden rule for large volumes: <b>refine the prompt on a small sample first</b> — discovering a prompt flaw after processing 100,000 documents means a costly resubmission that a 200-document trial would have prevented.</p>
+      </div>
+
+      <!-- Diagram 2: batch timeline -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[640px] max-w-[800px] mx-auto space-y-4">
+          <p class="text-center font-mono text-xs text-surface-400">BATCH LIFECYCLE — SUBMIT, POLL, RESUBMIT ONLY FAILURES</p>
+          <div class="flex items-stretch justify-center gap-2">
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center flex-1 max-w-[132px]">
+              <i data-lucide="inbox" class="w-5 h-5 text-surface-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-surface-200 leading-snug">collect docs<br>+ assign custom_id</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-amber-950/60 border border-amber-500/50 rounded-xl p-3 text-center flex-1 max-w-[132px]">
+              <i data-lucide="send" class="w-5 h-5 text-amber-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-amber-100 leading-snug">batches.create<br>(every 4h window)</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-sky-950/60 border border-sky-500/50 rounded-xl p-3 text-center flex-1 max-w-[132px]">
+              <i data-lucide="refresh-cw" class="w-5 h-5 text-sky-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-sky-100 leading-snug">poll status<br>(&le; 24h, no SLA)</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center flex-1 max-w-[132px]">
+              <i data-lucide="split" class="w-5 h-5 text-surface-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-surface-200 leading-snug">stream results<br>match by custom_id</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4 max-w-[560px] mx-auto">
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-3 text-center">
+              <p class="font-mono text-[11px] font-bold text-emerald-200">succeeded</p>
+              <p class="font-mono text-[10px] text-emerald-100/80">-&gt; save / downstream</p>
+            </div>
+            <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-3 text-center">
+              <p class="font-mono text-[11px] font-bold text-red-200">failed (by custom_id)</p>
+              <p class="font-mono text-[10px] text-red-100/80">-&gt; modify (e.g. chunk) -&gt; resubmit ONLY these</p>
+            </div>
+          </div>
+          <div class="bg-surface-800/70 border border-surface-600 rounded-xl p-3 text-center font-mono text-[11px] text-surface-300">
+            SLA math: submit every 4h -&gt; worst case 4h wait + 24h processing = 28h &le; 30h SLA (2h margin)
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">دورة الدفعة: تجميع بمعرفات، إرسال كل 4 ساعات، polling، ثم إعادة إرسال الفاشل فقط بعد تعديله</span>
+        <span class="lang-en">The batch cycle: collect with IDs, submit every 4 hours, poll, then resubmit only the modified failures</span>
+      </p>
+
+      <!-- Code: results + resubmit failures -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">قراءة النتائج بـ custom_id وإعادة إرسال الفاشل فقط:</span>
+          <span class="lang-en">Reading results by custom_id and resubmitting only the failures:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">failed = []
+
+for result in client.messages.batches.results(batch.id):
+    if result.result.type == "succeeded":
+        save_extraction(result.custom_id, result.result.message)
+    else:                                   # errored / expired / canceled
+        failed.append(result.custom_id)
+
+# resubmit ONLY the failures — with a fix matching the failure cause
+retry_requests = []
+for cid in failed:
+    doc = docs_by_custom_id[cid]
+    for i, chunk in enumerate(chunk_document(doc)):   # e.g. exceeded context
+        retry_requests.append({
+            "custom_id": f"{cid}-part{i}",
+            "params": build_extraction_params(chunk),
+        })
+
+retry_batch = client.messages.batches.create(requests=retry_requests)</code></pre>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">قبل دفعة الـ 100 ألف مستند: شغّل البرومبت synchronous على عينة 100-200 مستند ممثلة للتنوع، صحح العيوب، وبعدها أطلق الدفعة الكبيرة. تكلفة العينة فتات مقابل إعادة معالجة جماعية — وهذا "رفع نسبة نجاح المرور الأول" اللي ينص عليه الدليل.</div>
+          <div class="lang-en">Before the 100k-document batch: run the prompt synchronously on a 100-200 document sample representing the variety, fix the flaws, then launch the big batch. The sample's cost is crumbs next to a mass reprocessing — this is the guide's "maximize first-pass success rates".</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="shirt" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: المغسلة</span><span class="lang-en">Real-life example: the dry cleaner</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>مغسلة ملابس تقدم خدمتين: <b>استعجال</b> — تجلس تنتظر وثوبك يطلع خلال ساعة بالسعر الكامل (synchronous)، و<b>عادي</b> — تسلّمهم الثياب وترجع "بكرة أو بعده" بنص السعر (الدفعات: نافذة طويلة بدون موعد مضمون). لو عندك مناسبة الليلة، الغبي فقط يختار العادي عشان التوفير — والذكي ما يدفع الاستعجال لثياب الدوام اللي يحتاجها الأسبوع الجاي.</p>
+        <p>وعند التسليم يعلقون على كل قطعة <b>رقم بطاقة</b> (custom_id) — عشان لما تستلم 20 قطعة، تعرف أن هذا ثوبك أنت مو ثوب غيرك، مهما اختلف ترتيب الخروج. طلعت قطعتان ببقع ما راحت؟ ترجّع <b>القطعتين فقط</b> بأرقام بطاقتيهما مع ملاحظة "بقعة زيت — تحتاج معالجة خاصة" (إعادة الفاشل فقط مع التعديل المناسب) — ما أحد يعيد غسل السلة كلها. وفندق بيوقع عقداً مع المغسلة بشرط "كل قطعة ترجع خلال 30 ساعة"؟ بيرسل شحنة كل 4 ساعات، لأن قطعة وصلت بعد الشحنة مباشرة بتنتظر 4 ثم تُعالج بحد أقصى 24 — يعني 28 ساعة وداخل الوعد.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>A dry cleaner offers two services: <b>express</b> — you sit and wait, your thobe is ready within the hour at full price (synchronous), and <b>regular</b> — drop the clothes off and come back "tomorrow or the day after" at half price (batch: a long window with no promised time). If you have an event tonight, only a fool picks regular for the savings — and only a spendthrift pays express rates for next week's work clothes.</p>
+        <p>At drop-off they pin a <b>ticket number</b> on every piece (custom_id) — so when you collect 20 items, you know this thobe is yours regardless of the order they come out. Two pieces come back still stained? You return <b>those two only</b>, by their ticket numbers, with a note "oil stain — needs special treatment" (resubmit only failures, with the fitting modification) — nobody rewashes the whole basket. And a hotel signing a "every item back within 30 hours" contract with the cleaner? It sends a van every 4 hours, because an item arriving right after a van waits 4, then takes at most 24 — 28 hours, inside the promise.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>سؤال رسمي كامل في الدليل مبني على هذا الموضوع (فحص حاجب + تقرير ليلي). خلاصة التعامل:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>صنّف كل حمل: حاجب = synchronous، ليلي/أسبوعي = دفعات. الجواب الصحيح يقسم، ما يعمم.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>أسئلة الحساب: أقصى انتظار قبل الدفعة + 24 ساعة معالجة لازم يبقى تحت الـ SLA بهامش — نوافذ 4 ساعات لسلا الـ 30 ساعة.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>فشل جزئي؟ الجواب يذكر custom_id + إعادة الفاشل فقط + تعديل يناسب السبب (تقسيم الطويل).</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: "الدفعات غالباً سريعة" لتدفق حاجب، "الترتيب العشوائي مشكلة"، وfallback timeout الهجين.</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>A full official guide question is built on this topic (blocking check + overnight report). The playbook:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Classify each workload: blocking = synchronous, nightly/weekly = batch. The correct answer splits; it never generalizes.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Math questions: max pre-batch wait + 24h processing must stay under the SLA with margin — 4-hour windows for a 30-hour SLA.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Partial failure? The right answer mentions custom_id + resubmitting only failures + a cause-fitting modification (chunk the long ones).</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: "batches are usually fast" for a blocking flow, "random ordering is a problem", and the hybrid timeout-fallback.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">وعدتم العملاء بمعالجة كل مستند خلال 30 ساعة من استلامه، وتستخدمون Batches API (معالجة تصل 24 ساعة). وش أقصى فترة بين إرسالات الدفعات تضمن الوفاء بالوعد مع هامش أمان؟</p>
+            <p class="lang-en">You promised customers every document is processed within 30 hours of receipt, using the Batches API (processing up to 24 hours). What is the largest submission interval that guarantees the promise with a safety margin?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">كل 24 ساعة — دفعة يومية واحدة تكفي.</span>
+            <span class="lang-en">Every 24 hours — one daily batch suffices.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">كل 12 ساعة — دفعتان يومياً.</span>
+            <span class="lang-en">Every 12 hours — two batches a day.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">كل 6 ساعات — 6 + 24 = 30 بالضبط.</span>
+            <span class="lang-en">Every 6 hours — 6 + 24 = exactly 30.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">كل 4 ساعات — أسوأ حالة 4 + 24 = 28 ساعة، بهامش ساعتين.</span>
+            <span class="lang-en">Every 4 hours — worst case 4 + 24 = 28 hours, with a two-hour margin.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. أسوأ مستند ينتظر فترة الإرسال كاملة ثم 24 ساعة معالجة: 4 + 24 = 28 ≤ 30 مع هامش لاسترجاع النتائج. خيار الـ 6 ساعات يعطي 30 بالضبط — هامش صفر ينهار مع أول تأخير — و12 أو 24 ساعة تكسر الوعد أصلاً (36 أو 48 ساعة).</span>
+              <span class="lang-en">Correct. The unluckiest document waits the full interval then up to 24 hours of processing: 4 + 24 = 28, at most 30 with margin for result handling. The 6-hour option hits exactly 30 — zero margin that collapses at the first delay — and 12 or 24 hours breaks the promise outright (36 or 48 hours).</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح D: احسب أسوأ حالة = فترة الانتظار قبل الدفعة + 24 ساعة معالجة. نوافذ 4 ساعات تعطي 28 ≤ 30 بهامش؛ 6 ساعات = 30 بلا هامش؛ والأطول يكسر الـ SLA.</span>
+              <span class="lang-en">The answer is D: compute the worst case = pre-batch wait + 24h processing. Four-hour windows give 28 with margin; 6 hours = exactly 30 with none; anything longer breaks the SLA.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">دفعة من 5,000 مستند اكتملت: 4,850 نجحت و150 فشلت لتجاوز حد السياق. وش الخطوة الصحيحة؟</p>
+            <p class="lang-en">A 5,000-document batch completed: 4,850 succeeded, 150 failed for exceeding the context limit. What is the right move?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أعد إرسال الدفعة كاملة — أسهل من تتبع الفاشل.</span>
+            <span class="lang-en">Resubmit the whole batch — easier than tracking failures.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">حدد الـ 150 الفاشلة بـ custom_id، قسّم مستنداتها الطويلة، وأعد إرسالها وحدها.</span>
+            <span class="lang-en">Identify the 150 failures by custom_id, chunk their long documents, and resubmit only them.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">أعد إرسال الـ 150 كما هي — يمكن تنجح في المحاولة الثانية.</span>
+            <span class="lang-en">Resubmit the 150 unchanged — they might succeed on the second try.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">عالج الـ 150 عبر synchronous API بنموذج نافذة سياق أكبر بدون أي تعديل.</span>
+            <span class="lang-en">Process the 150 via the synchronous API with a larger-context model, unmodified.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. custom_id يحدد الفاشل بدقة، والتعديل (التقسيم chunks) يعالج سبب الفشل نفسه — تجاوز حد السياق — قبل الإعادة. إعادة الكل تدفع ثمن 4,850 ناجحاً مرتين، والإعادة بلا تعديل تكرر نفس الفشل حتماً لأن السبب حتمي مو عشوائي.</span>
+              <span class="lang-en">Correct. custom_id pinpoints the failures, and the modification (chunking) fixes the actual failure cause — exceeding the context limit — before resubmission. Resubmitting everything pays for 4,850 successes twice, and resubmitting unchanged deterministically repeats the failure since the cause is not random.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: أعد الفاشل فقط (بـ custom_id) مع التعديل المناسب لسبب الفشل — تقسيم المستندات المتجاوزة للحد. هذي المهارة النصية في الدليل لمعالجة فشل الدفعات.</span>
+              <span class="lang-en">The answer is B: resubmit only the failures (by custom_id) with a modification fitting the cause — chunking the over-limit documents. That is the guide's verbatim batch-failure skill.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">قسم الأرشيف يريد استخراج بيانات من 200,000 عقد تاريخي بأقل تكلفة، والنتائج مطلوبة "خلال الأسبوع". البرومبت جديد لم يُجرَّب. وش الخطة الأمثل؟</p>
+            <p class="lang-en">The archives department wants data extracted from 200,000 historical contracts at minimum cost, results due "within the week". The prompt is new and untested. What is the optimal plan?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أرسل الـ 200,000 دفعة واحدة فوراً — الوقت متسع لأي إعادة.</span>
+            <span class="lang-en">Send all 200,000 in one batch immediately — there is plenty of time for any redo.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">حسّن البرومبت على عينة صغيرة ممثلة أولاً، وبعد استقرار النتائج أرسل الحجم الكامل عبر الدفعات.</span>
+            <span class="lang-en">Refine the prompt on a small representative sample first, then send the full volume via batch once results stabilize.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">عالجها synchronous على أسبوع كامل لضمان جودة أعلى لكل عقد.</span>
+            <span class="lang-en">Process them synchronously across the whole week for higher per-contract quality.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">قسّمها على 20 دفعة متزامنة صغيرة عشان تخلص أسرع.</span>
+            <span class="lang-en">Split into 20 small concurrent batches so it finishes faster.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. تجريب البرومبت على عينة قبل الحجم الكامل يرفع نجاح المرور الأول ويجنّبك إعادة معالجة 200 ألف عقد بسبب عيب كان سيظهر في أول 200. الحمل متسامح مع الكمون فالدفعات صح، وsynchronous يضاعف التكلفة بلا مبرر، وتقسيم الدفعات لا يعالج مشكلة البرومبت غير المجرَّب.</span>
+              <span class="lang-en">Correct. Refining the prompt on a sample before full volume maximizes first-pass success and spares you reprocessing 200k contracts over a flaw the first 200 would have exposed. The workload is latency-tolerant so batch is right, synchronous doubles cost for nothing, and splitting batches does not fix an untested prompt.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: عينة أولاً ثم الحجم الكامل بالدفعات — "prompt refinement on a sample set" من الدليل لرفع نجاح المرور الأول وتقليل تكاليف الإعادة. الإرسال الأعمى يخاطر بإعادة كاملة، وsynchronous هدر، والتقسيم لا يحل شيئاً هنا.</span>
+              <span class="lang-en">The answer is B: sample first, then the full volume via batch — the guide's "prompt refinement on a sample set" to maximize first-pass success and cut resubmission costs. Blind submission risks a full redo, synchronous is waste, and splitting solves nothing here.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الأرقام الثلاثة: توفير 50%، نافذة حتى 24 ساعة، بدون SLA مضمون — و"غالباً أسرع" ليست ضمانة.</span><span class="lang-en">The three numbers: 50% savings, up to a 24-hour window, no guaranteed SLA — and "usually faster" is not a guarantee.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">حاجب (pre-merge) = synchronous دائماً؛ ليلي/أسبوعي غير حاجب = دفعات دائماً — القرار قرار كمون لا تكلفة.</span><span class="lang-en">Blocking (pre-merge) = always synchronous; non-blocking nightly/weekly = always batch — it is a latency decision, not a cost one.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">لا multi-turn tool calling داخل طلب الدفعة — المهام الوكيلة التفاعلية خارج نطاقها.</span><span class="lang-en">No multi-turn tool calling inside a batch request — interactive agentic tasks are out of scope.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">حساب الـ SLA: أقصى انتظار + 24 ≤ الوعد بهامش — نوافذ 4 ساعات تضمن SLA الثلاثين ساعة (28 ساعة أسوأ حالة).</span><span class="lang-en">SLA math: max wait + 24 must sit under the promise with margin — 4-hour windows secure the 30-hour SLA (28-hour worst case).</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">فشل جزئي: أعد الفاشل فقط بـ custom_id مع تعديل يناسب السبب — وجرّب البرومبت على عينة قبل أي حجم كبير.</span><span class="lang-en">Partial failure: resubmit only the failures by custom_id with a cause-fitting modification — and refine the prompt on a sample before any large volume.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="4-4-validation-retry.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.4 حلقات التحقق والإعادة</span><span class="lang-en">4.4 Validation &amp; retry loops</span></p>
+        </div>
+      </a>
+      <a href="4-6-multipass-review.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.6 معماريات المراجعة متعددة النسخ</span><span class="lang-en">4.6 Multi-instance review architectures</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

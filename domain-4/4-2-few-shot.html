@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.2 الأمثلة الموجهة Few-shot — CCAF مرجع</title>
+  <meta name="description" content="Task 4.2: Apply few-shot prompting to improve output consistency and quality — 2-4 targeted examples for ambiguous cases, format demonstration, distinguishing acceptable patterns, and reducing extraction hallucination.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">Few-shot</span><span class="lang-en">Few-shot</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.2</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">الأمثلة الموجهة Few-shot</span>
+            <span class="lang-en">Few-shot prompting</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن التعليمات التفصيلية وحدها كثيراً ما تنتج مخرجات متذبذبة — و2-4 أمثلة مستهدفة تعرض التفكير تحل ما عجزت عنه صفحات الشرح.</span>
+            <span class="lang-en">Why this matters: detailed instructions alone often produce inconsistent output — and 2-4 targeted examples that show reasoning solve what pages of prose could not.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش few-shot هو الأسلوب الأكثر فعالية لمخرجات متسقة وقابلة للتنفيذ لما تفشل التعليمات التفصيلية وحدها</span><span class="lang-en">Why few-shot is the most effective technique for consistently formatted, actionable output when detailed instructions alone fail</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">دور الأمثلة في معالجة الحالات الغامضة (اختيار الأدوات للطلبات الملتبسة، فجوات تغطية الفروع في الاختبارات)</span><span class="lang-en">The role of examples in handling ambiguous cases (tool selection for ambiguous requests, branch-level test coverage gaps)</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">كيف تمكّن الأمثلة النموذج من تعميم الحكم على أنماط جديدة بدل مطابقة الحالات المحددة مسبقاً فقط</span><span class="lang-en">How examples enable the model to generalize judgment to novel patterns rather than matching only pre-specified cases</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">بناء 2-4 أمثلة مستهدفة للسيناريوهات الغامضة تعرض سبب اختيار إجراء دون بدائله المعقولة، وبالتنسيق المطلوب (الموقع، المشكلة، الشدة، الإصلاح)</span><span class="lang-en">Building 2-4 targeted examples for ambiguous scenarios that show why one action was chosen over plausible alternatives, in the desired format (location, issue, severity, fix)</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">أمثلة تميّز الأنماط المقبولة عن المشاكل الحقيقية لتقليل الإيجابيات الكاذبة مع تمكين التعميم</span><span class="lang-en">Examples that distinguish acceptable patterns from genuine issues to cut false positives while enabling generalization</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تقليل الهلوسة والاستخراج الفارغ (null) عبر أمثلة تغطي القياسات غير الرسمية وتنوع هياكل المستندات (استشهادات ضمنية مقابل قوائم مراجع، أقسام منهجية مقابل تفاصيل مدمجة)</span><span class="lang-en">Reducing hallucination and empty/null extraction via examples covering informal measurements and varied document structures (inline citations vs bibliographies, methodology sections vs embedded details)</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: When examples beat instructions ===== -->
+    <section id="examples-vs-instructions" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">متى الأمثلة تغلب التعليمات</span><span class="lang-en">When examples beat instructions</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>جرّبت تكتب تعليمات مفصلة، دقيقة، مرتبة بالعناوين — ومع ذلك المخرجات تطلع كل مرة بشكل؟ هذي إشارة الدليل الرسمي الصريحة: <b>لما التعليمات التفصيلية وحدها تنتج نتائج غير متسقة، few-shot هو الأسلوب الأكثر فعالية</b> للوصول لمخرجات متسقة التنسيق وقابلة للتنفيذ. السبب بسيط: الوصف النصي يمر عبر طبقة تفسير، بينما المثال يشتغل كقالب يُحتذى مباشرة.</p>
+        <p>وفي نقطة أعمق من التنسيق: <b>الحكم على الحالات الغامضة</b>. خذ وكيل دعم يستقبل طلباً ملتبساً يحتمل أداتين، أو مولّد اختبارات لازم يقرر هل فجوة تغطية على مستوى الفرع (branch) تستحق اختباراً. ما تقدر تكتب قاعدة لكل حالة ممكنة — لكن تقدر تعطي 2-4 أمثلة تعرض <b>التفكير</b> اللي رجّح إجراء على بدائله المعقولة. النموذج ما يحفظ الأمثلة، بل يستخلص منها منطق الحكم ويعممه على أنماط جديدة ما شافها — وهذا الفرق الجوهري بين few-shot وبين قائمة حالات محددة مسبقاً.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>You wrote detailed, precise, well-structured instructions — and the output still comes back different every time? That is the official guide's explicit signal: <b>when detailed instructions alone produce inconsistent results, few-shot is the most effective technique</b> for consistently formatted, actionable output. The reason is simple: a prose description passes through a layer of interpretation, while an example acts as a template to imitate directly.</p>
+        <p>And there is a deeper point than formatting: <b>judgment on ambiguous cases</b>. Take a support agent receiving an ambiguous request that could fit two tools, or a test generator deciding whether a branch-level coverage gap deserves a test. You cannot write a rule for every possible case — but you can give 2-4 examples that show the <b>reasoning</b> that favored one action over its plausible alternatives. The model does not memorize the examples; it extracts the judgment logic and generalizes it to novel patterns it has never seen — the essential difference between few-shot and a list of pre-specified cases.</p>
+      </div>
+
+      <!-- Diagram 1: decision tree — when few-shot beats more instructions -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[760px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">DECISION — MORE INSTRUCTIONS OR FEW-SHOT EXAMPLES?</p>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl p-3.5 text-center max-w-[420px] mx-auto">
+            <p class="font-mono text-xs text-surface-100">Output problem detected. What kind?</p>
+          </div>
+          <div class="flex justify-center gap-16"><i data-lucide="arrow-down-left" class="w-5 h-5 text-surface-500"></i><i data-lucide="arrow-down-right" class="w-5 h-5 text-surface-500"></i></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-surface-800 border border-sky-500/40 rounded-xl p-3.5 text-center">
+              <p class="font-mono text-[11px] text-sky-200 leading-relaxed">A RULE is missing:<br>"never touch prod config"<br>a category to always skip</p>
+            </div>
+            <div class="bg-surface-800 border border-amber-500/40 rounded-xl p-3.5 text-center">
+              <p class="font-mono text-[11px] text-amber-200 leading-relaxed">Format inconsistent DESPITE detailed instructions,<br>or JUDGMENT wobbles on ambiguous cases,<br>or extraction hallucinates / returns null</p>
+            </div>
+          </div>
+          <div class="flex justify-center gap-16"><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i></div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-sky-950/60 border-2 border-sky-500/50 rounded-xl p-3.5 text-center">
+              <p class="font-mono text-xs font-bold text-sky-200 mb-1">ADD AN EXPLICIT RULE</p>
+              <p class="font-mono text-[11px] text-sky-100/80">clear criteria handle<br>enumerable, crisp policies (4.1)</p>
+            </div>
+            <div class="bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-3.5 text-center">
+              <p class="font-mono text-xs font-bold text-amber-200 mb-1">ADD 2-4 TARGETED EXAMPLES</p>
+              <p class="font-mono text-[11px] text-amber-100/80">demonstrate format + reasoning<br>on the AMBIGUOUS boundary cases</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">شجرة القرار: القواعد الواضحة للسياسات الحاسمة، والأمثلة الموجهة للتنسيق والحكم الغامض</span>
+        <span class="lang-en">Decision tree: explicit rules for crisp policies, targeted examples for format and ambiguous judgment</span>
+      </p>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">قوة few-shot هي <b>التعميم</b>: النموذج يستخلص منطق الحكم من الأمثلة ويطبقه على أنماط ما شافها من قبل. أنت ما تبني قاموس حالات — تبني بوصلة حكم.</div>
+          <div class="lang-en">The power of few-shot is <b>generalization</b>: the model extracts the judgment logic from the examples and applies it to patterns it has never seen. You are not building a case dictionary — you are building a judgment compass.</div>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar">العدد السحري في الدليل: <b>2-4 أمثلة مستهدفة</b>. أقل من كذا ما يرسم الحدود، وأكثر يضخم البرومبت بلا مكسب — الجودة (استهداف الحالات الغامضة) تغلب الكمية.</div>
+          <div class="lang-en">The guide's magic number: <b>2-4 targeted examples</b>. Fewer fails to draw the boundary, more bloats the prompt with no gain — quality (targeting the ambiguous cases) beats quantity.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: Anatomy of a targeted few-shot example ===== -->
+    <section id="anatomy" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">تشريح المثال الموجّه</span><span class="lang-en">Anatomy of a targeted example</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>المثال الفعال مو مجرد "مدخل ومخرج" — هو ثلاث طبقات: <b>مدخل غامض</b> يقع على الحد الفاصل، ثم <b>تفكير مكتوب</b> يشرح ليش هذا الإجراء وليس البديل المعقول، ثم <b>الإجراء النهائي بالتنسيق الكامل المطلوب</b> (الموقع، المشكلة، الشدة، الإصلاح المقترح). الطبقة الوسطى هي الذهب: بدونها المثال يعلّم النتيجة بدون المنطق، ومعها يعلّم كيف يفكر في الحالة الجاية اللي تشبهها ولا تطابقها.</p>
+        <p>وأهم زوج أمثلة لخفض الإيجابيات الكاذبة: <b>FLAG مقابل SKIP</b>. مثال يعرض مشكلة حقيقية وسبب التبليغ عنها، وجنبه مثال يعرض نمطاً مقبولاً يشبهها شكلاً وسبب تجاهله. هذا الزوج يرسم الحد الفاصل اللي تعجز عنه التعليمات — ويمكّن النموذج من تمييز "كود يشبه المشكلة" عن "مشكلة فعلاً".</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>An effective example is not just "input and output" — it is three layers: an <b>ambiguous input</b> sitting on the boundary, then <b>written reasoning</b> explaining why this action and not the plausible alternative, then <b>the final action in the complete required format</b> (location, issue, severity, suggested fix). The middle layer is the gold: without it the example teaches the outcome without the logic; with it, it teaches how to think about the next case that resembles — but does not match — this one.</p>
+        <p>And the most important example pair for cutting false positives: <b>FLAG versus SKIP</b>. One example shows a genuine issue and why it gets reported; next to it, another shows an acceptable pattern that superficially resembles it and why it gets skipped. That pair draws the boundary that instructions cannot — enabling the model to tell "code that looks like a problem" from "an actual problem".</p>
+      </div>
+
+      <!-- Diagram 2: few-shot anatomy -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[720px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">ANATOMY OF ONE TARGETED EXAMPLE</p>
+          <div class="flex items-stretch gap-3">
+            <div class="flex-1 bg-surface-800 border-2 border-surface-500 rounded-xl p-4 text-center">
+              <p class="font-mono text-[10px] text-surface-400 mb-1.5">LAYER 1</p>
+              <i data-lucide="help-circle" class="w-5 h-5 text-surface-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-xs text-surface-100 font-bold">AMBIGUOUS INPUT</p>
+              <p class="font-mono text-[10px] text-surface-400 mt-1.5 leading-relaxed">a boundary case that<br>could go either way</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-5 h-5 text-amber-400"></i></div>
+            <div class="flex-1 bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-4 text-center">
+              <p class="font-mono text-[10px] text-amber-400 mb-1.5">LAYER 2 — THE GOLD</p>
+              <i data-lucide="brain" class="w-5 h-5 text-amber-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-xs text-amber-100 font-bold">WRITTEN REASONING</p>
+              <p class="font-mono text-[10px] text-amber-200/80 mt-1.5 leading-relaxed">why THIS action over the<br>plausible alternative</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-5 h-5 text-amber-400"></i></div>
+            <div class="flex-1 bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-4 text-center">
+              <p class="font-mono text-[10px] text-emerald-400 mb-1.5">LAYER 3</p>
+              <i data-lucide="target" class="w-5 h-5 text-emerald-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-xs text-emerald-100 font-bold">CHOSEN ACTION</p>
+              <p class="font-mono text-[10px] text-emerald-200/80 mt-1.5 leading-relaxed">in the EXACT output format:<br>location, issue, severity, fix</p>
+            </div>
+          </div>
+          <div class="bg-surface-800/70 border border-surface-600 rounded-xl p-3 text-center">
+            <p class="font-mono text-[11px] text-surface-300">repeat 2-4 times, always including at least one FLAG + one SKIP pair on lookalike inputs</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">تشريح المثال: مدخل غامض ثم تفكير مكتوب ثم إجراء بالتنسيق الكامل — والتفكير هو الطبقة الذهبية</span>
+        <span class="lang-en">Example anatomy: ambiguous input, then written reasoning, then action in the full format — reasoning is the golden layer</span>
+      </p>
+
+      <!-- Code: few-shot block in a system prompt -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">بلوك few-shot داخل برومبت النظام لمراجع كود — زوج FLAG/SKIP بتفكير مكتوب:</span>
+          <span class="lang-en">A few-shot block inside a code reviewer's system prompt — a FLAG/SKIP pair with written reasoning:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">SYSTEM_PROMPT = """
+You review pull requests. Report findings in the exact format shown below.
+
+&lt;example&gt;
+Input:
+    def apply_discount(price, pct):
+        # caps discount at 50%
+        if pct &gt; 0.5:
+            pct = 0.5
+        return price * pct          # returns the DISCOUNT, not the price
+Reasoning: the function name and comment imply the discounted price,
+but the code returns price * pct (the discount amount). A caller doing
+charge(apply_discount(100, 0.2)) would charge 20 instead of 80.
+Plausible alternative: treat it as intended behavior — rejected, because
+both the name and call sites expect the final price.
+Action: FLAG
+  location: pricing.py:apply_discount
+  issue: returns discount amount where discounted price is expected
+  severity: high
+  suggested_fix: return price * (1 - pct)
+&lt;/example&gt;
+
+&lt;example&gt;
+Input:
+    retries = 3   # matches the gateway's documented retry budget
+    for attempt in range(retries):
+        ...
+Reasoning: a hardcoded constant LOOKS like a magic-number issue, but the
+comment ties it to an external documented contract, and this module uses
+the same idiom throughout. Consistent local pattern, not a defect.
+Action: SKIP — acceptable local pattern; do not report.
+&lt;/example&gt;
+"""</code></pre>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">اختر أمثلتك من <b>حالات فشل حقيقية</b>: راجع النتائج اللي رفضها المطورون أو الحالات اللي تذبذب فيها النموذج، وحوّل أوضحها لأمثلة. المثال المبني على فشل فعلي يسد فجوة موجودة — مو فجوة متخيلة.</div>
+          <div class="lang-en">Pick your examples from <b>real failure cases</b>: mine the findings developers dismissed or the cases where the model wobbled, and turn the clearest into examples. An example built from an actual failure closes a real gap — not an imagined one.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: Few-shot for extraction ===== -->
+    <section id="extraction" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">Few-shot لمهام الاستخراج</span><span class="lang-en">Few-shot for extraction tasks</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>في أنظمة الاستخراج (سيناريو S6)، الأمثلة تحل مشكلتين متعاكستين. الأولى: <b>الهلوسة</b> — المستند يقول "حوالي ساعتين ونص توقف" والنموذج يخترع رقماً دقيقاً بصيغة خاطئة، أو ما يلقى القيمة فيألّفها. أمثلة تعرض التعامل الصحيح مع القياسات غير الرسمية ("حوالي"، "تقريباً"، وحدات مختلطة) تعلّم النموذج التطبيع الصحيح — ومتى يرجع <span dir="ltr" class="font-mono">null</span> بدل ما يخترع.</p>
+        <p>الثانية والمعاكسة: <b>الاستخراج الفارغ</b> — حقول مطلوبة ترجع فارغة/null مع أن المعلومة موجودة، لكن بهيكل مستند مختلف عن اللي "توقعه" النموذج. الأوراق البحثية مثال كلاسيكي: بعضها يحط الاستشهادات ضمن النص (inline citations) وبعضها في قائمة مراجع (bibliography)؛ بعضها له قسم منهجية مستقل وبعضها يدمج التفاصيل داخل الفقرات. مثال استخراج صحيح واحد لكل هيكل شائع يفتح عين النموذج على أماكن المعلومة المختلفة — فيختفي الـ null الكاذب.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>In extraction systems (scenario S6), examples solve two opposite problems. First: <b>hallucination</b> — the document says "about two and a half hours of downtime" and the model invents a precise number in the wrong unit, or cannot find a value and fabricates one. Examples demonstrating correct handling of informal measurements ("about", "roughly", mixed units) teach proper normalization — and when to return <span class="font-mono">null</span> instead of inventing.</p>
+        <p>Second, and opposite: <b>empty/null extraction</b> — required fields come back empty even though the information exists, just in a document structure different from what the model "expected". Research papers are the classic case: some put citations inline, others in a bibliography; some have a standalone methodology section, others embed the details inside paragraphs. One correct-extraction example per common structure opens the model's eyes to the different homes of the same information — and the false nulls disappear.</p>
+      </div>
+
+      <!-- Diagram 3: varied structures panels -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[760px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">ONE FIELD, MANY DOCUMENT SHAPES — COVER EACH SHAPE WITH AN EXAMPLE</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-[11px] text-amber-300 font-bold">TARGET: citations</p>
+              <div class="bg-surface-900/80 rounded-lg p-2.5 font-mono text-[10px] text-surface-300 leading-relaxed">shape A: inline — "...as shown by Nakamura et al. (2023)..."<br><span class="text-surface-500">--------</span><br>shape B: bibliography — "[12] Nakamura, K. ..." at the end</div>
+              <p class="font-mono text-[10px] text-emerald-300">1 example per shape -&gt; both extracted</p>
+            </div>
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-[11px] text-amber-300 font-bold">TARGET: sample_size</p>
+              <div class="bg-surface-900/80 rounded-lg p-2.5 font-mono text-[10px] text-surface-300 leading-relaxed">shape A: methodology section — "We recruited 120 participants"<br><span class="text-surface-500">--------</span><br>shape B: embedded — "...the 120-person cohort showed..."</div>
+              <p class="font-mono text-[10px] text-emerald-300">1 example per shape -&gt; no false null</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-3">
+            <div class="bg-red-950/60 border border-red-500/50 rounded-xl px-4 py-2.5 font-mono text-[11px] text-red-200">no examples -&gt; null / fabricated values</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-500"></i>
+            <div class="bg-emerald-950/60 border border-emerald-500/50 rounded-xl px-4 py-2.5 font-mono text-[11px] text-emerald-200">shape-covering examples -&gt; correct extraction</div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">نفس المعلومة تسكن أماكن مختلفة حسب هيكل المستند — مثال لكل هيكل شائع يمنع الـ null الكاذب</span>
+        <span class="lang-en">The same information lives in different places per document structure — one example per common shape prevents false nulls</span>
+      </p>
+
+      <!-- Code: extraction few-shot -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">أمثلة استخراج: قياسات غير رسمية + متى ترجع null:</span>
+          <span class="lang-en">Extraction examples: informal measurements + when to return null:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-markdown"><code class="language-markdown">## Extraction examples
+
+&lt;example&gt;
+Document: "...the outage lasted about two and a half hours before failover..."
+Extraction: {"downtime_minutes": 150,
+             "source_text": "about two and a half hours"}
+Reasoning: informal measurement -&gt; normalize to minutes; keep the exact
+source phrase so reviewers can verify the conversion.
+&lt;/example&gt;
+
+&lt;example&gt;
+Document: "...services degraded during the incident. Recovery steps below..."
+Extraction: {"downtime_minutes": null, "source_text": null}
+Reasoning: no duration is stated anywhere. Return null — NEVER estimate
+a number the document does not contain.
+&lt;/example&gt;</code></pre>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">لا تجمع أمثلتك من الحالات السهلة الواضحة — النموذج أصلاً يجيدها. المكسب كله في أمثلة <b>الحدود الغامضة</b>: القياس غير الرسمي، الهيكل غير المألوف، النمط اللي يشبه المشكلة وهو مقبول.</div>
+          <div class="lang-en">Do not collect your examples from the easy, obvious cases — the model already handles those. All the gain is in <b>ambiguous boundary</b> examples: the informal measurement, the unfamiliar structure, the acceptable pattern that resembles a problem.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">لما يصف السؤال مخرجات غير متسقة رغم "تعليمات مفصلة"، المشتتات تكون: كتابة تعليمات أطول وأدق، تخفيض temperature، تكرار التحذيرات بأحرف كبيرة، أو تقسيم المهمة لاستدعاءات أصغر. الجواب المقصود دائماً: <b>أضف أمثلة few-shot تعرض التنسيق أو الحكم المطلوب</b>. ونفس الشي لمشكلة null extraction: الجواب أمثلة تغطي الهياكل المتنوعة — مو "اجعل الحقل إلزامياً بوصف أشد".</div>
+          <div class="lang-en">When the question describes inconsistent output despite "detailed instructions", the distractors are: write longer and more precise instructions, lower the temperature, repeat warnings in capital letters, or split the task into smaller calls. The intended answer is always: <b>add few-shot examples demonstrating the required format or judgment</b>. Same for the null-extraction problem: the answer is examples covering the varied structures — not "make the field required with a sterner description".</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="chef-hat" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: مطبخ المطعم</span><span class="lang-en">Real-life example: the restaurant kitchen</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>شيف جديد ينضم لمطبخ مطعم مشهور. تقدر تعطيه ملف 40 صفحة عن "فلسفة التقديم عندنا" — وبيطلع كل طبق بشكل مختلف. الشيف التنفيذي الشاطر يسوي شي ثاني: يجهز قدامه <b>طبقين أو ثلاثة أطباق مرجعية</b> من الحالات الصعبة بالذات، ومع كل طبق يشرح وهو يشتغل: "هنا السمكة سماكتها غير معتادة — كان ممكن أقسمها نصين، لكن اخترت أشويها كاملة عشان الرطوبة، وهذا ترتيب الصحن النهائي".</p>
+        <p>الشيف الجديد ما يحفظ الأطباق الثلاثة — يستوعب منها <b>طريقة التفكير والتنسيق النهائي</b>، وبكرة لما تجيه سمكة ما شافها من قبل، يطبق نفس المنطق. هذا بالضبط few-shot: أمثلة قليلة مستهدفة للحالات الغامضة، تعرض التفكير والشكل النهائي، فتنتقل من التقليد إلى التعميم.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>A new chef joins a famous restaurant's kitchen. You could hand him a 40-page binder on "our plating philosophy" — and every dish would still come out different. The smart executive chef does something else: he prepares <b>two or three reference dishes</b>, deliberately picked from the tricky cases, and narrates while working: "this fish is unusually thick — I could have split it in two, but I chose to roast it whole to keep the moisture, and this is the final plate arrangement".</p>
+        <p>The new chef does not memorize those three dishes — he absorbs the <b>way of thinking and the final presentation</b>, and tomorrow, facing a fish he has never seen, he applies the same logic. That is exactly few-shot: a few targeted examples of the ambiguous cases, showing the reasoning and the finished format, moving him from imitation to generalization.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>يظهر هذا الموضوع في سيناريوهي S5 وS6: مخرجات مراجعة غير متسقة التنسيق، وكيل يتخبط في اختيار الأداة للطلبات الملتبسة، أو استخراج يرجع null لحقول موجودة فعلاً. علامات الجواب الصحيح:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"2-4 أمثلة مستهدفة" + "تعرض التفكير/سبب الاختيار" + "بالتنسيق المطلوب" — هذي الصياغة المقصودة.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>لمشاكل الإيجابيات الكاذبة: أمثلة تميّز الأنماط المقبولة عن المشاكل الحقيقية (زوج FLAG/SKIP).</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: إطالة التعليمات، تخفيض temperature، نقل المهمة لنموذج أكبر، أو "عدّد كل الحالات الممكنة" (مستحيل التعداد — المطلوب تعميم).</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>This topic shows up in scenarios S5 and S6: inconsistently formatted review output, an agent fumbling tool selection on ambiguous requests, or extraction returning null for fields that do exist. Markers of the correct answer:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"2-4 targeted examples" + "showing the reasoning / why chosen" + "in the required format" — that is the intended phrasing.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>For false-positive problems: examples distinguishing acceptable patterns from genuine issues (a FLAG/SKIP pair).</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: longer instructions, lower temperature, moving to a bigger model, or "enumerate every possible case" (enumeration is impossible — generalization is the goal).</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">وكيل دعم يتردد بين process_refund وescalate_to_human في الطلبات الملتبسة، وقراراته متقلبة. التعليمات المكتوبة تغطي الحالات الواضحة فقط. وش الإضافة الأصح؟</p>
+            <p class="lang-en">A support agent wavers between process_refund and escalate_to_human on ambiguous requests, and its decisions are erratic. The written instructions cover only the clear-cut cases. What is the right addition?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">جدول قواعد يعدد كل مجموعة كلمات مفتاحية والأداة المقابلة لها.</span>
+            <span class="lang-en">A rules table enumerating every keyword combination and its matching tool.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">2-4 أمثلة لحالات ملتبسة فعلاً، كل مثال يعرض التفكير اللي رجّح أداة على الأخرى.</span>
+            <span class="lang-en">2-4 examples of genuinely ambiguous cases, each showing the reasoning that favored one tool over the other.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">تعليمة عامة: "عند الشك صعّد دائماً للإنسان".</span>
+            <span class="lang-en">A blanket instruction: "when in doubt, always escalate to a human".</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">20 مثالاً تغطي كل أنواع الطلبات الواضحة والغامضة.</span>
+            <span class="lang-en">20 examples covering all request types, clear and ambiguous alike.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الحالات الغامضة تحتاج أمثلة تعرض التفكير — فيتعلم النموذج منطق الترجيح ويعممه. تعداد الكلمات المفتاحية ينهار أمام أول صياغة جديدة، و"صعّد دائماً" يقتل هدف الحل الذاتي، و20 مثالاً عاماً أضعف من 2-4 مستهدفة.</span>
+              <span class="lang-en">Correct. Ambiguous cases need examples that show reasoning — the model learns the weighing logic and generalizes it. Keyword enumeration collapses at the first new phrasing, "always escalate" kills the first-contact-resolution goal, and 20 generic examples are weaker than 2-4 targeted ones.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: أمثلة قليلة مستهدفة للحالات الملتبسة، بتفكير مكتوب يوضح سبب اختيار الأداة. هذا يمكّن التعميم على أنماط جديدة — عكس القوائم الجامدة والتعليمات الشاملة والحشو بالأمثلة السهلة.</span>
+              <span class="lang-en">The answer is B: a few targeted examples of the ambiguous cases, with written reasoning for the tool choice. That enables generalization to novel patterns — unlike rigid lists, blanket rules, or padding with easy examples.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">نظام استخراج من أوراق بحثية يرجع null لحقل sample_size في 40% من الأوراق، مع أن القيمة موجودة فيها — أحياناً في قسم المنهجية وأحياناً مدموجة داخل الفقرات. وش الحل؟</p>
+            <p class="lang-en">A research-paper extraction system returns null for sample_size in 40% of papers even though the value exists — sometimes in a methodology section, sometimes embedded in paragraphs. What is the fix?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">اجعل الحقل إلزامياً في السكيما حتى لا يستطيع النموذج تركه فارغاً.</span>
+            <span class="lang-en">Make the field required in the schema so the model cannot leave it empty.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">أعد المحاولة تلقائياً ثلاث مرات عند رجوع null.</span>
+            <span class="lang-en">Automatically retry three times whenever null comes back.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">أضف أمثلة few-shot تعرض الاستخراج الصحيح من الهياكل المتنوعة: مثال لقسم المنهجية ومثال للتفاصيل المدمجة.</span>
+            <span class="lang-en">Add few-shot examples showing correct extraction from the varied structures: one for the methodology section, one for embedded details.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">قسّم كل ورقة لمقاطع صغيرة واستخرج من كل مقطع على حدة.</span>
+            <span class="lang-en">Split every paper into small chunks and extract from each chunk separately.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. المشكلة أن النموذج يبحث في هيكل واحد متوقع — والأمثلة متعددة الهياكل توسّع بحثه. جعل الحقل إلزامياً يستبدل الـ null بقيم ملفقة (أسوأ)، والإعادة بدون معلومة جديدة تكرر نفس الفشل.</span>
+              <span class="lang-en">Correct. The problem is that the model searches one expected structure — shape-covering examples widen its search. Making the field required swaps nulls for fabricated values (worse), and retrying with no new information repeats the same failure.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: أمثلة few-shot تعرض الاستخراج الصحيح من هياكل مستندات متنوعة — هذي المهارة النصية في الدليل لعلاج الاستخراج الفارغ. الإلزام يولّد تلفيقاً، والإعادة العمياء تكرار للفشل، والتقطيع يفقد السياق.</span>
+              <span class="lang-en">The answer is C: few-shot examples showing correct extraction from varied document structures — the guide's verbatim skill for fixing empty/null extraction. Forcing the field breeds fabrication, blind retries repeat the failure, and chunking loses context.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">مراجع الكود يبلّغ باستمرار عن ثوابت مكتوبة يدوياً (hardcoded) مع أنها نمط مقبول وموثق في الكودبيس، والمطورون يرفضون هذي النتائج. وش أفضل تحسين للبرومبت؟</p>
+            <p class="lang-en">The code reviewer keeps flagging hardcoded constants even though they are an accepted, documented pattern in this codebase, and developers dismiss those findings. What is the best prompt improvement?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف زوج أمثلة: نمط مقبول مشابه شكلاً مع سبب تجاهله (SKIP)، ومشكلة حقيقية مع سبب التبليغ عنها (FLAG).</span>
+            <span class="lang-en">Add an example pair: a lookalike acceptable pattern with why it is skipped (SKIP), and a genuine issue with why it is flagged (FLAG).</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">أضف تعليمة "لا تبلّغ عن الثوابت إلا إذا كنت متأكداً أنها مشكلة".</span>
+            <span class="lang-en">Add "do not flag constants unless you are sure they are a problem".</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">احذف فحص الثوابت نهائياً من المراجع.</span>
+            <span class="lang-en">Remove constant checking from the reviewer permanently.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">مرر قائمة بكل الثوابت المقبولة حالياً في الكودبيس مع البرومبت.</span>
+            <span class="lang-en">Pass a list of every currently accepted constant in the codebase with the prompt.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. زوج FLAG/SKIP على مدخلات متشابهة شكلاً يرسم الحد الفاصل ويمكّن التعميم على ثوابت جديدة. تعليمة "إذا كنت متأكداً" غامضة (فخ 4.1)، والحذف النهائي يفقد التغطية، وقائمة الثوابت تتقادم ولا تعمم.</span>
+              <span class="lang-en">Correct. A FLAG/SKIP pair on superficially similar inputs draws the boundary and generalizes to new constants. "If you are sure" is vague (the 4.1 trap), permanent removal loses coverage, and a constants list goes stale and never generalizes.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح A: أمثلة تميّز الأنماط المقبولة عن المشاكل الحقيقية — مهارة نصية من الدليل لتقليل الإيجابيات الكاذبة مع الحفاظ على التعميم. الصياغات الغامضة والقوائم الجامدة والحذف الكامل كلها تخسر شيئاً أساسياً.</span>
+              <span class="lang-en">The answer is A: examples distinguishing acceptable patterns from genuine issues — the guide's verbatim skill for cutting false positives while preserving generalization. Vague phrasing, rigid lists, and full removal each lose something essential.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">لما التعليمات التفصيلية تنتج مخرجات غير متسقة، few-shot هو الأسلوب الأكثر فعالية — النموذج يقلّد ما يراه أفضل مما يوصف له.</span><span class="lang-en">When detailed instructions produce inconsistent output, few-shot is the most effective technique — the model imitates what it sees better than what is described.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الوصفة: 2-4 أمثلة مستهدفة للحالات الغامضة، كل مثال يعرض التفكير وسبب ترجيح الإجراء على بدائله، وبالتنسيق الكامل (موقع، مشكلة، شدة، إصلاح).</span><span class="lang-en">The recipe: 2-4 targeted examples of ambiguous cases, each showing reasoning and why the action beat its alternatives, in the full format (location, issue, severity, fix).</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">زوج FLAG/SKIP على مدخلات متشابهة يقلل الإيجابيات الكاذبة ويمكّن التعميم على أنماط جديدة.</span><span class="lang-en">A FLAG/SKIP pair on lookalike inputs cuts false positives and enables generalization to novel patterns.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">للاستخراج: أمثلة القياسات غير الرسمية تقلل الهلوسة، وأمثلة الهياكل المتنوعة تعالج الـ null الكاذب للحقول الموجودة.</span><span class="lang-en">For extraction: informal-measurement examples reduce hallucination, and varied-structure examples fix false nulls for fields that exist.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الأمثلة تعلّم بوصلة حكم قابلة للتعميم — مو قاموس حالات محفوظة.</span><span class="lang-en">Examples teach a generalizable judgment compass — not a memorized case dictionary.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="4-1-explicit-criteria.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.1 معايير صريحة بدل التعليمات الغامضة</span><span class="lang-en">4.1 Explicit criteria over vague instructions</span></p>
+        </div>
+      </a>
+      <a href="4-3-structured-output.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.3 المخرجات المنظمة عبر Tool Use</span><span class="lang-en">4.3 Structured output via tool use</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.3 المخرجات المنظمة عبر Tool Use والسكيما — CCAF مرجع</title>
+  <meta name="description" content="Task 4.3: Enforce structured output using tool use and JSON schemas — tool_choice auto/any/forced, nullable fields against fabrication, enum + other patterns, and format normalization rules.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">المخرجات المنظمة</span><span class="lang-en">Structured output</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.3</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">المخرجات المنظمة عبر Tool Use والسكيما</span>
+            <span class="lang-en">Structured output via tool use &amp; JSON schemas</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن الأنظمة اللي بعدك في الخط (قواعد بيانات، APIs) ما ترحم: JSON مكسور أو حقل ملفق يعني فشل الخط كله — وtool_use هو الضمان الأوثق للهيكل.</span>
+            <span class="lang-en">Why this matters: the systems downstream (databases, APIs) show no mercy — broken JSON or a fabricated field breaks the whole pipeline, and tool_use is the most reliable structural guarantee.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش <span dir="ltr" class="font-mono">tool_use</span> مع JSON schemas هو الأسلوب الأوثق لمخرجات ملتزمة بالسكيما — يلغي أخطاء الـ syntax لكنه لا يمنع الأخطاء الدلالية</span><span class="lang-en">Why <span class="font-mono">tool_use</span> with JSON schemas is the most reliable route to schema-compliant output — it eliminates syntax errors but not semantic errors</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">الفرق بين <span dir="ltr" class="font-mono">tool_choice</span>: "auto" (قد يرد نصاً)، "any" (لازم أداة من اختياره)، وأداة مفروضة بالاسم</span><span class="lang-en">The difference between <span class="font-mono">tool_choice</span> "auto" (may reply in text), "any" (must call some tool), and a forced named tool</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تعريف أدوات استخراج بسكيما كمدخلات، وقراءة البيانات المنظمة من رد <span dir="ltr" class="font-mono">tool_use</span></span><span class="lang-en">Defining extraction tools with schemas as inputs, and reading the structured data from the <span class="font-mono">tool_use</span> response</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تصميم الحقول optional/nullable لما قد تغيب المعلومة من المصدر — لمنع تلفيق قيم لإرضاء الحقول الإلزامية</span><span class="lang-en">Designing fields optional/nullable when the source may lack the information — preventing fabricated values to satisfy required fields</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">أنماط enum القابلة للتوسع: قيمة "unclear" للحالات الملتبسة، و"other" + حقل تفصيل للفئات الجديدة</span><span class="lang-en">Extensible enum patterns: an "unclear" value for ambiguous cases, and "other" + a detail field for new categories</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">قواعد تطبيع التنسيق (تواريخ، مبالغ، أرقام هواتف) داخل البرومبت بجانب السكيما الصارمة لمعالجة تنسيق المصادر غير المتسق</span><span class="lang-en">Format normalization rules (dates, amounts, phone numbers) in the prompt alongside the strict schema to handle inconsistent source formatting</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: Tool use as the structure guarantee ===== -->
+    <section id="tool-use-guarantee" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">Tool Use: ضمان الهيكل</span><span class="lang-en">Tool use: the structure guarantee</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>لما تحتاج مخرجات منظمة من Claude، عندك طريقان: تطلب JSON في البرومبت وتدعي أنه يطلع سليماً، أو تعرّف <b>أداة استخراج</b> سكيمتها هي شكل البيانات المطلوب وتخلي النموذج "يستدعيها". الحيلة الذكية هنا أن الأداة مو أداة فعلاً — ما فيه دالة تنفَّذ. أنت فقط تستغل أن مدخلات الأدوات (<span dir="ltr" class="font-mono">input</span>) ملزمة بالسكيما على مستوى الـ API نفسه، فتضمن بنية صالحة دائماً: لا فاصلة ناقصة، لا قوس مكسور، لا نص دردشة حول الـ JSON. هذا اللي يجعله <b>الأسلوب الأوثق</b> للمخرجات الملتزمة بالسكيما في الدليل الرسمي.</p>
+        <p>لكن انتبه للحد الفاصل — وهو أكثر نقطة يحبها الاختبار: السكيما الصارمة تلغي <b>أخطاء الـ syntax</b> فقط. <b>الأخطاء الدلالية</b> تبقى واردة تماماً: بنود فاتورة مجموعها 4,700 والإجمالي المستخرج 5,200، تاريخ استحقاق في خانة تاريخ الإصدار، رقم صحيح البنية في الحقل الغلط. السكيما تضمن الشكل، لا المعنى — والمعنى يحتاج طبقة تحقق برمجية (موضوع 4.4).</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>When you need structured output from Claude, there are two roads: ask for JSON in the prompt and pray it comes out intact, or define an <b>extraction tool</b> whose schema is the shape of the data you want and let the model "call it". The clever trick: the tool is not really a tool — no function ever executes. You are exploiting the fact that tool <span class="font-mono">input</span> is schema-enforced at the API level itself, so you always get valid structure: no missing comma, no broken bracket, no chatty text wrapped around the JSON. That is what makes it <b>the most reliable approach</b> to schema-compliant output in the official guide.</p>
+        <p>But watch the boundary — the exam's favorite point: a strict schema eliminates <b>syntax errors</b> only. <b>Semantic errors</b> remain entirely possible: invoice line items summing to 4,700 while the extracted total says 5,200, a due date sitting in the issue-date field, a structurally valid number in the wrong place. The schema guarantees shape, not meaning — and meaning needs a programmatic validation layer (topic 4.4).</p>
+      </div>
+
+      <!-- Diagram 1: syntax vs semantic -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[760px] mx-auto space-y-4">
+          <p class="text-center font-mono text-xs text-surface-400">WHAT TOOL_USE SCHEMAS DO — AND DO NOT — ELIMINATE</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-emerald-300">
+                <i data-lucide="shield-check" class="w-4 h-4"></i> ELIMINATED: SYNTAX ERRORS
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-emerald-100/90">
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">missing commas / broken brackets</div>
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">prose wrapped around the JSON</div>
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">wrong types (string where number)</div>
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">missing required keys</div>
+              </div>
+            </div>
+            <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-4 space-y-2.5">
+              <div class="flex items-center gap-2 font-mono text-xs font-bold text-red-300">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i> STILL POSSIBLE: SEMANTIC ERRORS
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px] text-red-100/90">
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">line items don't sum to the total</div>
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">value placed in the wrong field</div>
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">fabricated value for a required field</div>
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">internally inconsistent data</div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-surface-800/70 border border-surface-600 rounded-xl p-3 text-center font-mono text-[11px] text-surface-300">
+            schema = shape guarantee &nbsp;|&nbsp; semantic validation (4.4) = meaning guarantee
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">السكيما تضمن الشكل وتلغي أخطاء الـ syntax — والأخطاء الدلالية تبقى مسؤولية طبقة التحقق</span>
+        <span class="lang-en">The schema guarantees shape and kills syntax errors — semantic errors remain the validation layer's job</span>
+      </p>
+
+      <!-- Code: extraction tool definition -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">تعريف أداة استخراج: required وnullable وenum + "other" و"unclear" في سكيما واحدة:</span>
+          <span class="lang-en">An extraction tool definition: required, nullable, and enum + "other" and "unclear" in one schema:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-json"><code class="language-json">{
+  "name": "record_invoice",
+  "description": "Record structured invoice data extracted from the document.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "invoice_number": { "type": "string" },
+      "issue_date":     { "type": "string", "description": "ISO 8601 (YYYY-MM-DD)" },
+      "total_amount":   { "type": "number" },
+      "currency": {
+        "type": "string",
+        "enum": ["USD", "SAR", "EUR", "other"],
+        "description": "Use 'other' when the currency is none of the listed codes."
+      },
+      "currency_detail": {
+        "type": ["string", "null"],
+        "description": "Required free-text detail when currency = 'other'; null otherwise."
+      },
+      "po_number": {
+        "type": ["string", "null"],
+        "description": "null when the document contains no PO number. NEVER guess one."
+      },
+      "payment_status": {
+        "type": "string",
+        "enum": ["paid", "unpaid", "partial", "unclear"],
+        "description": "Use 'unclear' when the document is ambiguous about payment."
+      }
+    },
+    "required": ["invoice_number", "issue_date", "total_amount",
+                 "currency", "payment_status"]
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Code: calling + extracting -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">الاستدعاء ثم قراءة البيانات من بلوك tool_use في الرد:</span>
+          <span class="lang-en">Calling, then reading the data from the tool_use block in the response:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">from anthropic import Anthropic
+
+client = Anthropic()
+
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    max_tokens=2048,
+    tools=[record_invoice_tool],
+    tool_choice={"type": "tool", "name": "record_invoice"},  # forced
+    messages=[{"role": "user", "content": f"Extract the invoice data:\n\n{document}"}],
+)
+
+# the "tool call" IS the structured output — no function ever runs
+tool_use = next(b for b in response.content if b.type == "tool_use")
+data = tool_use.input          # dict, guaranteed schema-compliant
+print(data["invoice_number"], data["total_amount"])</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">في الاستخراج المنظم، "الأداة" قالب بيانات مو دالة: استدعاء <span dir="ltr" class="font-mono">record_invoice</span> هو نفسه المخرج المنظم. القاعدة للاختبار: <b>tool_use + سكيما = يلغي syntax errors، ولا يمنع semantic errors</b>.</div>
+          <div class="lang-en">In structured extraction, the "tool" is a data template, not a function: the <span class="font-mono">record_invoice</span> call itself is the structured output. The exam rule: <b>tool_use + schema = eliminates syntax errors, does not prevent semantic errors</b>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: The three tool_choice modes ===== -->
+    <section id="tool-choice" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">أوضاع tool_choice الثلاثة</span><span class="lang-en">The three tool_choice modes</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>مقدار "الإجبار" على استدعاء الأدوات تتحكم فيه معامل <span dir="ltr" class="font-mono">tool_choice</span> بثلاثة أوضاع، والاختبار يحب يلعب على الفروقات بينها. <b><span dir="ltr" class="font-mono">auto</span></b>: النموذج حر — يستدعي أداة إذا شاف داعياً أو يرد نصاً عادياً. ممتاز للمحادثة، لكنه <b>ما يضمن</b> مخرجات منظمة. <b><span dir="ltr" class="font-mono">any</span></b>: لازم يستدعي أداة، لكن يختار أي واحدة من المتاح — هذا الضمان المطلوب لما عندك عدة سكيمات استخراج ونوع المستند غير معروف مسبقاً. <b>الأداة المفروضة</b> <span dir="ltr" class="font-mono">{"type": "tool", "name": "extract_metadata"}</span>: لازم يستدعي هذي الأداة بعينها — تستخدمها لما خط المعالجة يتطلب أن استخراجاً معيناً يتم قبل خطوات الإثراء اللاحقة.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>How hard the model is pushed toward tools is controlled by the <span class="font-mono">tool_choice</span> parameter's three modes, and the exam loves probing their differences. <b><span class="font-mono">auto</span></b>: the model is free — call a tool if warranted, or reply in plain text. Great for conversation, but it <b>does not guarantee</b> structured output. <b><span class="font-mono">any</span></b>: it must call a tool, but picks whichever fits — the guarantee you want when you have several extraction schemas and the document type is unknown up front. <b>Forced tool</b> <span class="font-mono">{"type": "tool", "name": "extract_metadata"}</span>: it must call that specific tool — used when your pipeline requires a particular extraction to run before later enrichment steps.</p>
+      </div>
+
+      <!-- Diagram 2: tool_choice decision tree -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[620px] max-w-[780px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">CHOOSING A TOOL_CHOICE MODE</p>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl p-3.5 text-center max-w-[440px] mx-auto">
+            <p class="font-mono text-xs text-surface-100">Must EVERY response be structured (a tool call)?</p>
+          </div>
+          <div class="flex justify-center gap-20">
+            <div class="text-center"><p class="font-mono text-[10px] text-red-300 mb-1">NO — text replies OK</p><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500 mx-auto"></i></div>
+            <div class="text-center"><p class="font-mono text-[10px] text-emerald-300 mb-1">YES — always structured</p><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500 mx-auto"></i></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-sky-950/60 border-2 border-sky-500/50 rounded-xl p-4 text-center space-y-1.5">
+              <p class="font-mono text-sm font-bold text-sky-200">{"type": "auto"}</p>
+              <p class="font-mono text-[11px] text-sky-100/80 leading-relaxed">model MAY return text instead<br>of calling a tool — conversation,<br>agents deciding freely</p>
+            </div>
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3.5 text-center">
+              <p class="font-mono text-xs text-surface-100">Must it be ONE SPECIFIC tool?</p>
+              <div class="flex justify-center gap-14 mt-2">
+                <div class="text-center"><p class="font-mono text-[10px] text-amber-300 mb-1">NO — model picks</p><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500 mx-auto"></i></div>
+                <div class="text-center"><p class="font-mono text-[10px] text-amber-300 mb-1">YES — this one</p><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500 mx-auto"></i></div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-3 text-center space-y-1">
+                <p class="font-mono text-xs font-bold text-amber-200">{"type": "any"}</p>
+                <p class="font-mono text-[10px] text-amber-100/80 leading-relaxed">multiple schemas,<br>unknown document type</p>
+              </div>
+              <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-3 text-center space-y-1">
+                <p class="font-mono text-[10px] font-bold text-emerald-200 leading-snug">{"type": "tool",<br>"name": "extract_metadata"}</p>
+                <p class="font-mono text-[10px] text-emerald-100/80 leading-relaxed">this extraction must run<br>before enrichment</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">شجرة القرار: auto للحرية، any لضمان أداةٍ ما، والأداة المسماة لفرض استخراج محدد</span>
+        <span class="lang-en">Decision tree: auto for freedom, any to guarantee some tool, a named tool to force a specific extraction</span>
+      </p>
+
+      <!-- Code: three calls -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">الأوضاع الثلاثة في نداءات الـ API:</span>
+          <span class="lang-en">The three modes as API calls:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python"># 1) auto — the model MAY answer in text OR call a tool (no guarantee)
+response = client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=2048,
+    tools=[extract_invoice, extract_contract, extract_receipt],
+    tool_choice={"type": "auto"},
+    messages=msgs,
+)
+
+# 2) any — the model MUST call one of the tools, its choice.
+#    Guaranteed structured output with multiple schemas + unknown doc type.
+response = client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=2048,
+    tools=[extract_invoice, extract_contract, extract_receipt],
+    tool_choice={"type": "any"},
+    messages=msgs,
+)
+
+# 3) forced — the model MUST call THIS tool.
+#    Ensures extract_metadata runs before any enrichment step.
+response = client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=2048,
+    tools=[extract_metadata],
+    tool_choice={"type": "tool", "name": "extract_metadata"},
+    messages=msgs,
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar">اسأل سؤالين وبس: "لازم يكون الرد منظماً؟" — لا: <span dir="ltr" class="font-mono">auto</span>. نعم: "لازم أداة محددة بعينها؟" — لا: <span dir="ltr" class="font-mono">any</span>، نعم: أداة مفروضة بالاسم.</div>
+          <div class="lang-en">Ask just two questions: "must the response be structured?" — no: <span class="font-mono">auto</span>. Yes: "must it be one specific tool?" — no: <span class="font-mono">any</span>; yes: force the named tool.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">لما يطلب السؤال "ضمان" مخرجات منظمة، <span dir="ltr" class="font-mono">auto</span> مشتت دائماً — لأنه يسمح برد نصي حر. والعكس فخ أيضاً: فرض أداة واحدة بالاسم لما تكون أنواع المستندات متعددة يحشر كل شي في سكيما واحدة خاطئة. وكل خيار "اطلب JSON في البرومبت مع التشديد" يرجعك لأخطاء syntax اللي وُجد tool_use ليلغيها.</div>
+          <div class="lang-en">When the question demands a "guarantee" of structured output, <span class="font-mono">auto</span> is always a distractor — it permits a free-text reply. The reverse is a trap too: forcing one named tool when document types vary crams everything into one wrong schema. And any "request JSON in the prompt, firmly" option walks you back into the syntax errors tool_use exists to eliminate.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: Schema design that prevents fabrication ===== -->
+    <section id="schema-design" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">تصميم سكيما يمنع التلفيق</span><span class="lang-en">Schema design that prevents fabrication</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>هنا أخطر قرار في تصميم السكيما: <b>required أم nullable؟</b> القاعدة من الدليل: إذا كانت المعلومة <b>قد تغيب</b> عن بعض المستندات المصدرية، لازم يكون الحقل optional/nullable. ليش؟ لأن الحقل الإلزامي أمرٌ للنموذج: "لا ترجع بدون قيمة" — وإذا ما وُجدت قيمة، النموذج بيرضي السكيما بالطريقة الوحيدة المتبقية: <b>يألّف وحدة</b>. حقل nullable يعطيه مخرجاً صادقاً: <span dir="ltr" class="font-mono">null</span> يعني "المعلومة غير موجودة في المصدر" — وهذي معلومة قيّمة، مو فشل.</p>
+        <p>وللحقول التصنيفية، نمطان يمنعان الحشر القسري: <b><span dir="ltr" class="font-mono">"unclear"</span></b> ضمن قيم الـ enum للحالات الملتبسة فعلاً (مستند يذكر دفعة جزئية بصياغة غامضة؟ <span dir="ltr" class="font-mono">payment_status: "unclear"</span> أصدق من تخمين)، و<b><span dir="ltr" class="font-mono">"other"</span> + حقل تفصيل نصي</b> للفئات القابلة للتوسع — فئة جديدة ما توقعتها؟ تنحفظ كـ other مع وصفها بدل ما تُحشر غلطاً في أقرب فئة. وأخيراً: السكيما الصارمة تحدد الشكل النهائي، لكن المصادر فوضوية التنسيق (تواريخ بعشر صيغ، مبالغ بفواصل وعملات ملتصقة) — فأضف <b>قواعد تطبيع</b> في البرومبت بجانب السكيما تشرح كيف يحوَّل كل تنسيق شائع للصيغة القياسية.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Here is the most dangerous schema decision: <b>required or nullable?</b> The guide's rule: if the information <b>may be absent</b> from some source documents, the field must be optional/nullable. Why? A required field is an order to the model: "do not come back without a value" — and when no value exists, the model satisfies the schema the only way left: <b>it fabricates one</b>. A nullable field gives it an honest exit: <span class="font-mono">null</span> means "the source does not contain this" — which is valuable information, not a failure.</p>
+        <p>For categorical fields, two patterns prevent forced cramming: <b><span class="font-mono">"unclear"</span></b> among the enum values for genuinely ambiguous cases (a document mentioning partial payment in vague terms? <span class="font-mono">payment_status: "unclear"</span> is more honest than a guess), and <b><span class="font-mono">"other"</span> + a free-text detail field</b> for extensible categories — a new category you did not anticipate gets stored as other with its description instead of being wrongly squeezed into the nearest bucket. Finally: the strict schema fixes the output shape, but sources are formatting chaos (dates in ten styles, amounts with separators and glued currencies) — so add <b>normalization rules</b> in the prompt alongside the schema explaining how each common format maps to the canonical one.</p>
+      </div>
+
+      <!-- Diagram 3: schema anatomy panels -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[620px] max-w-[780px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">SCHEMA ANATOMY — FOUR FIELD PATTERNS</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-surface-800 border-2 border-emerald-500/50 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-emerald-300">REQUIRED</p>
+              <p class="font-mono text-[10px] text-surface-300 bg-surface-900/80 rounded-lg p-2">"invoice_number": {"type": "string"}</p>
+              <p class="font-mono text-[10px] text-emerald-200/80 leading-relaxed">ONLY for fields every valid document is guaranteed to contain</p>
+            </div>
+            <div class="bg-surface-800 border-2 border-amber-500/60 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-amber-300">NULLABLE / OPTIONAL</p>
+              <p class="font-mono text-[10px] text-surface-300 bg-surface-900/80 rounded-lg p-2">"po_number": {"type": ["string","null"]}</p>
+              <p class="font-mono text-[10px] text-amber-200/80 leading-relaxed">info may be absent -&gt; null is honest; required would force fabrication</p>
+            </div>
+            <div class="bg-surface-800 border-2 border-sky-500/50 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-sky-300">ENUM + "unclear"</p>
+              <p class="font-mono text-[10px] text-surface-300 bg-surface-900/80 rounded-lg p-2">"enum": ["paid","unpaid","partial","unclear"]</p>
+              <p class="font-mono text-[10px] text-sky-200/80 leading-relaxed">ambiguous source -&gt; "unclear" beats a confident wrong guess</p>
+            </div>
+            <div class="bg-surface-800 border-2 border-violet-500/50 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-violet-300">ENUM + "other" + DETAIL</p>
+              <p class="font-mono text-[10px] text-surface-300 bg-surface-900/80 rounded-lg p-2">"enum": [..., "other"] + "detail": string</p>
+              <p class="font-mono text-[10px] text-violet-200/80 leading-relaxed">unforeseen category -&gt; captured with detail, not crammed into the nearest bucket</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">أنماط الحقول الأربعة: إلزامي للمضمون وجوده، nullable لما قد يغيب، وunclear/other للغموض والفئات الجديدة</span>
+        <span class="lang-en">The four field patterns: required for guaranteed-present, nullable for maybe-absent, unclear/other for ambiguity and new categories</span>
+      </p>
+
+      <!-- Code: normalization rules -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">قواعد تطبيع التنسيق داخل البرومبت — بجانب السكيما الصارمة:</span>
+          <span class="lang-en">Format normalization rules inside the prompt — alongside the strict schema:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-markdown"><code class="language-markdown">## Normalization rules — apply BEFORE filling the schema
+
+- Dates: always ISO 8601 (YYYY-MM-DD).
+  "3rd of March 2026" -&gt; "2026-03-03" | "03/04/26" -&gt; resolve using the
+  document's locale; if the locale is unknowable, set date_ambiguous = true.
+- Amounts: plain numbers, no thousands separators, dot decimal.
+  "SAR 1,250.00" -&gt; total_amount: 1250.00, currency: "SAR"
+- Phone numbers: E.164. "050 123 4567" (Saudi) -&gt; "+966501234567"
+- Percentages: store as fractions. "15%" -&gt; 0.15
+- Missing values: null. Do NOT write "N/A", "unknown", or empty strings.</code></pre>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">كل حقل تجعله required وأنت مو متأكد من وجوده في كل مستند = مصنع تلفيق صغير داخل نظامك. قيمة ملفقة "شكلها سليم" أخطر بكثير من null صريح، لأنها تعبر التحقق وتستقر في قاعدة البيانات.</div>
+          <div class="lang-en">Every field you mark required without being certain it exists in every document = a small fabrication factory inside your system. A fabricated value that "looks valid" is far more dangerous than an explicit null, because it passes validation and settles into your database.</div>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">اكتب في وصف كل حقل nullable جملة صريحة مثل: <span dir="ltr" class="font-mono">"null when the document has no PO number — never guess"</span>. وصف الحقل جزء من البرومبت يقرأه النموذج فعلياً — استغله لترسيخ سلوك الصدق.</div>
+          <div class="lang-en">Write an explicit sentence in every nullable field's description, like <span class="font-mono">"null when the document has no PO number — never guess"</span>. Field descriptions are prompt text the model actually reads — use them to anchor honest behavior.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="clipboard-list" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: النموذج الحكومي الورقي</span><span class="lang-en">Real-life example: the government paper form</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>روح لأي دائرة حكومية واطلب خدمة بدون نموذج — بس اكتب طلبك في ورقة بيضاء. النتيجة: كل متقدم يكتب بأسلوبه، نص ناقص وثاني مبعثر، والموظف يقضي يومه يفك الطلاسم. عشان كذا الحكومات اخترعت <b>النماذج الرسمية</b>: خانات مسماة بترتيب ثابت (هذي السكيما)، خانات النجمة الحمراء إلزامية (required)، وخانات اختيارية تتركها فارغة إذا ما تنطبق عليك (nullable) — والموظف يرفض أي "اجتهاد" خارج الخانات.</p>
+        <p>وشف ذكاء النماذج الورقية العريقة: قوائم الاختيار من متعدد فيها دائماً مربع أخير "أخرى — حدد: ______" (نمط enum + other + detail بالضبط)، وبعضها فيه خيار "غير متأكد" (unclear). وفوق النموذج تعليمات التعبئة: "التاريخ بصيغة يوم/شهر/سنة، المبلغ بالريال بدون فواصل" — هذي قواعد التطبيع. النموذج الورقي يضمن الشكل، لكن لو كتبت راتبك في خانة العمر، الورقة ما تعترض — الشكل مضمون والمعنى مسؤوليتك: بالضبط syntax مقابل semantics.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>Walk into any government office and request a service without a form — just write your request on a blank page. The result: every applicant writes their own way, one text incomplete, another scattered, and the clerk spends the day deciphering. That is why governments invented <b>official forms</b>: labeled boxes in a fixed order (the schema), red-star boxes that are mandatory (required), and optional boxes you leave empty when they do not apply (nullable) — and the clerk rejects any "creativity" outside the boxes.</p>
+        <p>Notice the wisdom of the old paper forms: multiple-choice lists always end with "Other — specify: ______" (exactly the enum + other + detail pattern), and some include "not sure" (unclear). Above the form sit filling instructions: "date as DD/MM/YYYY, amount in riyals without separators" — those are the normalization rules. The paper form guarantees shape, but if you write your salary in the age box, the paper does not object — shape is guaranteed, meaning is your responsibility: precisely syntax versus semantics.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>موضوع سيناريو S6 الأثير. توقع ثلاث زوايا:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"نحتاج ضمان مخرجات منظمة وعدة سكيمات ونوع المستند مجهول" — الجواب <span dir="ltr" class="font-mono">tool_choice: "any"</span>. "لازم استخراج معين قبل الإثراء" — أداة مفروضة بالاسم.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"النموذج يخترع قيماً للحقول الغائبة" — الجواب اجعل الحقل nullable/optional، مو "شدّد الوصف" ولا "أعد المحاولة".</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد أي خيار يوحي أن السكيما الصارمة تمنع الأخطاء الدلالية (المجاميع الخاطئة تعبر السكيما بنجاح) — وأي خيار "اطلب JSON نظيفاً في البرومبت" كبديل عن tool_use.</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>Scenario S6's favorite topic. Expect three angles:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"We need guaranteed structured output, several schemas, unknown document type" — answer <span class="font-mono">tool_choice: "any"</span>. "A specific extraction must run before enrichment" — the forced named tool.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"The model invents values for absent fields" — answer: make the field nullable/optional, not "strengthen the description" or "retry".</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate any option implying a strict schema prevents semantic errors (wrong sums pass the schema happily) — and any "just ask for clean JSON in the prompt" alternative to tool_use.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">خط معالجة يتطلب استخراج الميتاداتا أولاً قبل خطوات الإثراء اللاحقة، ولازم تضمن أن أداة extract_metadata بالذات هي اللي تُستدعى. وش الإعداد؟</p>
+            <p class="lang-en">A pipeline requires metadata extraction to run first, before later enrichment steps, and you must guarantee that the extract_metadata tool specifically is called. What is the setting?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "any"}</span> مع تقديم extract_metadata أول أداة في القائمة.</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "any"}</span> with extract_metadata listed first among the tools.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "tool", "name": "extract_metadata"}</span> — فرض الأداة بالاسم.</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "tool", "name": "extract_metadata"}</span> — force the tool by name.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "auto"}</span> مع تعليمة في البرومبت: "ابدأ دائماً بالميتاداتا".</span>
+            <span class="lang-en"><span class="font-mono">tool_choice: {"type": "auto"}</span> plus a prompt instruction: "always start with metadata".</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">اطلب في البرومبت إخراج JSON بنفس شكل سكيما الميتاداتا.</span>
+            <span class="lang-en">Ask in the prompt for JSON matching the metadata schema's shape.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الفرض بالاسم هو الضمان الوحيد لأداة محددة. "any" يضمن أداةً ما (قد تكون غيرها)، و"auto" مع تعليمة نصية مجرد رجاء غير ملزم، وطلب JSON في البرومبت يفقد ضمانات السكيما كلها.</span>
+              <span class="lang-en">Correct. Forcing by name is the only guarantee of a specific tool. "any" guarantees some tool (possibly a different one), "auto" plus a prompt line is a non-binding wish, and prompt-requested JSON loses every schema guarantee.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: <span dir="ltr" class="font-mono">{"type": "tool", "name": "extract_metadata"}</span>. لما المطلوب أداة بعينها، لا "any" (يختار النموذج) ولا "auto" (قد لا يستدعي شيئاً) يكفيان — والترتيب في القائمة ليس آلية ضمان.</span>
+              <span class="lang-en">The answer is B: <span class="font-mono">{"type": "tool", "name": "extract_metadata"}</span>. When a specific tool is required, neither "any" (model picks) nor "auto" (may call nothing) suffices — and list order is not a guarantee mechanism.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">حقل vendor_tax_id إلزامي في سكيمتكم، لكن 30% من الفواتير الواردة ما تذكر رقماً ضريبياً أصلاً — والنموذج صار يكتب أرقاماً "معقولة الشكل" ملفقة. وش الإصلاح الجذري؟</p>
+            <p class="lang-en">The vendor_tax_id field is required in your schema, but 30% of incoming invoices contain no tax ID at all — and the model now writes plausible-looking fabricated numbers. What is the root fix?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف للوصف: "لا تخترع أرقاماً ضريبية أبداً" مع إبقاء الحقل إلزامياً.</span>
+            <span class="lang-en">Add "never invent tax IDs" to the description while keeping the field required.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">تحقق من صيغة الرقم الضريبي بعد الاستخراج وارفض غير الصالح.</span>
+            <span class="lang-en">Validate the tax ID format after extraction and reject invalid ones.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">اجعل الحقل nullable: <span dir="ltr" class="font-mono">["string", "null"]</span> مع وصف يوضح أن null تعني عدم وجوده في المستند.</span>
+            <span class="lang-en">Make the field nullable: <span class="font-mono">["string", "null"]</span> with a description stating null means it is absent from the document.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">قسّم الفواتير: أرسل اللي فيها رقم ضريبي فقط لهذي السكيما.</span>
+            <span class="lang-en">Split the invoices: send only those containing a tax ID to this schema.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. السبب الجذري أن الحقل الإلزامي يجبر النموذج على إرضاء السكيما بالتلفيق لما تغيب المعلومة — وnullable يعطيه مخرج الصدق. التحذير النصي يخفف ولا يمنع (البنية ما زالت تطالب بقيمة)، وفحص الصيغة يمسك الملفق سيئ الشكل فقط، والتقسيم المسبق يتطلب معرفة الجواب سلفاً.</span>
+              <span class="lang-en">Correct. The root cause is that a required field forces the model to satisfy the schema by fabricating when the information is absent — nullable gives it the honest exit. A prose warning mitigates but does not prevent (the structure still demands a value), format validation only catches badly-shaped fabrications, and pre-splitting requires already knowing the answer.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: التصميم nullable هو حل الدليل لما قد تغيب المعلومة من المصدر — يمنع التلفيق من جذره. بقية الخيارات ترقيعات فوق سكيما تجبر النموذج على الاختراع.</span>
+              <span class="lang-en">The answer is C: nullable design is the guide's fix when information may be absent from the source — it removes fabrication at the root. The other options are patches over a schema that forces invention.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">تصنّفون مستندات واردة إلى فئات: contract / invoice / receipt. تظهر أحياناً أنواع جديدة (مذكرات تفاهم، عروض أسعار) والنموذج يحشرها غلطاً في أقرب فئة. وش تعديل السكيما الصحيح؟</p>
+            <p class="lang-en">You classify incoming documents into contract / invoice / receipt. New types occasionally appear (MOUs, quotations) and the model wrongly crams them into the nearest category. What is the right schema change?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف كل نوع جديد للـ enum فور ظهوره وأعد النشر.</span>
+            <span class="lang-en">Add every new type to the enum as it appears and redeploy.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">حوّل الحقل من enum إلى نص حر يكتب فيه النموذج ما يراه.</span>
+            <span class="lang-en">Turn the field from an enum into free text where the model writes whatever it sees.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">أضف "other" للـ enum مع حقل تفصيل نصي يوصف فيه النوع الجديد.</span>
+            <span class="lang-en">Add "other" to the enum plus a free-text detail field describing the new type.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">ارفض المستندات غير المطابقة للفئات الثلاث قبل الاستخراج.</span>
+            <span class="lang-en">Reject documents that do not match the three categories before extraction.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. نمط "other" + حقل التفصيل يحافظ على صرامة الـ enum للفئات المعروفة ويفتح مخرجاً موثقاً للجديدة — وحقل التفصيل يخبرك متى تستحق فئة ترقية لقيمة enum رسمية. الإضافة المستمرة سباق لا ينتهي، والنص الحر يفقد الاتساق، والرفض المسبق يتطلب مصنفاً أصلاً.</span>
+              <span class="lang-en">Correct. The "other" + detail pattern keeps the enum strict for known categories while opening a documented exit for new ones — and the detail field tells you when a category earns promotion to a formal enum value. Perpetual additions are an endless race, free text loses consistency, and pre-rejection requires a classifier in the first place.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: "other" + حقل تفصيل — نمط الدليل للفئات القابلة للتوسع. يمنع الحشر القسري بدون التضحية بصرامة الـ enum ولا الدخول في سباق تحديثات.</span>
+              <span class="lang-en">The answer is C: "other" + a detail field — the guide's pattern for extensible categories. It prevents forced cramming without sacrificing enum strictness or entering an update race.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">tool_use مع JSON schema = الأسلوب الأوثق للمخرجات المنظمة: يلغي أخطاء syntax، ولا يمنع الأخطاء الدلالية (المجاميع، الحقول المتبادلة).</span><span class="lang-en">tool_use with a JSON schema = the most reliable structured-output approach: eliminates syntax errors, does not prevent semantic ones (sums, swapped fields).</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">tool_choice: auto = قد يرد نصاً؛ any = لازم أداة من اختياره (الضمان مع تعدد السكيمات)؛ الأداة المسماة = فرض استخراج محدد قبل خطوات لاحقة.</span><span class="lang-en">tool_choice: auto = may reply in text; any = must call some tool (the guarantee with multiple schemas); named tool = force a specific extraction before later steps.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">أي معلومة قد تغيب من المصدر = حقل nullable — الحقل الإلزامي بلا مبرر يصنع قيماً ملفقة.</span><span class="lang-en">Any information that may be absent from the source = a nullable field — an unjustified required field manufactures fabricated values.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">"unclear" للالتباس، و"other" + حقل تفصيل للفئات الجديدة — صدق المخرجات أهم من امتلاء الخانات.</span><span class="lang-en">"unclear" for ambiguity, "other" + detail for new categories — honest output beats filled-in boxes.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">قواعد التطبيع في البرومبت (تواريخ ISO، مبالغ بلا فواصل، E.164) ترافق السكيما الصارمة لمعالجة فوضى تنسيق المصادر.</span><span class="lang-en">Normalization rules in the prompt (ISO dates, separator-free amounts, E.164) ride alongside the strict schema to tame messy source formatting.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="4-2-few-shot.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.2 الأمثلة الموجهة Few-shot</span><span class="lang-en">4.2 Few-shot prompting</span></p>
+        </div>
+      </a>
+      <a href="4-4-validation-retry.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.4 حلقات التحقق والإعادة</span><span class="lang-en">4.4 Validation &amp; retry loops</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

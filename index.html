@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مرجع شهادة Claude Certified Architect – Foundations | CCAF</title>
+  <meta name="description" content="المرجع الدراسي الشامل ثنائي اللغة لشهادة Claude Certified Architect – Foundations: الدومينز الخمسة، السيناريوهات الستة، خطة مذاكرة، واختبار تجريبي. Complete bilingual study reference for the CCAF exam.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white py-16 px-6 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, #36b3f8 0, transparent 40%), radial-gradient(circle at 80% 20%, #0c99e9 0, transparent 35%);"></div>
+    <div class="max-w-6xl mx-auto relative">
+      <div class="flex items-center gap-3 text-brand-300 text-sm mb-5">
+        <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        <span class="lang-ar">المرجع الدراسي الشامل — بأسلوب معلم</span>
+        <span class="lang-en">The Complete Study Reference — Mu3allim style</span>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-bold mb-4 text-balance leading-tight">
+        <span class="lang-ar">شهادة المعماري المعتمد من Claude</span>
+        <span class="lang-en">Claude Certified Architect</span>
+      </h1>
+      <p class="text-lg md:text-2xl text-brand-100 mb-3 font-mono" dir="ltr">Claude Certified Architect – Foundations</p>
+      <p class="text-base md:text-lg text-brand-200/90 mb-8 max-w-3xl leading-relaxed">
+        <span class="lang-ar">الشهادة تتحقق إنك قادر تاخذ قرارات معمارية صحيحة وتوازن بين الخيارات عند بناء حلول حقيقية بـ <span dir="ltr" class="font-mono">Claude</span> — عبر أربع تقنيات أساسية: <span dir="ltr" class="font-mono">Claude Code</span> و <span dir="ltr" class="font-mono">Agent SDK</span> و <span dir="ltr" class="font-mono">Claude API</span> و <span dir="ltr" class="font-mono">MCP</span>.</span>
+        <span class="lang-en">This certification validates that you can make informed architectural decisions and weigh tradeoffs when building real-world solutions with Claude — across four core technologies: Claude Code, the Agent SDK, the Claude API, and MCP.</span>
+      </p>
+      <div class="flex flex-wrap gap-3 mb-8 text-sm">
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="list-checks" class="w-4 h-4"></i><span class="lang-ar">60 سؤال</span><span class="lang-en">60 questions</span></span>
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="timer" class="w-4 h-4"></i><span class="lang-ar">120 دقيقة</span><span class="lang-en">120 minutes</span></span>
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="target" class="w-4 h-4"></i><span class="lang-ar">النجاح 720/1000</span><span class="lang-en">Pass: 720/1000</span></span>
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4"></i><span class="lang-ar">5 دومينز</span><span class="lang-en">5 domains</span></span>
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="badge-dollar-sign" class="w-4 h-4"></i>$125</span>
+        <span class="px-3 py-1.5 bg-white/10 rounded-full flex items-center gap-1.5"><i data-lucide="calendar-check" class="w-4 h-4"></i><span class="lang-ar">صلاحية 12 شهر</span><span class="lang-en">Valid 12 months</span></span>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="domain-1/index.html" class="px-6 py-3 bg-white text-brand-800 rounded-xl font-bold hover:bg-brand-50 transition-colors flex items-center gap-2">
+          <i data-lucide="play" class="w-4 h-4"></i>
+          <span class="lang-ar">ابدأ من الدومين الأول</span><span class="lang-en">Start with Domain 1</span>
+        </a>
+        <a href="practice-exam.html" class="px-6 py-3 bg-white/10 border border-white/30 rounded-xl font-bold hover:bg-white/20 transition-colors flex items-center gap-2">
+          <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+          <span class="lang-ar">جرّب الاختبار التجريبي</span><span class="lang-en">Take the practice exam</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-12 space-y-16">
+
+    <!-- ===== What is this cert ===== -->
+    <section id="about" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">وش هذي الشهادة؟ <span class="text-lg font-normal text-surface-500">About the certification</span></span>
+        <span class="lang-en">What is this certification?</span>
+      </h2>
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 md:p-8 space-y-4">
+        <div class="lang-ar space-y-3 leading-relaxed">
+          <p>شهادة <span dir="ltr" class="font-mono text-brand-700">Claude Certified Architect – Foundations</span> هي شهادة رسمية من <span dir="ltr" class="font-mono">Anthropic</span> موجهة لمهندسي الحلول اللي يصممون ويبنون تطبيقات إنتاجية بـ Claude. الاختبار ما يختبر الحفظ — يختبر <strong>الحُكم المعماري</strong>: متى تختار نمط بدل نمط، ووش الـ tradeoff الصح في كل موقف.</p>
+          <p>كل الأسئلة مبنية على <strong>سيناريوهات واقعية</strong> من استخدامات عملاء حقيقيين: وكيل دعم عملاء، نظام بحث متعدد الوكلاء، دمج Claude Code في CI/CD، أدوات إنتاجية للمطورين، واستخراج بيانات مهيكلة من مستندات.</p>
+        </div>
+        <div class="lang-en space-y-3 leading-relaxed">
+          <p>The <span class="font-mono text-brand-700">Claude Certified Architect – Foundations</span> certification is Anthropic's official credential for solution architects who design and implement production applications with Claude. The exam doesn't test memorization — it tests <strong>architectural judgment</strong>: when to choose one pattern over another, and what the right tradeoff is in each situation.</p>
+          <p>Every question is grounded in <strong>realistic scenarios</strong> drawn from actual customer use cases: a customer support agent, a multi-agent research system, Claude Code in CI/CD, developer productivity tooling, and structured data extraction from documents.</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
+          <div class="bg-surface-50 rounded-xl p-4 text-center border border-surface-200 hover:border-brand-300 transition-colors">
+            <i data-lucide="terminal" class="w-7 h-7 text-brand-600 mx-auto mb-2"></i>
+            <div class="font-mono font-bold text-sm" dir="ltr">Claude Code</div>
+            <div class="text-xs text-surface-500 mt-1"><span class="lang-ar">وكيل البرمجة في الطرفية</span><span class="lang-en">The coding agent CLI</span></div>
+          </div>
+          <div class="bg-surface-50 rounded-xl p-4 text-center border border-surface-200 hover:border-brand-300 transition-colors">
+            <i data-lucide="bot" class="w-7 h-7 text-brand-600 mx-auto mb-2"></i>
+            <div class="font-mono font-bold text-sm" dir="ltr">Agent SDK</div>
+            <div class="text-xs text-surface-500 mt-1"><span class="lang-ar">بناء وكلاء مستقلين</span><span class="lang-en">Building autonomous agents</span></div>
+          </div>
+          <div class="bg-surface-50 rounded-xl p-4 text-center border border-surface-200 hover:border-brand-300 transition-colors">
+            <i data-lucide="cloud" class="w-7 h-7 text-brand-600 mx-auto mb-2"></i>
+            <div class="font-mono font-bold text-sm" dir="ltr">Claude API</div>
+            <div class="text-xs text-surface-500 mt-1"><span class="lang-ar">الواجهة البرمجية والأدوات</span><span class="lang-en">Messages, tools & batches</span></div>
+          </div>
+          <div class="bg-surface-50 rounded-xl p-4 text-center border border-surface-200 hover:border-brand-300 transition-colors">
+            <i data-lucide="plug-zap" class="w-7 h-7 text-brand-600 mx-auto mb-2"></i>
+            <div class="font-mono font-bold text-sm" dir="ltr">MCP</div>
+            <div class="text-xs text-surface-500 mt-1"><span class="lang-ar">بروتوكول سياق النموذج</span><span class="lang-en">Model Context Protocol</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Exam facts ===== -->
+    <section id="exam-facts" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">الاختبار بلمحة <span class="text-lg font-normal text-surface-500">Exam at a glance</span></span>
+        <span class="lang-en">Exam at a glance</span>
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 text-center">
+          <div class="text-3xl font-bold text-brand-600 font-mono">60</div>
+          <div class="text-sm text-surface-600 mt-1"><span class="lang-ar">سؤال اختيار من متعدد</span><span class="lang-en">Multiple-choice questions</span></div>
+          <div class="text-xs text-surface-400 mt-1"><span class="lang-ar">إجابة صحيحة + 3 مموهات</span><span class="lang-en">1 correct + 3 distractors</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 text-center">
+          <div class="text-3xl font-bold text-brand-600 font-mono">120</div>
+          <div class="text-sm text-surface-600 mt-1"><span class="lang-ar">دقيقة</span><span class="lang-en">Minutes</span></div>
+          <div class="text-xs text-surface-400 mt-1"><span class="lang-ar">≈ دقيقتان لكل سؤال</span><span class="lang-en">≈ 2 min per question</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 text-center">
+          <div class="text-3xl font-bold text-brand-600 font-mono">720</div>
+          <div class="text-sm text-surface-600 mt-1"><span class="lang-ar">درجة النجاح</span><span class="lang-en">Passing score</span></div>
+          <div class="text-xs text-surface-400 mt-1"><span class="lang-ar">من مقياس 100–1000</span><span class="lang-en">on a 100–1,000 scale</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 text-center">
+          <div class="text-3xl font-bold text-brand-600 font-mono">4/6</div>
+          <div class="text-sm text-surface-600 mt-1"><span class="lang-ar">سيناريوهات</span><span class="lang-en">Scenarios</span></div>
+          <div class="text-xs text-surface-400 mt-1"><span class="lang-ar">4 تُختار عشوائيًا من 6</span><span class="lang-en">4 drawn at random from 6</span></div>
+        </div>
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 text-center">
+          <div class="text-3xl font-bold text-brand-600 font-mono">$125</div>
+          <div class="text-sm text-surface-600 mt-1"><span class="lang-ar">رسوم الاختبار</span><span class="lang-en">Exam fee</span></div>
+          <div class="text-xs text-surface-400 mt-1"><span class="lang-ar">مراقَب أونلاين أو في مركز</span><span class="lang-en">Online proctored or test center</span></div>
+        </div>
+      </div>
+      <div class="flex gap-3 p-4 bg-brand-50 border border-brand-200 rounded-xl">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed">
+          <div class="lang-ar"><strong class="text-brand-800">مفهوم أساسي:</strong> <span class="text-brand-700">الدرجة <strong>موزونة بالدومينز</strong> مو نسبة خام — أداؤك القوي في دومين وزنه كبير (مثل الدومين 1 بوزن 27%) يأثر في درجتك النهائية أكثر من نفس الدقة في دومين وزنه أخف. المنصة تلزمك تجاوب كل سؤال قبل تتقدم، فلا تترك شي فاضي.</span></div>
+          <div class="lang-en"><strong class="text-brand-800">Key concept:</strong> <span class="text-brand-700">Scoring is <strong>domain-weighted</strong>, not a raw percentage — strong performance in a heavy domain (like Domain 1 at 27%) moves your final score more than equal accuracy in a lighter one. The platform requires an answer to every question before advancing, so nothing is left blank.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Domain weights bar ===== -->
+    <section id="domains" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">الدومينز الخمسة <span class="text-lg font-normal text-surface-500">The five domains</span></span>
+        <span class="lang-en">The five domains</span>
+      </h2>
+      <p class="text-surface-600 leading-relaxed max-w-3xl">
+        <span class="lang-ar">هذي خريطة الاختبار كاملة. كل دومين له قسم مستقل: صفحة ملخص بشجرة المواضيع، وداخلها صفحة درس كاملة لكل <span dir="ltr" class="font-mono">Task Statement</span> رسمي — بمخططات، أمثلة من الحياة، أمثلة كود، أفخاخ الاختبار، وكويزات.</span>
+        <span class="lang-en">This is the full exam map. Each domain is a full section: an overview page with a topic tree, and inside it a complete lesson page for every official task statement — with diagrams, real-life examples, code samples, exam traps, and quizzes.</span>
+      </p>
+
+      <!-- Weight bar -->
+      <div dir="ltr" class="space-y-2">
+        <div class="flex h-10 rounded-xl overflow-hidden text-white text-xs font-bold font-mono">
+          <div class="bg-brand-500 flex items-center justify-center" style="width:27%">27%</div>
+          <div class="bg-emerald-500 flex items-center justify-center" style="width:18%">18%</div>
+          <div class="bg-violet-500 flex items-center justify-center" style="width:20%">20%</div>
+          <div class="bg-amber-500 flex items-center justify-center" style="width:20%">20%</div>
+          <div class="bg-rose-500 flex items-center justify-center" style="width:15%">15%</div>
+        </div>
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-500 font-mono">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-brand-500 inline-block"></span>D1 Agentic</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>D2 Tools/MCP</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-violet-500 inline-block"></span>D3 Claude Code</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>D4 Prompting</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>D5 Context</span>
+        </div>
+      </div>
+
+      <!-- Domain cards -->
+      <div class="grid md:grid-cols-2 gap-5">
+
+        <!-- D1 -->
+        <a href="domain-1/index.html" class="group bg-white rounded-2xl border-2 border-surface-200 hover:border-brand-400 hover:shadow-lg transition-all p-6 space-y-3 block">
+          <div class="flex items-center justify-between">
+            <span class="bg-brand-100 text-brand-700 font-mono font-bold text-sm px-3 py-1 rounded-lg">Domain 1</span>
+            <span class="text-2xl font-bold text-brand-600 font-mono">27%</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface-900 group-hover:text-brand-700 transition-colors">
+            <span class="lang-ar">البنية الوكيلية والتنسيق</span>
+            <span class="lang-en">Agentic Architecture & Orchestration</span>
+          </h3>
+          <p class="text-sm text-surface-500 font-mono" dir="ltr">≈ 16 / 60 questions — the heaviest domain</p>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">الحلقة الوكيلية و<span dir="ltr" class="font-mono">stop_reason</span>، تنسيق المنسق والوكلاء الفرعيين، تمرير السياق، الـ hooks، تفكيك المهام، وإدارة الجلسات.</span>
+            <span class="lang-en">The agentic loop & stop_reason, coordinator–subagent orchestration, context passing, hooks, task decomposition, and session management.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-surface-100 rounded">agentic loop</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">subagents</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">Task tool</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">hooks</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">fork_session</span>
+          </div>
+          <div class="flex items-center gap-1 text-brand-600 text-sm font-semibold pt-1">
+            <span class="lang-ar">ادرس الدومين</span><span class="lang-en">Study this domain</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+
+        <!-- D2 -->
+        <a href="domain-2/index.html" class="group bg-white rounded-2xl border-2 border-surface-200 hover:border-emerald-400 hover:shadow-lg transition-all p-6 space-y-3 block">
+          <div class="flex items-center justify-between">
+            <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1 rounded-lg">Domain 2</span>
+            <span class="text-2xl font-bold text-emerald-600 font-mono">18%</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface-900 group-hover:text-emerald-700 transition-colors">
+            <span class="lang-ar">تصميم الأدوات وتكامل MCP</span>
+            <span class="lang-en">Tool Design & MCP Integration</span>
+          </h3>
+          <p class="text-sm text-surface-500 font-mono" dir="ltr">≈ 11 / 60 questions</p>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">أوصاف الأدوات الفعالة، الأخطاء المهيكلة (<span dir="ltr" class="font-mono">errorCategory / isRetryable</span>)، توزيع الأدوات، <span dir="ltr" class="font-mono">tool_choice</span>، إعداد خوادم MCP، والأدوات المدمجة.</span>
+            <span class="lang-en">Effective tool descriptions, structured errors (errorCategory / isRetryable), tool distribution, tool_choice, MCP server configuration, and built-in tools.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-surface-100 rounded">descriptions</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">isError</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">tool_choice</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">.mcp.json</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">Grep/Glob</span>
+          </div>
+          <div class="flex items-center gap-1 text-emerald-600 text-sm font-semibold pt-1">
+            <span class="lang-ar">ادرس الدومين</span><span class="lang-en">Study this domain</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+
+        <!-- D3 -->
+        <a href="domain-3/index.html" class="group bg-white rounded-2xl border-2 border-surface-200 hover:border-violet-400 hover:shadow-lg transition-all p-6 space-y-3 block">
+          <div class="flex items-center justify-between">
+            <span class="bg-violet-100 text-violet-700 font-mono font-bold text-sm px-3 py-1 rounded-lg">Domain 3</span>
+            <span class="text-2xl font-bold text-violet-600 font-mono">20%</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface-900 group-hover:text-violet-700 transition-colors">
+            <span class="lang-ar">إعداد Claude Code وسير العمل</span>
+            <span class="lang-en">Claude Code Configuration & Workflows</span>
+          </h3>
+          <p class="text-sm text-surface-500 font-mono" dir="ltr">≈ 12 / 60 questions</p>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">هرمية <span dir="ltr" class="font-mono">CLAUDE.md</span>، الأوامر المخصصة والسكِلز، قواعد المسارات، <span dir="ltr" class="font-mono">plan mode</span>، التحسين التكراري، ودمج CI/CD.</span>
+            <span class="lang-en">The CLAUDE.md hierarchy, custom commands & skills, path-scoped rules, plan mode, iterative refinement, and CI/CD integration.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-surface-100 rounded">CLAUDE.md</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">.claude/rules/</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">skills</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">plan mode</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">-p / CI</span>
+          </div>
+          <div class="flex items-center gap-1 text-violet-600 text-sm font-semibold pt-1">
+            <span class="lang-ar">ادرس الدومين</span><span class="lang-en">Study this domain</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+
+        <!-- D4 -->
+        <a href="domain-4/index.html" class="group bg-white rounded-2xl border-2 border-surface-200 hover:border-amber-400 hover:shadow-lg transition-all p-6 space-y-3 block">
+          <div class="flex items-center justify-between">
+            <span class="bg-amber-100 text-amber-700 font-mono font-bold text-sm px-3 py-1 rounded-lg">Domain 4</span>
+            <span class="text-2xl font-bold text-amber-600 font-mono">20%</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface-900 group-hover:text-amber-700 transition-colors">
+            <span class="lang-ar">هندسة البرومبت والمخرجات المهيكلة</span>
+            <span class="lang-en">Prompt Engineering & Structured Output</span>
+          </h3>
+          <p class="text-sm text-surface-500 font-mono" dir="ltr">≈ 12 / 60 questions</p>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">المعايير الصريحة، الـ <span dir="ltr" class="font-mono">few-shot</span>، المخرجات المهيكلة عبر <span dir="ltr" class="font-mono">tool_use</span> و JSON schemas، حلقات التحقق وإعادة المحاولة، والـ <span dir="ltr" class="font-mono">Batches API</span>.</span>
+            <span class="lang-en">Explicit criteria, few-shot prompting, structured output via tool_use & JSON schemas, validation-retry loops, and the Message Batches API.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-surface-100 rounded">few-shot</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">JSON schema</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">tool_choice</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">batches</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">multi-pass</span>
+          </div>
+          <div class="flex items-center gap-1 text-amber-600 text-sm font-semibold pt-1">
+            <span class="lang-ar">ادرس الدومين</span><span class="lang-en">Study this domain</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+
+        <!-- D5 -->
+        <a href="domain-5/index.html" class="group bg-white rounded-2xl border-2 border-surface-200 hover:border-rose-400 hover:shadow-lg transition-all p-6 space-y-3 block md:col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between">
+            <span class="bg-rose-100 text-rose-700 font-mono font-bold text-sm px-3 py-1 rounded-lg">Domain 5</span>
+            <span class="text-2xl font-bold text-rose-600 font-mono">15%</span>
+          </div>
+          <h3 class="text-xl font-bold text-surface-900 group-hover:text-rose-700 transition-colors">
+            <span class="lang-ar">إدارة السياق والموثوقية</span>
+            <span class="lang-en">Context Management & Reliability</span>
+          </h3>
+          <p class="text-sm text-surface-500 font-mono" dir="ltr">≈ 9 / 60 questions</p>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">حفظ المعلومات عبر المحادثات الطويلة، أنماط التصعيد، انتشار الأخطاء بين الوكلاء، استكشاف الأكواد الكبيرة، ومعايرة الثقة والمراجعة البشرية.</span>
+            <span class="lang-en">Preserving information across long conversations, escalation patterns, error propagation across agents, large-codebase exploration, and confidence calibration with human review.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-surface-100 rounded">lost-in-middle</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">escalation</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">error context</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">provenance</span>
+            <span class="px-2 py-0.5 bg-surface-100 rounded">/compact</span>
+          </div>
+          <div class="flex items-center gap-1 text-rose-600 text-sm font-semibold pt-1">
+            <span class="lang-ar">ادرس الدومين</span><span class="lang-en">Study this domain</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+
+        <!-- Practice exam card -->
+        <a href="practice-exam.html" class="group bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl border-2 border-brand-700 hover:shadow-xl transition-all p-6 space-y-3 block md:col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between">
+            <span class="bg-white/15 font-mono font-bold text-sm px-3 py-1 rounded-lg">Practice</span>
+            <i data-lucide="clipboard-check" class="w-7 h-7 text-brand-200"></i>
+          </div>
+          <h3 class="text-xl font-bold">
+            <span class="lang-ar">الاختبار التجريبي</span>
+            <span class="lang-en">Practice Exam</span>
+          </h3>
+          <p class="text-sm text-brand-100 leading-relaxed">
+            <span class="lang-ar">20 سؤال بنمط الاختبار الحقيقي — منها الأسئلة الرسمية الـ 12 من دليل Anthropic مع شرح كامل لكل إجابة وفخ.</span>
+            <span class="lang-en">20 questions in the real exam's style — including all 12 official sample questions from Anthropic's guide, with full explanations of every answer and trap.</span>
+          </p>
+          <div class="flex items-center gap-1 text-white text-sm font-semibold pt-1">
+            <span class="lang-ar">ابدأ الاختبار</span><span class="lang-en">Start the exam</span>
+            <i data-lucide="arrow-left" class="w-4 h-4 lang-ar group-hover:-translate-x-1 transition-transform"></i>
+            <i data-lucide="arrow-right" class="w-4 h-4 lang-en group-hover:translate-x-1 transition-transform"></i>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== The 6 scenarios ===== -->
+    <section id="scenarios" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">السيناريوهات الستة <span class="text-lg font-normal text-surface-500">The six exam scenarios</span></span>
+        <span class="lang-en">The six exam scenarios</span>
+      </h2>
+      <p class="text-surface-600 leading-relaxed max-w-3xl">
+        <span class="lang-ar">كل أسئلة الاختبار تجيك داخل سياق سيناريو إنتاجي واقعي. يوم الاختبار بتشوف <strong>4 سيناريوهات تُختار عشوائيًا</strong> من هالبنك — يعني لازم تجهّز للستة كلها.</span>
+        <span class="lang-en">Every exam question comes framed inside a realistic production scenario. On exam day you'll see <strong>4 scenarios drawn at random</strong> from this bank — so you must prepare for all six.</span>
+      </p>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S1</span>
+            <i data-lucide="headset" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">وكيل حل مشاكل دعم العملاء</span>
+            <span class="lang-en">Customer Support Resolution Agent</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">وكيل بالـ Agent SDK يتعامل مع طلبات غامضة: استرجاعات ونزاعات فواتير، بأدوات MCP مثل <span dir="ltr" class="font-mono">process_refund</span> — والهدف حل 80%+ من أول تواصل مع معرفة متى يصعّد.</span>
+            <span class="lang-en">An Agent SDK agent handling ambiguous requests — returns, billing disputes — via MCP tools like <span class="font-mono">process_refund</span>, targeting 80%+ first-contact resolution while knowing when to escalate.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded">D1</span>
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">D2</span>
+            <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded">D5</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S2</span>
+            <i data-lucide="code-2" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">توليد الكود مع Claude Code</span>
+            <span class="lang-en">Code Generation with Claude Code</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">فريق يستخدم Claude Code للتوليد وإعادة الهيكلة والتوثيق — مع أوامر مخصصة، إعدادات <span dir="ltr" class="font-mono">CLAUDE.md</span>، ومتى تستخدم <span dir="ltr" class="font-mono">plan mode</span>.</span>
+            <span class="lang-en">A team using Claude Code for generation, refactoring, and docs — custom slash commands, CLAUDE.md configuration, and when to use plan mode vs direct execution.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-violet-100 text-violet-700 rounded">D3</span>
+            <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded">D5</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S3</span>
+            <i data-lucide="network" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">نظام بحث متعدد الوكلاء</span>
+            <span class="lang-en">Multi-Agent Research System</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">منسق يوزع المهام على وكلاء متخصصين: بحث ويب، تحليل مستندات، تجميع، وتقارير — والنتيجة تقارير شاملة بمصادر موثقة.</span>
+            <span class="lang-en">A coordinator delegating to specialized subagents — web search, document analysis, synthesis, reporting — producing comprehensive, cited reports.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded">D1</span>
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">D2</span>
+            <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded">D5</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S4</span>
+            <i data-lucide="wrench" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">أدوات إنتاجية للمطورين</span>
+            <span class="lang-en">Developer Productivity with Claude</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">وكيل يساعد المهندسين على استكشاف أكواد غير مألوفة وأتمتة المهام المتكررة — بالأدوات المدمجة (<span dir="ltr" class="font-mono">Read, Write, Bash, Grep, Glob</span>) وخوادم MCP.</span>
+            <span class="lang-en">An agent helping engineers explore unfamiliar codebases and automate repetitive tasks — using built-in tools (Read, Write, Bash, Grep, Glob) and MCP servers.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded">D2</span>
+            <span class="px-2 py-0.5 bg-violet-100 text-violet-700 rounded">D3</span>
+            <span class="px-2 py-0.5 bg-brand-100 text-brand-700 rounded">D1</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S5</span>
+            <i data-lucide="git-pull-request" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">Claude Code في التكامل المستمر</span>
+            <span class="lang-en">Claude Code for CI</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">دمج Claude Code في CI/CD: مراجعات كود آلية، توليد اختبارات، وملاحظات على الـ PRs — ببرومبتات تقلل الإنذارات الكاذبة.</span>
+            <span class="lang-en">Claude Code in the CI/CD pipeline: automated reviews, test generation, PR feedback — with prompts designed to minimize false positives.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-violet-100 text-violet-700 rounded">D3</span>
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded">D4</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-5 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="bg-surface-900 text-white font-mono text-xs font-bold w-7 h-7 rounded-lg flex items-center justify-center">S6</span>
+            <i data-lucide="file-json-2" class="w-5 h-5 text-surface-400"></i>
+          </div>
+          <h3 class="font-bold text-surface-900 leading-snug">
+            <span class="lang-ar">استخراج البيانات المهيكلة</span>
+            <span class="lang-en">Structured Data Extraction</span>
+          </h3>
+          <p class="text-sm text-surface-600 leading-relaxed">
+            <span class="lang-ar">نظام يستخرج معلومات من مستندات غير مهيكلة ويتحقق منها بـ JSON schemas — مع التعامل مع الحالات الحدّية والدمج مع أنظمة لاحقة.</span>
+            <span class="lang-en">A system extracting information from unstructured documents, validating with JSON schemas — handling edge cases gracefully and integrating with downstream systems.</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 text-xs font-mono" dir="ltr">
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded">D4</span>
+            <span class="px-2 py-0.5 bg-rose-100 text-rose-700 rounded">D5</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Study plan ===== -->
+    <section id="study-plan" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">خطة المذاكرة — 4 أسابيع <span class="text-lg font-normal text-surface-500">4-week study plan</span></span>
+        <span class="lang-en">4-week study plan</span>
+      </h2>
+      <p class="text-surface-600 leading-relaxed max-w-3xl">
+        <span class="lang-ar">خطة عملية تناسب واحد عنده خبرة فعلية مع Claude (الشهادة تفترض 6+ أشهر خبرة). علّم على المهام وهي تنحفظ في متصفحك تلقائيًا.</span>
+        <span class="lang-en">A practical plan for someone with real Claude experience (the cert assumes 6+ months hands-on). Check items off — progress is saved in your browser automatically.</span>
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-brand-500 text-white font-bold w-10 h-10 rounded-xl flex items-center justify-center">1</span>
+            <div>
+              <h3 class="font-bold text-surface-900"><span class="lang-ar">الأسبوع الأول — الدومين الأثقل</span><span class="lang-en">Week 1 — The heaviest domain</span></h3>
+              <p class="text-xs text-surface-500 font-mono" dir="ltr">Domain 1 (27%)</p>
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm">
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w1-1" class="mt-0.5 w-4 h-4 accent-brand-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">ادرس قسم الدومين 1 كامل: الملخص وكل صفحات المواضيع (الحلقة الوكيلية، التنسيق، الـ hooks، الجلسات)</span><span class="lang-en">Study the full Domain 1 section: overview and every topic page (agentic loop, orchestration, hooks, sessions)</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w1-2" class="mt-0.5 w-4 h-4 accent-brand-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">ابنِ عمليًا: حلقة وكيلية كاملة تفحص <span dir="ltr" class="font-mono">stop_reason</span> وتنفذ أدوات</span><span class="lang-en">Build hands-on: a complete agentic loop checking <span class="font-mono">stop_reason</span> and executing tools</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w1-3" class="mt-0.5 w-4 h-4 accent-brand-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">جرّب تنسيق منسق + وكيلين فرعيين مع تمرير سياق صريح</span><span class="lang-en">Try a coordinator + two subagents with explicit context passing</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w1-4" class="mt-0.5 w-4 h-4 accent-brand-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">حل كويز الدومين 1</span><span class="lang-en">Pass the Domain 1 mini quiz</span></span></label></li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-emerald-500 text-white font-bold w-10 h-10 rounded-xl flex items-center justify-center">2</span>
+            <div>
+              <h3 class="font-bold text-surface-900"><span class="lang-ar">الأسبوع الثاني — الأدوات وClaude Code</span><span class="lang-en">Week 2 — Tools & Claude Code</span></h3>
+              <p class="text-xs text-surface-500 font-mono" dir="ltr">Domains 2 (18%) + 3 (20%)</p>
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm">
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w2-1" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">ادرس قسمي الدومين 2 والدومين 3 بكل مواضيعهما</span><span class="lang-en">Study the full Domain 2 and Domain 3 sections</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w2-2" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">صمّم أداتين متشابهتين بأوصاف تمنع الخلط، وأخطاء مهيكلة بـ <span dir="ltr" class="font-mono">errorCategory</span></span><span class="lang-en">Design two similar tools with confusion-proof descriptions and structured <span class="font-mono">errorCategory</span> errors</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w2-3" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">جهّز مشروع فعلي: هرمية <span dir="ltr" class="font-mono">CLAUDE.md</span> + قواعد مسارات + سكِل بـ <span dir="ltr" class="font-mono">context: fork</span> + خادم MCP في <span dir="ltr" class="font-mono">.mcp.json</span></span><span class="lang-en">Configure a real project: CLAUDE.md hierarchy + path rules + a <span class="font-mono">context: fork</span> skill + an MCP server in <span class="font-mono">.mcp.json</span></span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w2-4" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">حل كويز الدومينين</span><span class="lang-en">Pass both mini quizzes</span></span></label></li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-amber-500 text-white font-bold w-10 h-10 rounded-xl flex items-center justify-center">3</span>
+            <div>
+              <h3 class="font-bold text-surface-900"><span class="lang-ar">الأسبوع الثالث — البرومبت والسياق</span><span class="lang-en">Week 3 — Prompting & Context</span></h3>
+              <p class="text-xs text-surface-500 font-mono" dir="ltr">Domains 4 (20%) + 5 (15%)</p>
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm">
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w3-1" class="mt-0.5 w-4 h-4 accent-amber-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">ادرس قسمي الدومين 4 والدومين 5 بكل مواضيعهما</span><span class="lang-en">Study the full Domain 4 and Domain 5 sections</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w3-2" class="mt-0.5 w-4 h-4 accent-amber-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">ابنِ pipeline استخراج: <span dir="ltr" class="font-mono">tool_use</span> + schema بحقول nullable + حلقة تحقق وإعادة محاولة</span><span class="lang-en">Build an extraction pipeline: <span class="font-mono">tool_use</span> + schema with nullable fields + a validation-retry loop</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w3-3" class="mt-0.5 w-4 h-4 accent-amber-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">جرّب الـ <span dir="ltr" class="font-mono">Message Batches API</span> وقارنه بالنداء المباشر</span><span class="lang-en">Try the Message Batches API and contrast it with synchronous calls</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w3-4" class="mt-0.5 w-4 h-4 accent-amber-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">حل كويز الدومينين</span><span class="lang-en">Pass both mini quizzes</span></span></label></li>
+          </ul>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <span class="bg-rose-500 text-white font-bold w-10 h-10 rounded-xl flex items-center justify-center">4</span>
+            <div>
+              <h3 class="font-bold text-surface-900"><span class="lang-ar">الأسبوع الرابع — محاكاة ومراجعة</span><span class="lang-en">Week 4 — Simulate & review</span></h3>
+              <p class="text-xs text-surface-500 font-mono" dir="ltr">Practice + review</p>
+            </div>
+          </div>
+          <ul class="space-y-2 text-sm">
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w4-1" class="mt-0.5 w-4 h-4 accent-rose-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">حل الاختبار التجريبي هنا بوقت حقيقي (دقيقتان لكل سؤال) — الهدف ≥ 80%</span><span class="lang-en">Take the practice exam here under real timing (2 min/question) — target ≥ 80%</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w4-2" class="mt-0.5 w-4 h-4 accent-rose-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">حل اختبار Anthropic التدريبي الرسمي من منصة skilljar</span><span class="lang-en">Take Anthropic's official practice examination on Skilljar</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w4-3" class="mt-0.5 w-4 h-4 accent-rose-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">راجع صناديق «فخ الاختبار» في صفحات المواضيع + خلاصات كل دومين</span><span class="lang-en">Review the "exam trap" boxes across the topic pages + each domain summary</span></span></label></li>
+            <li><label class="flex items-start gap-2.5 cursor-pointer group"><input type="checkbox" data-plan="w4-4" class="mt-0.5 w-4 h-4 accent-rose-600 shrink-0"><span class="group-hover:text-surface-900"><span class="lang-ar">احجز الاختبار وارتاح ليلتها</span><span class="lang-en">Book the exam and get a good night's sleep</span></span></label></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed">
+          <div class="lang-ar"><strong class="text-emerald-800">نصيحة:</strong> <span class="text-emerald-700">التحضير نفسه بيخليك مهندس Claude أفضل حتى لو ما دخلت الاختبار — كل تمرين في الخطة هو نمط إنتاجي حقيقي بتستخدمه في شغلك.</span></div>
+          <div class="lang-en"><strong class="text-emerald-800">Tip:</strong> <span class="text-emerald-700">The preparation alone makes you a better Claude practitioner even if you never sit the exam — every exercise in this plan is a real production pattern you'll use at work.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Target candidate ===== -->
+    <section id="target" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">لمن هذي الشهادة؟ <span class="text-lg font-normal text-surface-500">Target candidate</span></span>
+        <span class="lang-en">Who is this certification for?</span>
+      </h2>
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <p class="leading-relaxed">
+          <span class="lang-ar">المرشح المثالي <strong>مهندس حلول</strong> يصمم وينفذ تطبيقات إنتاجية بـ Claude، وعنده عادةً <strong>6+ أشهر خبرة عملية</strong> مع Claude API و Agent SDK و Claude Code و MCP. الدليل الرسمي يحدد الخبرات التالية:</span>
+          <span class="lang-en">The ideal candidate is a <strong>solution architect</strong> who designs and implements production applications with Claude, typically with <strong>6+ months of hands-on experience</strong> across the Claude API, Agent SDK, Claude Code, and MCP. The official guide lists these experiences:</span>
+        </p>
+        <div class="grid md:grid-cols-2 gap-3 text-sm">
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">بناء تطبيقات وكيلية بالـ Agent SDK: تنسيق متعدد الوكلاء، تفويض فرعي، تكامل أدوات، و lifecycle hooks</span><span class="lang-en">Building agentic apps with the Agent SDK: multi-agent orchestration, subagent delegation, tool integration, lifecycle hooks</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">إعداد Claude Code لفرق العمل: <span dir="ltr" class="font-mono">CLAUDE.md</span>، Agent Skills، تكاملات MCP، و plan mode</span><span class="lang-en">Configuring Claude Code for teams: CLAUDE.md, Agent Skills, MCP integrations, and plan mode</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">تصميم واجهات أدوات وموارد MCP لتكامل الأنظمة الخلفية</span><span class="lang-en">Designing MCP tool and resource interfaces for backend integration</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">هندسة برومبتات تنتج مخرجات مهيكلة موثوقة: JSON schemas و few-shot وأنماط الاستخراج</span><span class="lang-en">Engineering prompts for reliable structured output: JSON schemas, few-shot, extraction patterns</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">إدارة نوافذ السياق عبر مستندات طويلة ومحادثات متعددة وتسليمات بين وكلاء</span><span class="lang-en">Managing context windows across long documents, multi-turn conversations, and multi-agent handoffs</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">دمج Claude في CI/CD: مراجعة كود آلية وتوليد اختبارات وملاحظات PRs</span><span class="lang-en">Integrating Claude into CI/CD: automated review, test generation, PR feedback</span></span></div>
+          <div class="flex items-start gap-2.5 p-3 bg-surface-50 rounded-xl md:col-span-2"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">قرارات تصعيد وموثوقية سليمة: معالجة أخطاء، human-in-the-loop، وأنماط التقييم الذاتي</span><span class="lang-en">Sound escalation and reliability decisions: error handling, human-in-the-loop workflows, self-evaluation patterns</span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== In scope / Out of scope ===== -->
+    <section id="scope" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">وش يدخل الاختبار ووش لا؟ <span class="text-lg font-normal text-surface-500">In scope vs out of scope</span></span>
+        <span class="lang-en">What's in scope vs out of scope?</span>
+      </h2>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div class="bg-white rounded-2xl border border-emerald-200 overflow-hidden">
+          <div class="bg-emerald-50 border-b border-emerald-200 p-4 flex items-center gap-2">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
+            <h3 class="font-bold text-emerald-800"><span class="lang-ar">داخل النطاق — يُختبر فعليًا</span><span class="lang-en">In scope — explicitly tested</span></h3>
+          </div>
+          <ul class="p-5 space-y-2 text-sm text-surface-700">
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">الحلقة الوكيلية والتحكم عبر <span dir="ltr" class="font-mono">stop_reason</span> وشروط الإنهاء</span><span class="lang-en">Agentic loop control via <span class="font-mono">stop_reason</span> and termination conditions</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">تنسيق المنسق والوكلاء الفرعيين والتنفيذ المتوازي والتحسين التكراري</span><span class="lang-en">Coordinator–subagent patterns, parallel execution, iterative refinement</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">تصميم واجهات الأدوات وأوصافها وتقسيمها vs دمجها</span><span class="lang-en">Tool interface design, descriptions, splitting vs consolidating</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">إعداد خوادم MCP (نطاق مشروع/مستخدم) والموارد كفهارس محتوى</span><span class="lang-en">MCP server config (project/user scope), resources as content catalogs</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">الأخطاء المهيكلة والتصعيد والتعافي المحلي قبل النشر للأعلى</span><span class="lang-en">Structured errors, escalation, local recovery before propagation</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">هرمية <span dir="ltr" class="font-mono">CLAUDE.md</span> والقواعد بالـ glob والأوامر والسكِلز</span><span class="lang-en">CLAUDE.md hierarchy, glob-scoped rules, commands & skills</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar"><span dir="ltr" class="font-mono">plan mode</span> مقابل التنفيذ المباشر</span><span class="lang-en">Plan mode vs direct execution</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">المخرجات المهيكلة عبر <span dir="ltr" class="font-mono">tool_use</span> والحقول الـ nullable ضد الاختلاق</span><span class="lang-en">Structured output via <span class="font-mono">tool_use</span>, nullable fields against fabrication</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">الـ few-shot والـ batch processing وتحسين نافذة السياق</span><span class="lang-en">Few-shot prompting, batch processing, context window optimization</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-emerald-500 mt-1">•</span><span><span class="lang-ar">مراجعة بشرية ومعايرة ثقة وتتبع مصادر المعلومات</span><span class="lang-en">Human review workflows, confidence calibration, information provenance</span></span></li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-2xl border border-red-200 overflow-hidden">
+          <div class="bg-red-50 border-b border-red-200 p-4 flex items-center gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>
+            <h3 class="font-bold text-red-800"><span class="lang-ar">خارج النطاق — لا تضيّع وقتك فيه</span><span class="lang-en">Out of scope — don't waste study time</span></h3>
+          </div>
+          <ul class="p-5 space-y-2 text-sm text-surface-700 columns-1">
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">الـ fine-tuning وتدريب نماذج مخصصة</span><span class="lang-en">Fine-tuning or training custom models</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">المصادقة والفوترة وإدارة الحسابات في الـ API</span><span class="lang-en">API authentication, billing, account management</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">تفاصيل لغات برمجة أو أطر بعينها</span><span class="lang-en">Deep specifics of particular languages/frameworks</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">نشر واستضافة خوادم MCP (بنية تحتية وحاويات)</span><span class="lang-en">Deploying/hosting MCP servers (infra, containers)</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">البنية الداخلية للنموذج وعملية التدريب والأوزان</span><span class="lang-en">Claude's internal architecture, training, weights</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">Constitutional AI و RLHF ومنهجيات السلامة</span><span class="lang-en">Constitutional AI, RLHF, safety methodologies</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">الـ embeddings وقواعد البيانات المتجهة</span><span class="lang-en">Embedding models, vector database internals</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">الـ computer use وتحليل الصور</span><span class="lang-en">Computer use; vision/image analysis</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">تنفيذ الـ streaming والـ SSE</span><span class="lang-en">Streaming API / server-sent events implementation</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">حدود المعدل والحصص وحسابات التسعير</span><span class="lang-en">Rate limits, quotas, pricing calculations</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">OAuth وتدوير المفاتيح وبروتوكولات المصادقة</span><span class="lang-en">OAuth, key rotation, auth protocol details</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">إعدادات مزودي السحابة (AWS/GCP/Azure)</span><span class="lang-en">Cloud provider configs (AWS/GCP/Azure)</span></span></li>
+            <li class="flex items-start gap-2"><span class="text-red-400 mt-1">•</span><span><span class="lang-ar">تفاصيل الـ prompt caching (يكفي تعرف إنه موجود) وخوارزميات العد</span><span class="lang-en">Prompt caching internals (know it exists), token counting algorithms</span></span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Resources ===== -->
+    <section id="resources" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">المصادر الرسمية <span class="text-lg font-normal text-surface-500">Official resources</span></span>
+        <span class="lang-en">Official resources</span>
+      </h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <a href="https://anthropic-partners.skilljar.com/claude-certified-architect-foundations-certification" target="_blank" rel="noopener" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-400 p-5 flex items-start gap-4 transition-all">
+          <div class="bg-brand-100 rounded-xl p-3"><i data-lucide="award" class="w-6 h-6 text-brand-600"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-surface-900 group-hover:text-brand-700 transition-colors"><span class="lang-ar">صفحة الشهادة الرسمية (Skilljar)</span><span class="lang-en">Official certification page (Skilljar)</span></h3>
+            <p class="text-sm text-surface-500 mt-1"><span class="lang-ar">التسجيل، دليل الاختبار PDF، الشروط والأحكام، وسياسة الاختبارات</span><span class="lang-en">Registration, Exam Guide PDF, terms & conditions, exam policy</span></p>
+          </div>
+          <i data-lucide="external-link" class="w-4 h-4 text-surface-300 group-hover:text-brand-500 transition-colors"></i>
+        </a>
+        <a href="https://anthropic.skilljar.com/" target="_blank" rel="noopener" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-400 p-5 flex items-start gap-4 transition-all">
+          <div class="bg-brand-100 rounded-xl p-3"><i data-lucide="school" class="w-6 h-6 text-brand-600"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-surface-900 group-hover:text-brand-700 transition-colors"><span class="lang-ar">أكاديمية Anthropic (كورسات مجانية)</span><span class="lang-en">Anthropic Academy (free courses)</span></h3>
+            <p class="text-sm text-surface-500 mt-1" dir="ltr" class="font-mono">Claude 101 · Building with the Claude API · MCP · Subagents & Agent Skills · Claude Code 101 / In Action</p>
+          </div>
+          <i data-lucide="external-link" class="w-4 h-4 text-surface-300 group-hover:text-brand-500 transition-colors"></i>
+        </a>
+        <a href="https://docs.claude.com/" target="_blank" rel="noopener" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-400 p-5 flex items-start gap-4 transition-all">
+          <div class="bg-brand-100 rounded-xl p-3"><i data-lucide="book-open" class="w-6 h-6 text-brand-600"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-surface-900 group-hover:text-brand-700 transition-colors"><span class="lang-ar">وثائق Claude الرسمية</span><span class="lang-en">Claude official documentation</span></h3>
+            <p class="text-sm text-surface-500 mt-1"><span class="lang-ar">الـ API والـ Agent SDK و Claude Code — المرجع التقني الأول</span><span class="lang-en">The API, Agent SDK, and Claude Code — the primary technical reference</span></p>
+          </div>
+          <i data-lucide="external-link" class="w-4 h-4 text-surface-300 group-hover:text-brand-500 transition-colors"></i>
+        </a>
+        <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-400 p-5 flex items-start gap-4 transition-all">
+          <div class="bg-brand-100 rounded-xl p-3"><i data-lucide="plug-zap" class="w-6 h-6 text-brand-600"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-surface-900 group-hover:text-brand-700 transition-colors"><span class="lang-ar">وثائق بروتوكول MCP</span><span class="lang-en">MCP protocol documentation</span></h3>
+            <p class="text-sm text-surface-500 mt-1"><span class="lang-ar">الأدوات والموارد والبرومبتات — أساس الدومين الثاني</span><span class="lang-en">Tools, resources, and prompts — the foundation of Domain 2</span></p>
+          </div>
+          <i data-lucide="external-link" class="w-4 h-4 text-surface-300 group-hover:text-brand-500 transition-colors"></i>
+        </a>
+      </div>
+      <div class="flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed">
+          <div class="lang-ar"><strong class="text-amber-800">تنبيه:</strong> <span class="text-amber-700">هذا الموقع مرجع دراسي غير رسمي مبني على دليل الاختبار الرسمي (إصدار 0.2 — يونيو 2026). قبل الاختبار، حمّل أحدث نسخة من الدليل من صفحة الشهادة لأن التفاصيل قد تتغير.</span></div>
+          <div class="lang-en"><strong class="text-amber-800">Note:</strong> <span class="text-amber-700">This site is an unofficial study reference built on the official Exam Guide (v0.2 — June 2026). Before sitting the exam, download the latest guide from the certification page as details may change.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section id="faq" class="space-y-6">
+      <h2 class="text-2xl md:text-3xl font-bold text-surface-900">
+        <span class="lang-ar">أسئلة شائعة <span class="text-lg font-normal text-surface-500">FAQ</span></span>
+        <span class="lang-en">Frequently asked questions</span>
+      </h2>
+      <div class="space-y-3">
+        <details class="group bg-white rounded-xl border border-surface-200 overflow-hidden">
+          <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-50 transition-colors">
+            <span class="font-semibold"><span class="lang-ar">كيف تُحسب درجتي؟ وليش 720 مو 72%؟</span><span class="lang-en">How is my score calculated? Why 720 and not 72%?</span></span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-surface-400 transition-transform group-open:rotate-180 shrink-0"></i>
+          </summary>
+          <div class="px-4 pb-4 text-surface-600 leading-relaxed text-sm space-y-2">
+            <p class="lang-ar">درجتك <strong>مقياس موزون (scaled score)</strong> من 100 إلى 1000، والنجاح عند 720. المقياس الموزون يوازن الفروقات البسيطة في صعوبة نسخ الاختبار المختلفة، والدومينز لها أوزان مختلفة — فمثلًا إتقانك للدومين 1 (27%) يرفع درجتك أكثر من الدومين 5 (15%). النتيجة النهائية: ناجح أو راسب فقط.</p>
+            <p class="lang-en">Your result is a <strong>scaled score</strong> from 100–1,000 with a 720 minimum to pass. Scaled scoring equates slightly different exam forms, and domains carry different weights — mastering Domain 1 (27%) lifts your score more than Domain 5 (15%). Reporting is simply pass or fail.</p>
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-surface-200 overflow-hidden">
+          <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-50 transition-colors">
+            <span class="font-semibold"><span class="lang-ar">من وين أبدأ إذا وقتي ضيق؟</span><span class="lang-en">Where do I start if I'm short on time?</span></span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-surface-400 transition-transform group-open:rotate-180 shrink-0"></i>
+          </summary>
+          <div class="px-4 pb-4 text-surface-600 leading-relaxed text-sm space-y-2">
+            <p class="lang-ar">ابدأ بالوزن: الدومين 1 (27%) ثم الدومين 3 والدومين 4 (20% لكل منهما) — هالثلاثة تغطي 67% من الاختبار. بعدها الدومين 2 (18%) والدومين 5 (15%). وأيًا كان وقتك، لا تدخل الاختبار قبل ما تحل الأسئلة الرسمية الـ 12 في <a href="practice-exam.html" class="text-brand-600 underline">الاختبار التجريبي</a>.</p>
+            <p class="lang-en">Follow the weights: Domain 1 (27%), then Domains 3 and 4 (20% each) — those three cover 67% of the exam. Then Domain 2 (18%) and Domain 5 (15%). Whatever your timeline, don't sit the exam before working through the 12 official questions in the <a href="practice-exam.html" class="text-brand-600 underline">practice exam</a>.</p>
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-surface-200 overflow-hidden">
+          <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-50 transition-colors">
+            <span class="font-semibold"><span class="lang-ar">وش نمط الأسئلة؟ حفظ ولا فهم؟</span><span class="lang-en">What's the question style — recall or judgment?</span></span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-surface-400 transition-transform group-open:rotate-180 shrink-0"></i>
+          </summary>
+          <div class="px-4 pb-4 text-surface-600 leading-relaxed text-sm space-y-2">
+            <p class="lang-ar"><strong>فهم وحُكم معماري.</strong> السؤال النموذجي يعطيك موقف إنتاجي فيه مشكلة (نسبة حل منخفضة، وكيل يختار الأداة الغلط، مراجعة متناقضة…) وأربعة حلول كلها «تبدو» معقولة. الإجابة الصحيحة غالبًا هي اللي: تعالج السبب الجذري، متناسبة مع حجم المشكلة (مو over-engineering)، وتستخدم ضمانات حتمية للقواعد الحرجة بدل الاعتماد على البرومبت.</p>
+            <p class="lang-en"><strong>Judgment.</strong> A typical question gives you a production situation with a problem (low resolution rate, wrong tool selection, contradictory reviews…) and four plausible-looking fixes. The right answer usually: addresses the root cause, is proportionate (not over-engineered), and uses deterministic guarantees for critical rules instead of relying on prompts.</p>
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-surface-200 overflow-hidden">
+          <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-50 transition-colors">
+            <span class="font-semibold"><span class="lang-ar">كم مدة صلاحية الشهادة؟ وهل فيه إعادة؟</span><span class="lang-en">How long is it valid? What about retakes?</span></span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-surface-400 transition-transform group-open:rotate-180 shrink-0"></i>
+          </summary>
+          <div class="px-4 pb-4 text-surface-600 leading-relaxed text-sm space-y-2">
+            <p class="lang-ar">الشهادة صالحة <strong>12 شهرًا</strong> من تاريخ منحها — فترة قصيرة نسبيًا لأن المجال يتطور بسرعة. سياسات الإعادة والجدولة تفصّلها وثيقة <span dir="ltr" class="font-mono">Anthropic Certification Exam Policy</span> المرفقة في صفحة التسجيل، فراجعها قبل الحجز.</p>
+            <p class="lang-en">The credential is valid for <strong>12 months</strong> from award — deliberately short given how fast the field moves. Retake and rescheduling policies are detailed in the Anthropic Certification Exam Policy document on the registration page; review it before booking.</p>
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-surface-200 overflow-hidden">
+          <summary class="flex items-center justify-between p-4 cursor-pointer hover:bg-surface-50 transition-colors">
+            <span class="font-semibold"><span class="lang-ar">هل المذاكرة من هذا الموقع تكفي؟</span><span class="lang-en">Is this site enough to pass?</span></span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-surface-400 transition-transform group-open:rotate-180 shrink-0"></i>
+          </summary>
+          <div class="px-4 pb-4 text-surface-600 leading-relaxed text-sm space-y-2">
+            <p class="lang-ar">الموقع يغطي <strong>كل</strong> الـ Task Statements الرسمية بالتفصيل، لكن الاختبار مصمم لأصحاب الخبرة العملية — النظري وحده ما يكفي. ادمج القراءة هنا مع التمارين العملية في كل صفحة (ابنِ الحلقة الوكيلية بيدك، جهّز CLAUDE.md فعلي، صمّم أداة MCP…) وبتدخل الاختبار واثق.</p>
+            <p class="lang-en">This site covers <strong>every</strong> official task statement in detail, but the exam is designed for practitioners — theory alone won't cut it. Pair the reading here with each page's hands-on exercises (build the agentic loop yourself, configure a real CLAUDE.md, design an MCP tool…) and you'll walk in confident.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ===== Next step CTA ===== -->
+    <section class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 rounded-3xl text-white p-8 md:p-12 text-center space-y-5">
+      <i data-lucide="rocket" class="w-10 h-10 mx-auto text-brand-300"></i>
+      <h2 class="text-2xl md:text-3xl font-bold">
+        <span class="lang-ar">جاهز؟ ابدأ من الدومين الأثقل</span>
+        <span class="lang-en">Ready? Start with the heaviest domain</span>
+      </h2>
+      <p class="text-brand-200 max-w-2xl mx-auto leading-relaxed">
+        <span class="lang-ar">الدومين الأول وزنه 27% — يعني تقريبًا كل سؤال رابع في اختبارك منه. أتقنه أول، والباقي بينبني عليه.</span>
+        <span class="lang-en">Domain 1 carries 27% — roughly every fourth question on your exam. Master it first; everything else builds on it.</span>
+      </p>
+      <a href="domain-1/index.html" class="inline-flex items-center gap-2 px-8 py-4 bg-white text-brand-800 rounded-xl font-bold hover:bg-brand-50 transition-colors">
+        <span class="lang-ar">الدومين 1: البنية الوكيلية والتنسيق</span>
+        <span class="lang-en">Domain 1: Agentic Architecture & Orchestration</span>
+        <i data-lucide="arrow-left" class="w-5 h-5 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-5 h-5 lang-en"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Study plan checklist persistence ===== */
+    (function () {
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem('ccaf-study-plan') || '{}'); } catch (e) {}
+      document.querySelectorAll('input[data-plan]').forEach(cb => {
+        cb.checked = !!saved[cb.dataset.plan];
+        cb.addEventListener('change', () => {
+          saved[cb.dataset.plan] = cb.checked;
+          try { localStorage.setItem('ccaf-study-plan', JSON.stringify(saved)); } catch (e) {}
+        });
+      });
+    })();
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>

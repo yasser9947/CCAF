@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.1 معايير صريحة بدل التعليمات الغامضة — CCAF مرجع</title>
+  <meta name="description" content="Task 4.1: Design prompts with explicit criteria to improve precision and reduce false positives — why vague instructions fail, false positives and trust, severity criteria with code examples.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">المعايير الصريحة</span><span class="lang-en">Explicit criteria</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.1</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">معايير صريحة بدل التعليمات الغامضة</span>
+            <span class="lang-en">Explicit criteria over vague instructions</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن مراجعاً آلياً بمعايير غامضة يغرق فريقك بإيجابيات كاذبة — وأول ما يفقد المطورون الثقة فيه، يتجاهلون حتى تنبيهاته الصحيحة.</span>
+            <span class="lang-en">Why this matters: an automated reviewer with vague criteria floods your team with false positives — and once developers stop trusting it, they ignore even its accurate alerts.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش المعيار الصريح ("بلّغ فقط عندما يناقض التعليق سلوك الكود الفعلي") يتفوق على التعليمات الغامضة ("تأكد أن التعليقات دقيقة")</span><span class="lang-en">Why an explicit criterion ("flag comments only when claimed behavior contradicts actual code behavior") beats a vague instruction ("check that comments are accurate")</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش "كن متحفظاً" و"بلّغ عن النتائج عالية الثقة فقط" يفشلان في رفع الدقة مقارنة بالمعايير التصنيفية المحددة</span><span class="lang-en">Why "be conservative" and "only report high-confidence findings" fail to improve precision compared to specific categorical criteria</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">أثر الإيجابيات الكاذبة على الثقة: فئة واحدة عالية الأخطاء تقوّض الثقة حتى بالفئات الدقيقة</span><span class="lang-en">The impact of false positives on trust: one noisy category undermines confidence even in the accurate categories</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">كتابة معايير مراجعة تحدد وش تبلّغ عنه (bugs، security) ووش تتجاهله (الأسلوب البسيط، الأنماط المحلية) بدل الفلترة بالثقة</span><span class="lang-en">Writing review criteria that define what to report (bugs, security) versus skip (minor style, local patterns) instead of confidence-based filtering</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">التعطيل المؤقت للفئات عالية الإيجابيات الكاذبة لاستعادة ثقة المطورين أثناء تحسين برومبتاتها</span><span class="lang-en">Temporarily disabling high false-positive categories to restore developer trust while you improve their prompts</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تعريف معايير شدة صريحة بأمثلة كود ملموسة لكل مستوى لتحقيق تصنيف متسق</span><span class="lang-en">Defining explicit severity criteria with concrete code examples per level to achieve consistent classification</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: Why vague instructions fail ===== -->
+    <section id="why-vague-fails" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">ليش التعليمات الغامضة تفشل</span><span class="lang-en">Why vague instructions fail</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>لما تكتب لمراجع الكود "تأكد أن التعليقات دقيقة"، أنت ما عطيته معياراً — عطيته <b>هدفاً مفتوح التفسير</b>. النموذج بيفسّر "دقيقة" بأوسع معنى: بيعلّق على تعليق ناقص التفاصيل، وتعليق قديم الصياغة، وتعليق ما يعجبه أسلوبه. النتيجة سيل من الملاحظات أغلبها ما يهم أحداً.</p>
+        <p>المعيار الصريح يقلب المعادلة: <span dir="ltr" class="font-mono">"flag a comment only when its claimed behavior contradicts the actual code behavior"</span>. هنا حددت <b>شرط التبليغ</b> بدقة قابلة للفحص: في تناقض بين كلام التعليق وسلوك الكود؟ بلّغ. ما في؟ اسكت. أي شخص ثالث يقدر يطبق نفس المعيار ويوصل لنفس النتيجة — وهذا تعريف المعيار الجيد.</p>
+        <p>ونفس المنطق ينسحب على تعليمات "الضبط النفسي" مثل <span dir="ltr" class="font-mono">"be conservative"</span> أو <span dir="ltr" class="font-mono">"only report high-confidence findings"</span>: هذي ما تحسّن الدقة، لأنها ما تعرّف وش يعني "متحفظ" ولا وش يعتبر "ثقة عالية". النموذج يظل يقرر بمزاجه، بس صار الآن متردداً بشكل عشوائي — ممكن يسكت عن ثغرة حقيقية ويبلّغ عن تفضيل أسلوبي. البديل الصحيح دائماً: <b>معايير تصنيفية</b> تسمّي الفئات المطلوب التبليغ عنها والفئات المطلوب تجاهلها.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>When you tell a code reviewer "check that comments are accurate", you have not given it a criterion — you have given it an <b>open-ended goal</b>. The model interprets "accurate" as broadly as possible: it comments on a comment that lacks detail, one with dated phrasing, one whose style it dislikes. The result is a flood of remarks that matter to nobody.</p>
+        <p>An explicit criterion flips the equation: <span class="font-mono">"flag a comment only when its claimed behavior contradicts the actual code behavior"</span>. You have defined the <b>reporting condition</b> with checkable precision: is there a contradiction between what the comment claims and what the code does? Report. No contradiction? Stay silent. Any third party could apply the same criterion and reach the same verdict — which is the definition of a good criterion.</p>
+        <p>The same logic applies to "mood adjustment" instructions like <span class="font-mono">"be conservative"</span> or <span class="font-mono">"only report high-confidence findings"</span>: they do not improve precision, because they never define what "conservative" means or what counts as "high confidence". The model still decides by feel, only now it hesitates randomly — it may stay silent on a real vulnerability and still report a style preference. The correct alternative is always <b>categorical criteria</b> that name the categories to report and the categories to skip.</p>
+      </div>
+
+      <!-- Diagram 1: vague vs explicit side-by-side -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-5 space-y-3">
+            <div class="flex items-center gap-2 text-red-300 font-mono text-sm font-bold">
+              <i data-lucide="thumbs-down" class="w-4 h-4"></i> VAGUE INSTRUCTION
+            </div>
+            <p class="font-mono text-xs text-red-200 bg-red-900/40 rounded-lg p-3">"Check that comments are accurate.<br>Be conservative. Only report<br>high-confidence findings."</p>
+            <div class="space-y-1.5 font-mono text-[11px] text-red-200/90">
+              <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> "accurate" undefined -&gt; widest interpretation</div>
+              <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> "conservative" = random hesitation</div>
+              <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> "confidence" never defined</div>
+              <div class="flex items-center gap-2"><i data-lucide="x" class="w-3.5 h-3.5 text-red-400 shrink-0"></i> output: noise + missed real bugs</div>
+            </div>
+          </div>
+          <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-5 space-y-3">
+            <div class="flex items-center gap-2 text-emerald-300 font-mono text-sm font-bold">
+              <i data-lucide="thumbs-up" class="w-4 h-4"></i> EXPLICIT CRITERION
+            </div>
+            <p class="font-mono text-xs text-emerald-200 bg-emerald-900/40 rounded-lg p-3">"Flag a comment ONLY when its<br>claimed behavior contradicts<br>the actual code behavior."</p>
+            <div class="space-y-1.5 font-mono text-[11px] text-emerald-200/90">
+              <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> testable condition: contradiction or not</div>
+              <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> a third party reaches the same verdict</div>
+              <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> defines when to STAY SILENT</div>
+              <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i> output: fewer, real findings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">مقارنة: تعليمات غامضة تنتج ضجيجاً، ومعيار صريح ينتج نتائج قليلة وحقيقية</span>
+        <span class="lang-en">Comparison: vague instructions produce noise, an explicit criterion produces few, real findings</span>
+      </p>
+
+      <!-- Code: bad vs good review prompt -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">برومبت مراجعة بمعايير report/skip تصنيفية:</span>
+          <span class="lang-en">A review prompt with categorical report/skip criteria:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-markdown"><code class="language-markdown"># Code review criteria
+
+## REPORT only these categories
+1. Bugs — the code's actual behavior contradicts its documented/claimed behavior
+   (wrong operators, inverted conditions, off-by-one, unhandled edge cases that
+   break the stated contract)
+2. Security — SQL injection, secrets committed in code, missing auth checks,
+   unsafe deserialization
+
+## SKIP — never report
+- Minor style: naming, formatting, import order (the linter owns these)
+- Local patterns: idioms already used consistently in this file/codebase
+- Subjective preferences: "I would write this differently"
+
+Do NOT filter by confidence. If a finding matches a REPORT category, report it;
+if it does not, skip it.</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">الدقة (precision) تتحسن لما تعرّف <b>وش يُبلَّغ عنه ووش يُتجاهل كفئات</b>، مو لما تطلب من النموذج "يتحفظ". المعيار الصريح يحدد شرطاً قابلاً للفحص؛ التعليمة الغامضة تفوّض القرار لمزاج النموذج.</div>
+          <div class="lang-en">Precision improves when you define <b>what to report and what to skip as categories</b>, not when you ask the model to "be careful". An explicit criterion sets a checkable condition; a vague instruction delegates the decision to the model's mood.</div>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar">اختبار سريع لأي معيار: هل يقدر مهندس آخر يطبقه على نفس الكود ويوصل لنفس الحكم؟ إذا لا، فهو تعليمة غامضة مو معيار.</div>
+          <div class="lang-en">Quick test for any criterion: could another engineer apply it to the same code and reach the same verdict? If not, it is a vague instruction, not a criterion.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: False positives destroy trust ===== -->
+    <section id="false-positives-trust" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">الإيجابيات الكاذبة تدمر الثقة</span><span class="lang-en">False positives destroy trust</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>في مراجعة الكود الآلية، الإيجابية الكاذبة (false positive) أغلى بكثير مما تتصور. كل تعليق خاطئ يستهلك وقت مطور يقرأه ويتحقق منه ويرفضه — والأخطر: <b>الثقة تنهار على مستوى الأداة كلها، مو على مستوى الفئة الخاطئة فقط</b>. إذا كانت فئة الأسلوب ترمي 20 تعليقاً خاطئاً يومياً، المطور ما بيفرز "هذا تعليق أسلوبي أتجاهله وهذا أمني أقرأه" — بيسوي mute للمراجع كله، وبتضيع معه تنبيهات الثغرات الصحيحة.</p>
+        <p>عشان كذا الدليل الرسمي يعتمد تكتيكاً عملياً: <b>عطّل الفئة عالية الإيجابيات الكاذبة مؤقتاً</b>. توقيف فئة الأسلوب المزعجة يرجّع الثقة فوراً للفئات الدقيقة (bugs وsecurity)، وأنت في الخلفية تحسّن معايير الفئة المعطلة وترجعها لما تثبت دقتها على عينة اختبار. هذا مو استسلام — هذا إدارة ثقة.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>In automated code review, a false positive costs far more than you would think. Every wrong comment burns developer time to read, verify, and dismiss — and worse: <b>trust collapses at the level of the whole tool, not just the noisy category</b>. If the style category throws 20 wrong comments a day, developers will not triage "this style comment I ignore, this security one I read" — they mute the entire reviewer, and the accurate vulnerability alerts drown with it.</p>
+        <p>That is why the official guide endorses a practical tactic: <b>temporarily disable the high false-positive category</b>. Switching off the noisy style category immediately restores trust in the accurate categories (bugs, security), while you refine the disabled category's criteria in the background and re-enable it once it proves precise on a test sample. That is not surrender — that is trust management.</p>
+      </div>
+
+      <!-- Diagram 2: false-positive trust spiral -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[560px] space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">THE FALSE-POSITIVE TRUST SPIRAL</p>
+          <div class="flex items-stretch justify-center gap-2">
+            <div class="bg-amber-900/50 border border-amber-500/50 rounded-xl p-3 text-center flex-1 max-w-[150px]">
+              <i data-lucide="megaphone" class="w-5 h-5 text-amber-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-[11px] text-amber-100 leading-snug">noisy category<br>floods PRs with FPs</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-5 h-5 text-surface-500"></i></div>
+            <div class="bg-amber-900/50 border border-amber-500/50 rounded-xl p-3 text-center flex-1 max-w-[150px]">
+              <i data-lucide="clock" class="w-5 h-5 text-amber-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-[11px] text-amber-100 leading-snug">devs waste time<br>dismissing them</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-5 h-5 text-surface-500"></i></div>
+            <div class="bg-red-900/50 border border-red-500/50 rounded-xl p-3 text-center flex-1 max-w-[150px]">
+              <i data-lucide="bell-off" class="w-5 h-5 text-red-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-[11px] text-red-100 leading-snug">devs mute the<br>WHOLE reviewer</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-5 h-5 text-surface-500"></i></div>
+            <div class="bg-red-900/50 border border-red-500/50 rounded-xl p-3 text-center flex-1 max-w-[150px]">
+              <i data-lucide="shield-off" class="w-5 h-5 text-red-300 mx-auto mb-1.5"></i>
+              <p class="font-mono text-[11px] text-red-100 leading-snug">real security findings<br>get ignored too</p>
+            </div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-emerald-400"></i></div>
+          <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-4 max-w-[420px] mx-auto text-center">
+            <p class="font-mono text-xs text-emerald-200 font-bold mb-1">THE FIX — break the spiral</p>
+            <p class="font-mono text-[11px] text-emerald-100/90 leading-relaxed">temporarily DISABLE the noisy category<br>-&gt; trust in accurate categories returns<br>-&gt; refine its criteria offline -&gt; re-enable when precise</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">دوامة الثقة: فئة واحدة مزعجة تسحب الأداة كلها للقاع — وكسرها يبدأ بتعطيل مؤقت</span>
+        <span class="lang-en">The trust spiral: one noisy category drags the whole tool down — breaking it starts with a temporary disable</span>
+      </p>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">لا تحاول "موازنة" فئة مزعجة بإضافة "كن أكثر تحفظاً في تعليقات الأسلوب" — رجعت للتعليمات الغامضة. الخياران الصحيحان: معايير تصنيفية أدق، أو تعطيل مؤقت للفئة كلها.</div>
+          <div class="lang-en">Do not try to "balance" a noisy category by adding "be more conservative about style comments" — that is the vague instruction again. The two correct moves: sharper categorical criteria, or a temporary disable of the whole category.</div>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">تتبّع نسبة الرفض (dismissal rate) لكل فئة على حدة. فئة يرفض المطورون أكثر من نصف نتائجها = مرشحة فورية للتعطيل المؤقت وإعادة صياغة معاييرها — وستشوف في 4.4 كيف حقل <span dir="ltr" class="font-mono">detected_pattern</span> يخلي هذا التحليل منهجياً.</div>
+          <div class="lang-en">Track the dismissal rate per category separately. A category whose findings developers dismiss more than half the time is an immediate candidate for a temporary disable and criteria rewrite — and in 4.4 you will see how a <span class="font-mono">detected_pattern</span> field makes that analysis systematic.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: Severity criteria with code examples ===== -->
+    <section id="severity-criteria" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">معايير الشدة بأمثلة كود لكل مستوى</span><span class="lang-en">Severity criteria with code examples per level</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>حتى لو حددت الفئات بدقة، يبقى سؤال ثاني: وش شدة كل نتيجة؟ إذا كتبت بس "صنّف الشدة critical/high/medium"، بترجع لك تصنيفات متذبذبة — نفس المشكلة تطلع مرة high ومرة medium حسب مزاج الاستدعاء. الحل اللي يعتمده الدليل: <b>عرّف كل مستوى شدة بمثال كود ملموس</b>. المثال يرسّخ المعنى أكثر من أي وصف نصي، لأن النموذج يقيس الحالة الجديدة على الحالة المرجعية اللي شافها.</p>
+        <p>لاحظ أن هذا امتداد طبيعي لفكرة الموضوع كله: المعيار الصريح للفئة يجاوب "هل أبلّغ؟"، ومعيار الشدة بالأمثلة يجاوب "بأي مستوى؟". الاثنان مع بعض ينتجان مخرجات متسقة تقدر تبني عليها أتمتة (مثلاً: block على critical، تعليق فقط على medium).</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Even with precise categories, a second question remains: how severe is each finding? If you just write "classify severity as critical/high/medium", you get wobbly classifications — the same issue comes back high on one call and medium on the next. The guide's solution: <b>define each severity level with a concrete code example</b>. An example anchors meaning better than any prose description, because the model measures new cases against the reference case it has seen.</p>
+        <p>Notice this is a natural extension of the whole topic: the explicit category criterion answers "do I report?", and example-anchored severity criteria answer "at what level?". Together they produce consistent output you can build automation on (for example: block on critical, comment-only on medium).</p>
+      </div>
+
+      <!-- Diagram 3: severity ladder -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[520px] max-w-[680px] mx-auto space-y-2">
+          <p class="text-center font-mono text-xs text-surface-400 mb-3">SEVERITY LADDER — each level anchored by a concrete code example</p>
+          <div class="flex items-center gap-3 bg-red-950/70 border-2 border-red-500/60 rounded-xl p-3.5">
+            <span class="font-mono text-xs font-bold text-red-200 bg-red-500/25 rounded-lg px-2.5 py-1.5 shrink-0 w-24 text-center">CRITICAL</span>
+            <div class="font-mono text-[11px] text-red-100/90 leading-relaxed">security vulnerability / data loss<br><span class="text-red-300">anchor: f-string SQL query with user input</span></div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="chevron-down" class="w-4 h-4 text-surface-600"></i></div>
+          <div class="flex items-center gap-3 bg-orange-950/60 border-2 border-orange-500/50 rounded-xl p-3.5">
+            <span class="font-mono text-xs font-bold text-orange-200 bg-orange-500/25 rounded-lg px-2.5 py-1.5 shrink-0 w-24 text-center">HIGH</span>
+            <div class="font-mono text-[11px] text-orange-100/90 leading-relaxed">logic bug producing wrong results<br><span class="text-orange-300">anchor: inverted boundary check on discounts</span></div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="chevron-down" class="w-4 h-4 text-surface-600"></i></div>
+          <div class="flex items-center gap-3 bg-amber-950/60 border-2 border-amber-500/50 rounded-xl p-3.5">
+            <span class="font-mono text-xs font-bold text-amber-200 bg-amber-500/25 rounded-lg px-2.5 py-1.5 shrink-0 w-24 text-center">MEDIUM</span>
+            <div class="font-mono text-[11px] text-amber-100/90 leading-relaxed">error-handling gap, crash on bad input<br><span class="text-amber-300">anchor: json.loads with no try/except</span></div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="chevron-down" class="w-4 h-4 text-surface-600"></i></div>
+          <div class="flex items-center gap-3 bg-surface-800 border-2 border-surface-600 rounded-xl p-3.5">
+            <span class="font-mono text-xs font-bold text-surface-300 bg-surface-600/40 rounded-lg px-2.5 py-1.5 shrink-0 w-24 text-center">SKIP</span>
+            <div class="font-mono text-[11px] text-surface-300/90 leading-relaxed">style, naming, local idioms<br><span class="text-surface-400">not reported at any severity — the linter's job</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">سلّم الشدة: كل مستوى مثبّت بمثال كود مرجعي — وفئة SKIP خارج السلم بالكامل</span>
+        <span class="lang-en">The severity ladder: each level anchored by a reference code example — and SKIP sits outside the ladder entirely</span>
+      </p>
+
+      <!-- Code: severity criteria prompt -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">مقطع من برومبت المراجعة: معايير شدة بمثال لكل مستوى:</span>
+          <span class="lang-en">Review-prompt excerpt: severity criteria with an example per level:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-markdown"><code class="language-markdown">## Severity criteria — classify ONLY using these anchors
+
+### CRITICAL: exploitable security flaw or data loss
+    query = f"SELECT * FROM users WHERE id = {user_id}"
+    # SQL injection: user input interpolated into SQL
+
+### HIGH: logic bug that silently produces wrong results
+    if discount > 100:        # BUG: should be >= 100
+        reject_order()        # a 100% discount slips through
+
+### MEDIUM: missing error handling that can crash the job
+    data = json.loads(response.text)
+    # no try/except: one malformed response kills the whole run
+
+### Rules
+- Match the NEW finding to the closest anchor above.
+- If it matches no anchor and no REPORT category -&gt; do not report it.
+- Never invent intermediate severities.</code></pre>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">أي خيار يحسّن الدقة عبر "كن متحفظاً" أو "بلّغ عن الثقة العالية فقط" أو "خفف حساسية المراجع" هو مشتت — يبدو معقولاً لأنه "يقلل الضجيج"، لكنه لا يعرّف شيئاً. الجواب الصحيح دائماً يسمّي فئات: بلّغ عن كذا، تجاهل كذا، وبأمثلة لكل مستوى شدة. وإذا كانت فئة تحترق بالإيجابيات الكاذبة، الجواب الصحيح غالباً تعطيلها مؤقتاً — مو معايرة مزاجية.</div>
+          <div class="lang-en">Any option that improves precision via "be conservative", "only report high confidence", or "make the reviewer less sensitive" is a distractor — it sounds reasonable because it "reduces noise", but it defines nothing. The correct answer always names categories: report these, skip those, with examples per severity level. And when a category is burning trust with false positives, the right answer is usually a temporary disable — not mood calibration.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="plane" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: أمن المطار</span><span class="lang-en">Real-life example: airport security</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>تخيّل مشرف أمن مطار يقول لموظفيه: "كونوا حذرين وأوقفوا أي شنطة مشبوهة". كل موظف بيفسر "مشبوهة" بمزاجه — واحد يوقف كل شنطة كبيرة، وواحد يفتش العطور. الطوابير تطول، والمسافرون يتذمرون، والموظفون أنفسهم يتعبون من الإنذارات الكاذبة لدرجة أنهم يبدأون يمررون الشنط بدون تدقيق — وهنا تعدي الشنطة الخطرة فعلاً.</p>
+        <p>المطارات الحقيقية تشتغل بالعكس: <b>قائمة ممنوعات صريحة</b> (سوائل فوق 100 مل، أدوات حادة، بطاريات ليثيوم فوق سعة محددة) مع صور مرجعية لكل صنف. الموظف ما يجتهد — يطابق. وإذا جهاز فحص معيّن صار يطلق إنذارات كاذبة كثيرة، يوقفونه عن الخدمة مؤقتاً ويعايرونه بدل ما يخلونه يدمر ثقة الموظفين بالإنذارات. هذا بالضبط: معايير تصنيفية + أمثلة مرجعية + تعطيل مؤقت للمصدر المزعج.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>Imagine an airport security supervisor telling staff: "be careful and stop any suspicious bag". Every officer interprets "suspicious" by feel — one stops every large suitcase, another searches perfume bottles. Queues grow, travelers grumble, and the officers themselves get so worn down by false alarms that they start waving bags through unchecked — and that is when the genuinely dangerous bag slips past.</p>
+        <p>Real airports work the opposite way: an <b>explicit prohibited-items list</b> (liquids over 100 ml, sharp objects, lithium batteries above a set capacity) with reference photos for each item. Officers do not improvise — they match. And when one scanner starts throwing too many false alarms, it is pulled from service and recalibrated rather than being allowed to erode staff trust in alarms. That is exactly this topic: categorical criteria + reference examples + temporarily disabling the noisy source.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>هذا الموضوع يجي غالباً داخل سيناريو S5 (Claude Code في CI): مراجع آلي يرمي إيجابيات كاذبة والمطورون بدأوا يتجاهلونه. يسألونك: وش تعدّل في البرومبت؟</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد فوراً: "أضف تعليمات كن متحفظاً / عالي الثقة فقط" — تعليمات غامضة لا تعرّف شيئاً.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: "رقِّ النموذج" أو "خل المطورين يردون على كل تعليق" — يعالجان العرض لا السبب.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>اختر: معايير تصنيفية report/skip، أمثلة كود لكل مستوى شدة، وتعطيل مؤقت للفئة الغارقة بالإيجابيات الكاذبة.</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>This topic usually arrives inside scenario S5 (Claude Code for CI): an automated reviewer throwing false positives while developers start ignoring it. The question: what do you change in the prompt?</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate immediately: "add be-conservative / high-confidence-only instructions" — vague words that define nothing.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: "upgrade the model" or "make developers respond to every comment" — symptom treatments, not causes.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Pick: categorical report/skip criteria, code examples per severity level, and a temporary disable of the category drowning in false positives.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">مراجع تعليقات الكود عندك يعلّق على كل تعليق "ممكن يكون أوضح". تبغى يبلّغ فقط عن التعليقات الخاطئة فعلاً. وش أفضل صياغة؟</p>
+            <p class="lang-en">Your comment reviewer remarks on every comment that "could be clearer". You want it to flag only genuinely wrong comments. What is the best wording?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">"تأكد أن التعليقات دقيقة وواضحة، وكن انتقائياً في ملاحظاتك."</span>
+            <span class="lang-en">"Check that comments are accurate and clear, and be selective with your remarks."</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">"بلّغ عن تعليق فقط عندما يناقض السلوك المزعوم فيه سلوك الكود الفعلي."</span>
+            <span class="lang-en">"Flag a comment only when its claimed behavior contradicts the actual code behavior."</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">"بلّغ فقط عن ملاحظات التعليقات اللي ثقتك فيها فوق 90%."</span>
+            <span class="lang-en">"Only report comment findings where your confidence exceeds 90%."</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">"تجاهل التعليقات تماماً وركز على الكود فقط."</span>
+            <span class="lang-en">"Ignore comments entirely and focus only on the code."</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. هذا معيار صريح بشرط قابل للفحص: تناقض بين الزعم والسلوك. الخيار A غامض، وC فلترة بالثقة (نسبة بلا تعريف)، وD يرمي المهمة كلها بدل ضبطها.</span>
+              <span class="lang-en">Correct. This is an explicit criterion with a checkable condition: contradiction between claim and behavior. Option A is vague, C is confidence filtering (an undefined percentage), and D throws away the task instead of tuning it.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: المعيار الصريح يحدد شرط التبليغ (تناقض الزعم مع السلوك الفعلي) بحيث يوصل أي مقيّم لنفس الحكم. الغموض ("كن انتقائياً") ونِسَب الثقة غير المعرّفة ما يحسّنان الدقة.</span>
+              <span class="lang-en">The answer is B: the explicit criterion defines the reporting condition (claim contradicts actual behavior) so any evaluator reaches the same verdict. Vagueness ("be selective") and undefined confidence percentages do not improve precision.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">فئة "الأمان" في مراجعكم دقيقة جداً، لكن فئة "الأداء" ترمي إيجابيات كاذبة كثيرة، والفريق بدأ يتجاهل المراجع كله. وش التصرف الصحيح؟</p>
+            <p class="lang-en">Your review's "security" category is highly accurate, but the "performance" category throws many false positives, and the team has started ignoring the whole reviewer. What is the right move?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أبقِ الفئتين — فقدان تغطية الأداء أسوأ من الضجيج.</span>
+            <span class="lang-en">Keep both categories — losing performance coverage is worse than the noise.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">أضف لتعليمات فئة الأداء: "بلّغ فقط عن مشاكل الأداء المؤكدة".</span>
+            <span class="lang-en">Add to the performance category instructions: "only report confirmed performance issues".</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">عطّل فئة الأداء مؤقتاً لاستعادة الثقة، وحسّن معاييرها ثم أعدها بعد التحقق من دقتها.</span>
+            <span class="lang-en">Temporarily disable the performance category to restore trust, refine its criteria, and re-enable after verifying its precision.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">عطّل المراجع بالكامل إلى أن تكتمل إعادة تصميم كل الفئات.</span>
+            <span class="lang-en">Disable the entire reviewer until all categories are redesigned.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. التعطيل المؤقت للفئة المزعجة يحمي ثقة الفريق بالفئات الدقيقة (الأمان)، وأنت تحسّن معايير الأداء بهدوء. إبقاء الوضع (A) يواصل نزيف الثقة، وB تعليمات غامضة، وD يضحي بفئة دقيقة بلا مبرر.</span>
+              <span class="lang-en">Correct. Temporarily disabling the noisy category protects the team's trust in the accurate ones (security) while you refine the performance criteria quietly. Keeping the status quo (A) continues the trust bleed, B is a vague instruction, and D sacrifices an accurate category for no reason.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C. المبدأ من الدليل: الفئة عالية الإيجابيات الكاذبة تقوّض الثقة حتى بالفئات الدقيقة، والحل تعطيلها مؤقتاً أثناء تحسين برومبتها — مو إبقاؤها ولا تعطيل الأداة كلها ولا صياغات "مؤكدة" الغامضة.</span>
+              <span class="lang-en">The answer is C. The guide's principle: a high false-positive category undermines trust even in accurate categories, and the fix is a temporary disable while its prompt improves — not keeping it, not killing the whole tool, and not vague "confirmed" phrasing.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">نفس المشكلة يصنفها المراجع مرة HIGH ومرة MEDIUM بين استدعاء وآخر. وش الإصلاح الأكثر فعالية لاتساق التصنيف؟</p>
+            <p class="lang-en">The reviewer classifies the same issue HIGH on one call and MEDIUM on another. What is the most effective fix for consistent classification?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف وصفاً نصياً أطول لكل مستوى شدة.</span>
+            <span class="lang-en">Add a longer prose description for each severity level.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">شغّل المراجعة ثلاث مرات وخذ التصنيف الأكثر تكراراً.</span>
+            <span class="lang-en">Run the review three times and take the most frequent classification.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">ادمج HIGH وMEDIUM في مستوى واحد لتقليل الخيارات.</span>
+            <span class="lang-en">Merge HIGH and MEDIUM into one level to reduce the choices.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">عرّف كل مستوى شدة بمعيار صريح + مثال كود ملموس يرسّخه.</span>
+            <span class="lang-en">Define each severity level with an explicit criterion plus a concrete code example anchoring it.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. الأمثلة الملموسة لكل مستوى هي اللي ترسّخ الحدود بين المستويات — النموذج يقيس الحالة الجديدة على المرجع. الوصف الأطول يظل غامضاً، والتصويت الثلاثي يضاعف التكلفة بدون إصلاح السبب، والدمج يفقدك معلومة الشدة.</span>
+              <span class="lang-en">Correct. Concrete examples per level are what anchor the boundaries — the model measures new cases against the reference. Longer prose stays vague, triple-run voting triples cost without fixing the cause, and merging loses the severity signal.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح D: معايير شدة صريحة بمثال كود لكل مستوى — هذا نص مهارة من الدليل الرسمي لتحقيق تصنيف متسق. الشرح الأطول والتصويت والدمج كلها التفافات حول غياب المرساة.</span>
+              <span class="lang-en">The answer is D: explicit severity criteria with a code example per level — that is a verbatim skill from the official guide for consistent classification. Longer prose, voting, and merging all dance around the missing anchor.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">المعيار الصريح = شرط تبليغ قابل للفحص ("بلّغ فقط عند تناقض الزعم مع السلوك الفعلي")، مو هدف عام ("تأكد من الدقة").</span><span class="lang-en">An explicit criterion = a checkable reporting condition ("flag only when claim contradicts actual behavior"), not a general goal ("check accuracy").</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">"كن متحفظاً" و"عالي الثقة فقط" لا يحسّنان الدقة — المعايير التصنيفية (بلّغ عن bugs/security، تجاهل الأسلوب والأنماط المحلية) هي اللي تحسّنها.</span><span class="lang-en">"Be conservative" and "high-confidence only" do not improve precision — categorical criteria (report bugs/security, skip style and local patterns) do.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الإيجابيات الكاذبة تدمر الثقة بالأداة كلها — فئة مزعجة واحدة تُسكِت حتى التنبيهات الصحيحة.</span><span class="lang-en">False positives destroy trust in the whole tool — one noisy category silences even the accurate alerts.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">التعطيل المؤقت للفئة عالية الإيجابيات الكاذبة تكتيك مشروع: يستعيد الثقة الآن، وترجع الفئة بعد تحسين معاييرها.</span><span class="lang-en">Temporarily disabling a high false-positive category is a legitimate tactic: it restores trust now, and the category returns once its criteria improve.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">اتساق الشدة يجي من أمثلة كود ملموسة لكل مستوى (CRITICAL/HIGH/MEDIUM) — المثال مرساة أقوى من أي وصف.</span><span class="lang-en">Severity consistency comes from concrete code examples per level (CRITICAL/HIGH/MEDIUM) — an example anchors better than any description.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">نظرة عامة على الدومين 4</span><span class="lang-en">Domain 4 overview</span></p>
+        </div>
+      </a>
+      <a href="4-2-few-shot.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.2 الأمثلة الموجهة Few-shot</span><span class="lang-en">4.2 Few-shot prompting</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

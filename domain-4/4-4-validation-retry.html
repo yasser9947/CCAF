@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.4 حلقات التحقق والإعادة والتغذية الراجعة — CCAF مرجع</title>
+  <meta name="description" content="Task 4.4: Implement validation, retry, and feedback loops for extraction quality — retry-with-error-feedback, the limits of retries, detected_pattern fields, calculated_total vs stated_total, and conflict_detected booleans.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-amber-800 via-amber-900 to-surface-900 text-white">
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-amber-200/90 flex-wrap">
+        <a href="../index.html" class="hover:text-white transition-colors flex items-center gap-1">
+          <i data-lucide="home" class="w-3.5 h-3.5"></i>
+          <span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span>
+        </a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 4</span><span class="lang-en">Domain 4</span></a>
+        <span class="text-amber-400/70"><span class="lang-ar">&#8249;</span><span class="lang-en">&#8250;</span></span>
+        <span class="text-white font-semibold"><span class="lang-ar">التحقق والإعادة</span><span class="lang-en">Validation &amp; retry</span></span>
+      </div>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold bg-white/10 border border-white/20 rounded-xl px-3.5 py-2 shrink-0">4.4</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl md:text-4xl font-bold text-balance leading-tight">
+            <span class="lang-ar">حلقات التحقق والإعادة والتغذية الراجعة</span>
+            <span class="lang-en">Validation, retry &amp; feedback loops</span>
+          </h1>
+          <p class="text-amber-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن السكيما ضمنت الشكل فقط — جودة الاستخراج الحقيقية تجي من حلقة: تحقق دلالي، إعادة بأخطاء محددة، ومعرفة دقيقة بمتى الإعادة عبث.</span>
+            <span class="lang-en">Why this matters: the schema only guaranteed shape — real extraction quality comes from a loop: semantic validation, retries with specific errors, and knowing exactly when retrying is futile.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 md:px-6 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i></span>
+        <span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span>
+      </h2>
+      <ul class="grid md:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">نمط retry-with-error-feedback: إلحاق أخطاء التحقق المحددة بالبرومبت عند الإعادة لتوجيه النموذج نحو التصحيح</span><span class="lang-en">The retry-with-error-feedback pattern: appending specific validation errors to the prompt on retry to guide the model toward correction</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">بناء طلب المتابعة الصحيح: المستند الأصلي + الاستخراج الفاشل + أخطاء التحقق المحددة</span><span class="lang-en">Building the correct follow-up request: the original document + the failed extraction + the specific validation errors</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">حدود الإعادة: تنجح مع أخطاء التنسيق والهيكل، وتفشل حتماً لما تكون المعلومة غائبة عن المستند (موجودة فقط في مصدر خارجي)</span><span class="lang-en">The limits of retry: it succeeds on format and structural errors, and inevitably fails when the information is absent from the document (existing only in an external source)</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">الفرق بين أخطاء التحقق الدلالية (مجاميع لا تتطابق، قيم بحقول خاطئة) وأخطاء الـ syntax اللي ألغاها tool_use</span><span class="lang-en">The difference between semantic validation errors (sums that do not match, values in wrong fields) and the syntax errors tool_use already eliminated</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">حقل detected_pattern في النتائج المهيكلة لتحليل أنماط الإيجابيات الكاذبة عندما يرفض المطورون النتائج</span><span class="lang-en">The detected_pattern field on structured findings to analyze false-positive patterns when developers dismiss findings</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5">
+          <i data-lucide="check" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تدفقات التصحيح الذاتي: استخراج calculated_total بجانب stated_total لكشف التعارض، وحقول conflict_detected للبيانات المتضاربة في المصدر</span><span class="lang-en">Self-correction flows: extracting calculated_total alongside stated_total to flag discrepancies, and conflict_detected booleans for inconsistent source data</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== Section 1: The validation-retry loop ===== -->
+    <section id="retry-loop" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">1</span>
+        <span class="lang-ar">حلقة التحقق والإعادة</span><span class="lang-en">The validation-retry loop</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>وصلتك بيانات ملتزمة بالسكيما من 4.3 — الآن يبدأ التحقق <b>الدلالي</b>: هل مجموع البنود يساوي الإجمالي؟ هل التاريخ منطقي؟ هل القيم في حقولها الصحيحة؟ لما يفشل التحقق، أسوأ رد فعل هو إعادة الطلب كما هو ("جرّب مرة ثانية") — النموذج ما يدري وش غلط، فيكرر نفس الخطأ غالباً. النمط الصحيح من الدليل: <b>retry-with-error-feedback</b>.</p>
+        <p>طلب الإعادة الفعال يحمل ثلاثة مكونات، الثلاثة كلها: <b>المستند الأصلي</b> (عشان يرجع للمصدر لا لذاكرته)، و<b>الاستخراج الفاشل</b> (عشان يعرف وش أنتج)، و<b>أخطاء التحقق المحددة</b> نصاً: "مجموع البنود 4,700 لكن stated_total = 5,200" — مو "فيه خطأ، صححه". الخطأ المحدد يوجه انتباه النموذج للحقل المكسور بالضبط، فيصحح جراحياً بدل ما يعيد توليد كل شي ويكسر حاجة ثانية.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Schema-compliant data arrived from 4.3 — now <b>semantic</b> validation begins: do the line items sum to the total? Is the date plausible? Are values in their right fields? When validation fails, the worst reaction is resending the request unchanged ("try again") — the model has no idea what was wrong, so it usually repeats the same mistake. The guide's pattern: <b>retry-with-error-feedback</b>.</p>
+        <p>An effective retry request carries three components, all three: <b>the original document</b> (so it returns to the source, not its memory), <b>the failed extraction</b> (so it knows what it produced), and <b>the specific validation errors</b>, spelled out: "line items sum to 4,700 but stated_total = 5,200" — not "there is an error, fix it". The specific error points the model's attention at exactly the broken field, so it corrects surgically instead of regenerating everything and breaking something else.</p>
+      </div>
+
+      <!-- Diagram 1: validation-retry loop cycle -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[620px] max-w-[780px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">THE VALIDATION-RETRY LOOP</p>
+          <div class="flex items-stretch justify-center gap-2">
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center flex-1 max-w-[130px]">
+              <i data-lucide="file-text" class="w-5 h-5 text-surface-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-surface-200 leading-snug">document<br>+ extraction tool</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-amber-950/60 border border-amber-500/50 rounded-xl p-3 text-center flex-1 max-w-[130px]">
+              <i data-lucide="braces" class="w-5 h-5 text-amber-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-amber-100 leading-snug">schema-valid<br>extraction (4.3)</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-sky-950/60 border border-sky-500/50 rounded-xl p-3 text-center flex-1 max-w-[140px]">
+              <i data-lucide="scan-search" class="w-5 h-5 text-sky-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-sky-100 leading-snug">SEMANTIC validation<br>sums / fields / dates</p>
+            </div>
+            <div class="flex items-center"><i data-lucide="arrow-right" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-3 text-center flex-1 max-w-[120px]">
+              <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-300 mx-auto mb-1"></i>
+              <p class="font-mono text-[10px] text-emerald-100 leading-snug">PASS<br>-&gt; downstream</p>
+            </div>
+          </div>
+          <div class="flex justify-center pe-24">
+            <div class="flex flex-col items-center">
+              <p class="font-mono text-[10px] text-red-300 mb-1">FAIL (retriable, attempts left)</p>
+              <i data-lucide="corner-left-down" class="w-5 h-5 text-red-400"></i>
+            </div>
+          </div>
+          <div class="bg-red-950/50 border-2 border-red-500/50 rounded-xl p-4 max-w-[560px] mx-auto">
+            <p class="font-mono text-xs font-bold text-red-200 text-center mb-2">RETRY REQUEST = 3 COMPONENTS, ALWAYS</p>
+            <div class="grid grid-cols-3 gap-2 font-mono text-[10px] text-red-100/90 text-center">
+              <div class="bg-red-900/40 rounded-lg p-2">1. original<br>document</div>
+              <div class="bg-red-900/40 rounded-lg p-2">2. failed<br>extraction</div>
+              <div class="bg-red-900/40 rounded-lg p-2">3. SPECIFIC<br>validation errors</div>
+            </div>
+            <p class="font-mono text-[10px] text-red-300/90 text-center mt-2">-&gt; back to extraction | attempts exhausted -&gt; route to human review</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">الحلقة: استخراج ثم تحقق دلالي؛ عند الفشل إعادة بالمكونات الثلاثة، وعند نفاد المحاولات تحويل لمراجعة بشرية</span>
+        <span class="lang-en">The loop: extract, then semantically validate; on failure retry with all three components, on exhausted attempts route to human review</span>
+      </p>
+
+      <!-- Code: Pydantic validation + retry loop -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">حلقة تحقق وإعادة بنكهة Pydantic — الأخطاء المحددة ترجع للنموذج:</span>
+          <span class="lang-en">A Pydantic-flavored validation-retry loop — specific errors go back to the model:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">from pydantic import BaseModel, ValidationError, model_validator
+
+class Invoice(BaseModel):
+    invoice_number: str
+    line_items: list[LineItem]
+    stated_total: float            # what the document SAYS
+    calculated_total: float        # what the items actually SUM to
+    conflict_detected: bool        # true when the source contradicts itself
+
+    @model_validator(mode="after")
+    def totals_must_reconcile(self):
+        calc = round(sum(i.amount for i in self.line_items), 2)
+        if abs(calc - self.stated_total) &gt; 0.01 and not self.conflict_detected:
+            raise ValueError(
+                f"line items sum to {calc} but stated_total is "
+                f"{self.stated_total}; if the document itself is inconsistent, "
+                f"set conflict_detected=true instead of inventing numbers"
+            )
+        return self
+
+def extract_with_retry(document: str, max_retries: int = 2) -&gt; Invoice:
+    error_feedback = None
+    for attempt in range(max_retries + 1):
+        raw = call_extraction_tool(document, error_feedback)   # tool_use, forced
+        try:
+            return Invoice.model_validate(raw)
+        except ValidationError as e:
+            error_feedback = build_retry_prompt(document, raw, str(e))
+    route_to_human_review(document, raw, error_feedback)       # loop exhausted</code></pre>
+        </div>
+      </div>
+
+      <!-- Code: retry prompt -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">بناء طلب الإعادة بمكوناته الثلاثة:</span>
+          <span class="lang-en">Building the retry request with its three components:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-python"><code class="language-python">def build_retry_prompt(document: str, failed: dict, errors: str) -&gt; str:
+    return f"""Your previous extraction failed validation.
+
+&lt;document&gt;
+{document}
+&lt;/document&gt;
+
+&lt;failed_extraction&gt;
+{json.dumps(failed, indent=2)}
+&lt;/failed_extraction&gt;
+
+&lt;validation_errors&gt;
+{errors}
+&lt;/validation_errors&gt;
+
+Re-read the document, correct ONLY the fields named in the validation
+errors, and call record_invoice again. If the document itself contains
+contradictory values, set conflict_detected=true — do not force numbers
+to reconcile."""</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border-s-4 border-brand-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-brand-800"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+          <div class="lang-ar">قيمة الإعادة كلها في <b>تحديد الخطأ</b>: "المجموع 4,700 والمصرح 5,200" يصلح؛ "فيه خطأ" يدوّخ. الإعادة الموجهة بأخطاء دقيقة تحوّل النموذج من مخمّن إلى مصحح.</div>
+          <div class="lang-en">All of retry's value lives in <b>error specificity</b>: "sum is 4,700, stated 5,200" fixes; "something is wrong" flails. Retries guided by precise errors turn the model from a guesser into a corrector.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: When retry cannot help ===== -->
+    <section id="retry-limits" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">2</span>
+        <span class="lang-ar">حدود الإعادة: متى تصير عبثاً</span><span class="lang-en">The limits of retry: when it becomes futile</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>قبل ما تعيد، اسأل السؤال الفاصل: <b>هل المعلومة موجودة أصلاً في المستند المقدَّم؟</b> الإعادة تشتغل مع أخطاء <b>التنسيق والهيكل</b>: تاريخ بصيغة خاطئة، قيمة بحقل غلط، مجموع محسوب خطأ — كلها حالات "المعلومة موجودة والاستخراج تعثر"، فتوجيه الانتباه يصلحها. لكن إذا كان رقم أمر الشراء ما ذُكر في الفاتورة أساساً — موجود فقط في نظام خارجي ما مررته — فكل محاولة إضافية حرق توكنز: ما تقدر تستخرج شيئاً غير موجود. علامة هذي الحالة في الإنتاج: نفس الحقل يفشل بنفس الطريقة عبر كل المحاولات، أو يتقلب بين null وقيم ملفقة مختلفة.</p>
+        <p>التصرف الهندسي الصحيح مع المعلومة الغائبة: حقل nullable (من 4.3)، إثراء لاحق من المصدر الصحيح، أو تحويل للمراجعة البشرية — وأبداً ليس "محاولات أكثر بإصرار أعلى".</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>Before retrying, ask the deciding question: <b>does the information exist in the provided document at all?</b> Retry works on <b>format and structural</b> errors: a date in the wrong format, a value in the wrong field, a miscomputed total — all cases of "the information is there and extraction stumbled", where directed attention fixes it. But if the PO number was never mentioned in the invoice — it lives only in an external system you did not pass — every extra attempt burns tokens: you cannot extract what is not there. The production signature of this case: the same field failing the same way across all attempts, or oscillating between null and assorted fabricated values.</p>
+        <p>The sound engineering response to absent information: a nullable field (from 4.3), later enrichment from the right source, or routing to human review — and never "more attempts with more insistence".</p>
+      </div>
+
+      <!-- Diagram 2: retryable vs non-retryable decision tree -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[740px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">RETRY OR NOT? ONE QUESTION DECIDES</p>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl p-4 text-center max-w-[460px] mx-auto">
+            <p class="font-mono text-xs text-surface-100">Is the required information PRESENT<br>in the provided document?</p>
+          </div>
+          <div class="flex justify-center gap-24">
+            <div class="text-center"><p class="font-mono text-[10px] text-emerald-300 mb-1">YES — extraction stumbled</p><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500 mx-auto"></i></div>
+            <div class="text-center"><p class="font-mono text-[10px] text-red-300 mb-1">NO — info is absent</p><i data-lucide="arrow-down" class="w-5 h-5 text-surface-500 mx-auto"></i></div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-emerald-950/60 border-2 border-emerald-500/50 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-emerald-200 text-center">RETRY WILL LIKELY SUCCEED</p>
+              <div class="space-y-1.5 font-mono text-[10px] text-emerald-100/90">
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">format mismatch (date style, units)</div>
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">value placed in the wrong field</div>
+                <div class="bg-emerald-900/40 rounded-lg px-2.5 py-1.5">structural output errors</div>
+              </div>
+              <p class="font-mono text-[10px] text-emerald-300 text-center">-&gt; retry WITH specific error feedback</p>
+            </div>
+            <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-4 space-y-2">
+              <p class="font-mono text-xs font-bold text-red-200 text-center">RETRY IS FUTILE</p>
+              <div class="space-y-1.5 font-mono text-[10px] text-red-100/90">
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">info exists only in an EXTERNAL doc</div>
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">field simply never mentioned</div>
+                <div class="bg-red-900/40 rounded-lg px-2.5 py-1.5">same failure repeating every attempt</div>
+              </div>
+              <p class="font-mono text-[10px] text-red-300 text-center">-&gt; nullable / enrich from source / human review</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">سؤال واحد يحسم: المعلومة موجودة والاستخراج تعثر؟ أعد بتغذية راجعة. غائبة؟ الإعادة حرق مال</span>
+        <span class="lang-en">One question decides: information present but extraction stumbled? Retry with feedback. Absent? Retrying burns money</span>
+      </p>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border-s-4 border-sky-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-sky-800"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+          <div class="lang-ar">الإعادة تصلح أخطاء <b>الإخراج</b>، لا نقص <b>المدخلات</b>. إذا كان الحل الحقيقي "أعطه المستند الثاني"، فلا صيغة برومبت ولا عدد محاولات بيعوّض عنه.</div>
+          <div class="lang-en">Retry fixes <b>output</b> errors, not missing <b>input</b>. If the real fix is "hand it the other document", no prompt wording and no retry count will substitute for it.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border-s-4 border-red-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+          <div class="lang-ar">لما يذكر السؤال أن المعلومة "موجودة في نظام/مستند خارجي لم يُقدَّم"، كل خيارات "زد المحاولات"، "قوِّ صياغة البرومبت"، "اجعل الحقل إلزامياً ليجتهد النموذج" مشتتات — بعضها يفاقم المشكلة بدفع النموذج للتلفيق. الجواب الصحيح يعالج المدخلات: nullable، إثراء من المصدر، أو مسار بشري.</div>
+          <div class="lang-en">When the question states the information "exists in an external system/document that was not provided", every "increase retries", "strengthen the prompt wording", "make the field required so the model tries harder" option is a distractor — some actively worsen things by pushing fabrication. The correct answer fixes the input side: nullable, source enrichment, or a human path.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: Feedback-loop and self-correction fields ===== -->
+    <section id="feedback-fields" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-mono font-bold">3</span>
+        <span class="lang-ar">حقول التغذية الراجعة والتصحيح الذاتي</span><span class="lang-en">Feedback-loop &amp; self-correction fields</span>
+      </h2>
+
+      <div class="lang-ar space-y-3 leading-relaxed">
+        <p>الحلقة تصير أذكى لما تصمم <b>حقولاً في السكيما نفسها</b> تخدم التحسين المستمر. أولها <b><span dir="ltr" class="font-mono">detected_pattern</span></b> في نتائج المراجعة: كل نتيجة تسجل أي بناء برمجي أطلقها ("f-string SQL query"، "bare except"، "mutable default arg"). لما يرفض المطورون نتائج معينة، تجمّع الرفض حسب النمط فتشوف بالأرقام: "نمط X مرفوض بنسبة 80% = مصدر إيجابيات كاذبة" — فتعدّل معاييره أو تعطله (ربطاً بـ 4.1) بتحليل منهجي بدل الانطباعات.</p>
+        <p>وثانيها ثنائي <b>التصحيح الذاتي</b> للاستخراج: بدل استخراج الإجمالي مرة واحدة، اطلب حقلين — <b><span dir="ltr" class="font-mono">stated_total</span></b> (المكتوب في المستند نصاً) و<b><span dir="ltr" class="font-mono">calculated_total</span></b> (مجموع البنود اللي يحسبه النموذج). تطابقا؟ ثقة أعلى. اختلفا؟ عندك إشارة تعارض قابلة للفحص الآلي. وثالثها <b><span dir="ltr" class="font-mono">conflict_detected</span></b>: قيمة boolean يرفعها النموذج لما يتناقض المصدر نفسه (جدول يقول 5,200 وفقرة تقول 5,400). بدون هذا الحقل، النموذج المحاصر بالتحقق قد "يوفّق" الأرقام بنفسه ويخفي التعارض — ومع الحقل، التعارض يطفو كبيانات صريحة تقرر أنت كيف تعالجها.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed">
+        <p>The loop gets smarter when you design <b>fields inside the schema itself</b> that serve continuous improvement. First, <b><span class="font-mono">detected_pattern</span></b> on review findings: each finding records which code construct triggered it ("f-string SQL query", "bare except", "mutable default arg"). When developers dismiss findings, you aggregate dismissals by pattern and see it in numbers: "pattern X dismissed 80% of the time = a false-positive source" — so you refine or disable its criteria (tying back to 4.1) through systematic analysis instead of impressions.</p>
+        <p>Second, the <b>self-correction</b> pair for extraction: rather than extracting the total once, request two fields — <b><span class="font-mono">stated_total</span></b> (what the document literally says) and <b><span class="font-mono">calculated_total</span></b> (the line-item sum the model computes). They match? Higher confidence. They differ? You have a machine-checkable discrepancy signal. Third, <b><span class="font-mono">conflict_detected</span></b>: a boolean the model raises when the source contradicts itself (a table says 5,200, a paragraph says 5,400). Without this field, a validation-cornered model may quietly "reconcile" the numbers and bury the conflict — with it, the conflict surfaces as explicit data you decide how to handle.</p>
+      </div>
+
+      <!-- Diagram 3: self-correction fields panel -->
+      <div dir="ltr" class="bg-surface-900 rounded-2xl p-6 overflow-x-auto">
+        <div class="min-w-[600px] max-w-[760px] mx-auto space-y-3">
+          <p class="text-center font-mono text-xs text-surface-400 mb-2">THREE FIELDS THAT MAKE THE LOOP SMARTER</p>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-violet-950/60 border-2 border-violet-500/50 rounded-xl p-3.5 space-y-1.5 text-center">
+              <i data-lucide="fingerprint" class="w-5 h-5 text-violet-300 mx-auto"></i>
+              <p class="font-mono text-[11px] font-bold text-violet-200">detected_pattern</p>
+              <p class="font-mono text-[10px] text-violet-100/80 leading-relaxed">which construct triggered the finding -&gt; aggregate dismissals -&gt; find FP sources</p>
+            </div>
+            <div class="bg-amber-950/60 border-2 border-amber-500/60 rounded-xl p-3.5 space-y-1.5 text-center">
+              <i data-lucide="scale" class="w-5 h-5 text-amber-300 mx-auto"></i>
+              <p class="font-mono text-[11px] font-bold text-amber-200">stated_total vs calculated_total</p>
+              <p class="font-mono text-[10px] text-amber-100/80 leading-relaxed">document's claim vs computed sum -&gt; mismatch = checkable discrepancy flag</p>
+            </div>
+            <div class="bg-red-950/60 border-2 border-red-500/50 rounded-xl p-3.5 space-y-1.5 text-center">
+              <i data-lucide="git-compare-arrows" class="w-5 h-5 text-red-300 mx-auto"></i>
+              <p class="font-mono text-[11px] font-bold text-red-200">conflict_detected</p>
+              <p class="font-mono text-[10px] text-red-100/80 leading-relaxed">source contradicts ITSELF -&gt; surface it as data, never silently reconcile</p>
+            </div>
+          </div>
+          <div class="bg-surface-800/70 border border-surface-600 rounded-xl p-3 text-center font-mono text-[11px] text-surface-300">
+            design the schema to CARRY quality signals — the loop then improves itself with data
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">ثلاثة حقول تحمل إشارات الجودة داخل المخرجات نفسها: نمط الاكتشاف، وثنائي الإجمالي، وراية التعارض</span>
+        <span class="lang-en">Three fields carrying quality signals inside the output itself: the detection pattern, the totals pair, and the conflict flag</span>
+      </p>
+
+      <!-- Code: finding with detected_pattern -->
+      <div class="space-y-2">
+        <p class="text-sm font-semibold text-surface-700 flex items-center gap-2"><i data-lucide="file-code-2" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">نتيجة مراجعة مهيكلة بحقل detected_pattern + استخراج بثنائي الإجمالي وراية التعارض:</span>
+          <span class="lang-en">A structured review finding with detected_pattern + an extraction with the totals pair and conflict flag:</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 bg-surface-700 hover:bg-surface-600 text-surface-200 text-xs font-mono rounded-md px-2 py-1 transition-colors">copy</button>
+          <pre class="language-json"><code class="language-json">// review finding — detected_pattern enables dismissal analytics
+{
+  "location": "db/queries.py:42",
+  "issue": "user input interpolated into SQL string",
+  "severity": "critical",
+  "suggested_fix": "use parameterized queries",
+  "detected_pattern": "f-string SQL query"
+}
+
+// extraction — self-correction fields make discrepancies explicit
+{
+  "invoice_number": "INV-2026-0341",
+  "line_items": [
+    { "description": "consulting", "amount": 3200.00 },
+    { "description": "licenses",   "amount": 1500.00 }
+  ],
+  "stated_total": 5200.00,
+  "calculated_total": 4700.00,
+  "conflict_detected": true
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border-s-4 border-emerald-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-emerald-800"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+          <div class="lang-ar">اربط الحلقات ببعض: تقرير أسبوعي يجمّع الرفض حسب <span dir="ltr" class="font-mono">detected_pattern</span>، والأنماط الأعلى رفضاً تدخل قائمة التحسين — أمثلة few-shot جديدة (4.2) أو تعديل معايير (4.1). كذا تتحول الإيجابيات الكاذبة من إزعاج إلى وقود تحسين.</div>
+          <div class="lang-en">Chain the loops together: a weekly report aggregating dismissals by <span class="font-mono">detected_pattern</span>, with the most-dismissed patterns entering the improvement queue — new few-shot examples (4.2) or criteria changes (4.1). False positives turn from noise into improvement fuel.</div>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border-s-4 border-amber-500 rounded-xl p-5 flex gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="text-sm leading-relaxed space-y-1">
+          <p class="font-bold text-amber-800"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+          <div class="lang-ar">تحقق صارم بدون مخرج <span dir="ltr" class="font-mono">conflict_detected</span> يدفع النموذج "لتجميل" البيانات المتعارضة حتى تعبر الفحص — فتخسر أهم إشارة جودة في النظام. لازم يكون للتعارض طريق شرعي للظهور.</div>
+          <div class="lang-en">Strict validation with no <span class="font-mono">conflict_detected</span> exit pushes the model to "beautify" contradictory data until it passes the checks — losing the most important quality signal in the system. Conflict must have a legitimate way to surface.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center"><i data-lucide="pencil-line" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مثال من الحياة: المعلم والقلم الأحمر</span><span class="lang-en">Real-life example: the teacher's red pen</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-amber-950">
+        <p>معلم رياضيات استلم واجباً فيه أخطاء. المعلم الضعيف يرجّع الورقة مكتوب عليها "أعد الحل" — الطالب بيعيد نفس الأخطاء لأنه ما يدري وينها. المعلم الشاطر يرجّع الورقة ومعها ثلاثة أشياء: <b>الأسئلة الأصلية</b> (المستند)، و<b>حل الطالب كما هو</b> (الاستخراج الفاشل)، و<b>ملاحظات حمراء محددة</b> عند كل خطأ: "هنا جمعت بدل ما تضرب — راجع السطر الثالث" (أخطاء التحقق المحددة). الطالب يصحح المواضع المحددة بالضبط — هذا retry-with-error-feedback حرفياً.</p>
+        <p>لكن لو كان السؤال يعتمد على جدول لوغاريتمات ما وُزّع على الطلاب أصلاً، فلا إعادة ولا عشر إعادات بتنفع — المعلومة مو عند الطالب (حدود الإعادة). والمعلم الخبير يمسك دفتراً يسجل فيه نوع كل خطأ متكرر عبر الفصل — "قسمة الكسور: 12 طالباً غلطوا فيها" — فيعيد شرح الدرس المحدد بدل ما يعيد المنهج كله: هذا بالضبط دور detected_pattern.</p>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-amber-950">
+        <p>A math teacher receives homework with mistakes. The weak teacher hands it back stamped "redo" — the student repeats the same mistakes, having no idea where they are. The good teacher returns it with three things: <b>the original questions</b> (the document), <b>the student's work as-is</b> (the failed extraction), and <b>specific red notes</b> at each error: "you added instead of multiplying here — recheck line three" (the specific validation errors). The student corrects exactly the marked spots — that is retry-with-error-feedback, literally.</p>
+        <p>But if the problem depends on a logarithm table that was never handed out, no retry — not even ten — will help: the student does not have the information (the limits of retry). And the veteran teacher keeps a notebook logging each recurring error type across the class — "fraction division: 12 students got it wrong" — then re-teaches that specific lesson instead of the whole syllabus: exactly the role of detected_pattern.</p>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-the-exam" class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+      </h2>
+      <div class="lang-ar space-y-3 leading-relaxed text-surface-200">
+        <p>أسئلة هذا الموضوع (سيناريو S6 غالباً) تختبر ثلاث تمييزات:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>إعادة صحيحة = المستند + الاستخراج الفاشل + الأخطاء المحددة. أي خيار "أعد الطلب فقط" أو "بدون تحديد الأخطاء" ناقص.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>ميّز الفشل القابل للإصلاح (تنسيق/هيكل — أعد) من غير القابل (معلومة غائبة/بمستند خارجي — لا تعد؛ صحح المدخلات).</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>لكشف التعارضات: استخرج calculated_total مع stated_total وأضف conflict_detected — مو "خل النموذج يتأكد من الجمع" كتعليمة إنشائية.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: رفع عدد المحاولات كحل جذري، الإعادة بدون تغذية راجعة، وتجاهل تتبع أنماط الرفض.</span></li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 leading-relaxed text-surface-200">
+        <p>Questions here (usually scenario S6) test three distinctions:</p>
+        <ul class="space-y-2 text-sm">
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>A correct retry = document + failed extraction + specific errors. Any "just resend" or "without naming the errors" option is incomplete.</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Separate fixable failures (format/structure — retry) from unfixable ones (absent/external information — do not retry; fix the inputs).</span></li>
+          <li class="flex gap-2"><i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>For discrepancy detection: extract calculated_total alongside stated_total and add conflict_detected — not a prose "make sure the sums are right" instruction.</span></li>
+          <li class="flex gap-2"><i data-lucide="minus-circle" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: raising the retry count as a root fix, feedback-free retries, and ignoring dismissal-pattern tracking.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quick-check" class="space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5"></i></span>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <i data-lucide="target" class="w-4 h-4 text-amber-600"></i>
+          <span class="lang-ar">النتيجة:</span><span class="lang-en">Score:</span>
+          <span class="font-mono font-bold text-surface-900" dir="ltr"><span id="score">0</span>/<span id="total-q">0</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm font-medium">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span id="answered" class="font-mono font-bold text-surface-900">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">1</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">فشل استخراج فاتورة في التحقق: مجموع البنود لا يساوي الإجمالي. تبغى أفضل فرصة نجاح للمحاولة الثانية. وش ترسل؟</p>
+            <p class="lang-en">An invoice extraction failed validation: the line items do not sum to the total. You want the best chance of success on the second attempt. What do you send?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">نفس الطلب الأصلي بدون تغيير — النتائج تختلف بين المحاولات.</span>
+            <span class="lang-en">The same original request unchanged — results vary between attempts.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">الاستخراج الفاشل فقط مع رسالة "صحح الأخطاء".</span>
+            <span class="lang-en">Only the failed extraction with a "fix the errors" message.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">المستند الأصلي + الاستخراج الفاشل + نص أخطاء التحقق المحددة (المجموع المحسوب مقابل المصرح).</span>
+            <span class="lang-en">The original document + the failed extraction + the specific validation errors (computed vs stated total).</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">المستند الأصلي فقط مع temperature أقل.</span>
+            <span class="lang-en">The original document alone with a lower temperature.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. المكونات الثلاثة كلها: المصدر للرجوع إليه، والمحاولة الفاشلة ليعرف وش أنتج، والأخطاء المحددة لتوجيه التصحيح جراحياً. الإعادة العمياء أو "صحح الأخطاء" بدون تحديدها تترك النموذج يخمن.</span>
+              <span class="lang-en">Correct. All three components: the source to consult, the failed attempt so it knows what it produced, and the specific errors to direct a surgical fix. Blind retries or an unspecific "fix the errors" leave the model guessing.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح C: نمط retry-with-error-feedback = المستند + الاستخراج الفاشل + الأخطاء المحددة. أي مكوّن ناقص يضعف فرصة التصحيح، وtemperature ما له علاقة بفهم الخطأ.</span>
+              <span class="lang-en">The answer is C: retry-with-error-feedback = document + failed extraction + specific errors. Any missing component weakens the correction, and temperature has nothing to do with understanding the error.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">2</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">أي حالة من التالية الإعادة فيها بلا فائدة مهما حسّنت رسالة الخطأ؟</p>
+            <p class="lang-en">In which of these cases is a retry futile no matter how good the error message is?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">التاريخ استُخرج بصيغة MM/DD بدل ISO 8601 المطلوبة.</span>
+            <span class="lang-en">The date was extracted as MM/DD instead of the required ISO 8601.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">قيمة الضريبة انحطت في حقل الخصم بالغلط.</span>
+            <span class="lang-en">The tax value landed in the discount field by mistake.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">قائمة البنود رجعت ككائن واحد بدل مصفوفة.</span>
+            <span class="lang-en">The line items came back as a single object instead of an array.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">شروط الدفع موجودة فقط في ملحق عقد منفصل لم يُمرَّر للنموذج.</span>
+            <span class="lang-en">The payment terms exist only in a separate contract annex that was never passed to the model.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. المعلومة غائبة عن المدخلات — موجودة في مستند خارجي لم يُقدَّم — فلا توجد إعادة تستخرج غير الموجود. الحالات الثلاث الأخرى أخطاء تنسيق وهيكل ومواضع، وكلها قابلة للإصلاح بإعادة موجهة بالخطأ المحدد.</span>
+              <span class="lang-en">Correct. The information is absent from the inputs — it lives in an external document that was not provided — so no retry can extract what is not there. The other three are format, structure, and placement errors, all fixable by a retry guided by the specific error.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح D: المعلومة في مستند خارجي غير مقدَّم = إعادة عبثية؛ الحل تصحيح المدخلات (تمرير الملحق) أو nullable أو مسار بشري. صيغ التاريخ والحقول المتبادلة والهياكل الخاطئة كلها قابلة للإصلاح بالإعادة الموجهة.</span>
+              <span class="lang-en">The answer is D: information in an unprovided external document = a futile retry; the fix is correcting the inputs (pass the annex), nullable, or a human path. Date formats, swapped fields, and wrong structures are all retriable with guided feedback.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-amber-100 text-amber-700 font-bold flex items-center justify-center font-mono text-sm">3</span>
+          <div class="font-semibold text-surface-900 leading-relaxed">
+            <p class="lang-ar">مطورون يرفضون نتائج معينة من مراجع الكود باستمرار، وتحتاج طريقة منهجية لمعرفة أي أنواع الاكتشافات هي مصدر الإيجابيات الكاذبة. وش تضيف؟</p>
+            <p class="lang-en">Developers keep dismissing certain findings from the code reviewer, and you need a systematic way to learn which detection types are the false-positive sources. What do you add?</p>
+          </div>
+        </div>
+        <div class="grid gap-2">
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">A</span>
+            <span class="lang-ar">استبيان شهري يسأل المطورين عن انطباعهم عن جودة المراجعات.</span>
+            <span class="lang-en">A monthly survey asking developers their impression of review quality.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">B</span>
+            <span class="lang-ar">حقل detected_pattern في كل نتيجة يسجل البناء البرمجي المطلق لها، ثم تجميع الرفض حسب النمط.</span>
+            <span class="lang-en">A detected_pattern field on every finding recording the triggering code construct, then aggregating dismissals by pattern.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">C</span>
+            <span class="lang-ar">خفّض عدد النتائج المسموح للمراجع بإرجاعها في كل PR.</span>
+            <span class="lang-en">Cap how many findings the reviewer may return per PR.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option text-start border-2 border-surface-200 rounded-xl px-4 py-3 hover:border-amber-400 hover:bg-amber-50 transition-all text-sm leading-relaxed">
+            <span class="font-mono text-surface-400 me-2">D</span>
+            <span class="lang-ar">اطلب من النموذج شرحاً أطول مع كل نتيجة ليقتنع المطورون بها.</span>
+            <span class="lang-en">Ask the model for a longer explanation with each finding so developers accept them.</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">صحيح. detected_pattern يحوّل كل رفض إلى نقطة بيانات مصنفة — فتشوف بالأرقام أي الأنماط مصدر الإيجابيات الكاذبة وتعالجها بمعايير أدق أو تعطيل مؤقت. الاستبيانات انطباعية، والسقف العددي يخفي مشاكل حقيقية، والشرح الأطول يزيد الضجيج.</span>
+              <span class="lang-en">Correct. detected_pattern turns every dismissal into a labeled data point — you see numerically which patterns source the false positives and fix them with sharper criteria or a temporary disable. Surveys are impressionistic, caps hide real issues, and longer explanations add noise.</span>
+            </div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden bg-red-50 border border-red-200 rounded-xl p-4 text-sm leading-relaxed">
+          <div class="flex gap-2 items-start"><i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar">الصحيح B: حقل detected_pattern + تجميع الرفض حسب النمط — تصميم حلقة التغذية الراجعة كما في الدليل. يعطيك تحليلاً منهجياً بالبيانات بدل الانطباعات والحلول الشكلية.</span>
+              <span class="lang-en">The answer is B: a detected_pattern field + aggregating dismissals by pattern — the guide's feedback-loop design. It gives systematic, data-driven analysis instead of impressions and cosmetic fixes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 text-center space-y-4">
+        <i data-lucide="trophy" class="w-12 h-12 text-amber-500 mx-auto"></i>
+        <p class="text-4xl font-bold font-mono text-surface-900" dir="ltr"><span id="final-score"></span></p>
+        <p class="text-lg font-mono text-surface-500" dir="ltr"><span id="final-pct"></span></p>
+        <p id="result-message" class="text-xl font-bold"></p>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 bg-surface-900 text-white rounded-xl px-5 py-2.5 font-semibold hover:bg-surface-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">إعادة المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="bg-amber-900 text-amber-50 rounded-2xl p-6 md:p-8 space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-3">
+        <i data-lucide="bookmark-check" class="w-6 h-6 text-amber-300"></i>
+        <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+      </h2>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الإعادة الفعالة = المستند الأصلي + الاستخراج الفاشل + أخطاء التحقق المحددة نصاً — التحديد هو اللي يصحح.</span><span class="lang-en">An effective retry = original document + failed extraction + the specific validation errors spelled out — specificity is what corrects.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">الإعادة تصلح أخطاء التنسيق والهيكل، وتعجز حتماً عن المعلومة الغائبة عن المستند — عالج المدخلات: nullable، إثراء، أو مسار بشري.</span><span class="lang-en">Retry fixes format and structural errors, and is inevitably powerless against information absent from the document — fix the inputs: nullable, enrichment, or a human path.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">التحقق الدلالي (المجاميع، مواضع الحقول) مسؤوليتك البرمجية — السكيما ألغت الـ syntax فقط.</span><span class="lang-en">Semantic validation (sums, field placement) is your programmatic responsibility — the schema only killed syntax.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">detected_pattern يحوّل رفض المطورين لبيانات تحليل منهجي لأنماط الإيجابيات الكاذبة.</span><span class="lang-en">detected_pattern turns developer dismissals into systematic analysis data for false-positive patterns.</span></span></li>
+        <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 text-amber-300 shrink-0 mt-0.5 rtl:rotate-0 ltr:rotate-180"></i><span><span class="lang-ar">صمّم للتصحيح الذاتي: calculated_total بجانب stated_total يكشف الفروقات، وconflict_detected يمنع "تجميل" التعارض في المصدر.</span><span class="lang-en">Design for self-correction: calculated_total beside stated_total exposes discrepancies, and conflict_detected stops source contradictions from being "beautified" away.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="grid md:grid-cols-2 gap-4 pt-4">
+      <a href="4-3-structured-output.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.3 المخرجات المنظمة عبر Tool Use</span><span class="lang-en">4.3 Structured output via tool use</span></p>
+        </div>
+      </a>
+      <a href="4-5-batch-processing.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-amber-400 hover:shadow-md transition-all p-6 flex items-center justify-end gap-4 text-end">
+        <div>
+          <p class="text-xs text-surface-500 mb-1"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></p>
+          <p class="font-bold text-surface-900 group-hover:text-amber-700 transition-colors"><span class="lang-ar">4.5 استراتيجيات المعالجة بالدفعات</span><span class="lang-en">4.5 Batch processing strategies</span></p>
+        </div>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-amber-600 transition-colors rtl:rotate-0 ltr:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '&#10003;';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>
