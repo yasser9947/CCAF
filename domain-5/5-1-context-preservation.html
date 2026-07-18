@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.1 حفظ السياق عبر المحادثات الطويلة — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.1 من شهادة CCAF: مخاطر التلخيص التدريجي، تأثير الضياع في المنتصف، كتلة حقائق القضية، قصّ نتائج الأدوات، والتسليم المنظّم للوكلاء الفرعيين.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.1 حفظ السياق</span><span class="lang-en">5.1 Context preservation</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.1</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">حفظ السياق عبر المحادثات الطويلة</span>
+            <span class="lang-en">Context preservation across long interactions</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن المحادثة الطويلة ما تفشل بنفاد التوكنز — تفشل لما «تنسى» مبلغ 1,299 ريال اللي وعدت العميل فيه.</span>
+            <span class="lang-en">Why it matters: a long conversation doesn't fail by running out of tokens — it fails when it "forgets" the 1,299 SAR you promised the customer.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">ليش <span dir="ltr" class="font-mono">progressive summarization</span> يبلع الأرقام والنسب والتواريخ وتوقعات العميل المصرّح بها.</span><span class="lang-en">Why <span dir="ltr" class="font-mono">progressive summarization</span> swallows numbers, percentages, dates, and customer-stated expectations.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تأثير «الضياع في المنتصف» (<span dir="ltr" class="font-mono">lost in the middle</span>) وكيف ترتّب المدخلات الطويلة ضده.</span><span class="lang-en">The "lost in the middle" effect and how to order long inputs against it.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">كيف تتراكم نتائج الأدوات (40+ حقلًا وأنت تحتاج 5) وكيف تقصّها قبل ما تدخل السياق.</span><span class="lang-en">How tool results accumulate (40+ fields when you need 5) and how to trim them before they hit context.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">بناء كتلة «حقائق القضية» الثابتة، وطبقة سياق منفصلة لكل قضية في الجلسات متعددة القضايا.</span><span class="lang-en">Building a persistent "case facts" block, and a separate context layer per issue in multi-issue sessions.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">لماذا يجب تمرير كامل سجل المحادثة في كل طلب <span dir="ltr" class="font-mono">API</span> لاحق للحفاظ على الترابط.</span><span class="lang-en">Why the complete conversation history must be passed in each subsequent API request to maintain coherence.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">إلزام الوكلاء الفرعيين بميتاداتا (تواريخ، مواقع المصادر، سياق منهجي) وبيانات منظّمة بدل سلاسل التفكير المطوّلة.</span><span class="lang-en">Requiring subagents to return metadata (dates, source locations, methodological context) and structured data instead of verbose reasoning chains.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: THE FOUR TRAPS ===== -->
+    <section id="four-traps" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">المصائد الأربع اللي تقتل المحادثة الطويلة</span>
+        <span class="lang-en">The four traps that kill a long conversation</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>لما محادثة الدعم تطول (رجوع منتج، نزاع فوترة... 30 دورة)، الخطر الحقيقي مو نفاد التوكنز — الخطر إنك <strong>تفقد الحقيقة</strong> وأنت ما تدري. أربع مصائد يعيد الاختبار تدويرها بصيغ مختلفة:</p>
+        <ol class="space-y-3 list-decimal ps-6 marker:text-rose-500 marker:font-semibold">
+          <li><strong>التلخيص التدريجي (<span dir="ltr" class="font-mono">progressive summarization</span>)</strong> يكثّف القيم الرقمية والنسب والتواريخ وتوقعات العميل المصرّح بها إلى ملخصات مبهمة: «العميل يبي استرداد» بدل «العميل يبي استرداد <u>كامل</u> بمبلغ <span dir="ltr" class="font-mono">1,299 SAR</span>، ويرفض رصيد المتجر».</li>
+          <li><strong>الضياع في المنتصف</strong>: النموذج يعالج بداية ونهاية المدخل الطويل بثبات، لكنه قد يُسقِط نتائج من <em>الوسط</em> — يعني ترتيب المعلومة داخل المدخل قرار معماري، مو تفصيلة.</li>
+          <li><strong>تراكم نتائج الأدوات</strong>: كل استدعاء <span dir="ltr" class="font-mono">lookup_order</span> يرمي 40+ حقلًا في السياق وأنت تحتاج 5 منها فقط — استهلاك توكنز غير متناسب مع الأهمية، وضجيج يزاحم الحقائق.</li>
+          <li><strong>كسر الترابط</strong>: لازم تمرّر <u>كامل</u> سجل المحادثة في كل طلب API لاحق. الحذف العشوائي لدورات قديمة يكسر الترابط — القصّ الذكي يكون في <em>حجم</em> نتائج الأدوات وفي <em>فصل</em> الحقائق، مو في رمي أجزاء من الحوار.</li>
+        </ol>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>When a support conversation runs long (a return, a billing dispute... 30 turns), the real risk isn't running out of tokens — it's <strong>losing the truth</strong> without noticing. Four traps the exam recycles in different forms:</p>
+        <ol class="space-y-3 list-decimal ps-6 marker:text-rose-500 marker:font-semibold">
+          <li><strong>Progressive summarization</strong> condenses numerical values, percentages, dates, and customer-stated expectations into vague summaries: "customer wants a refund" instead of "customer wants a <u>full</u> refund of <span dir="ltr" class="font-mono">1,299 SAR</span> and refuses store credit."</li>
+          <li><strong>Lost in the middle</strong>: models reliably process the beginning and end of a long input but may omit findings from the <em>middle</em> — so where information sits inside the input is an architectural decision, not a detail.</li>
+          <li><strong>Tool-result accumulation</strong>: every <span dir="ltr" class="font-mono">lookup_order</span> call dumps 40+ fields into context when only 5 matter — token consumption disproportionate to relevance, and noise that crowds out the facts.</li>
+          <li><strong>Broken coherence</strong>: you must pass the <u>complete</u> conversation history in each subsequent API request. Arbitrarily dropping old turns breaks coherence — smart reduction targets the <em>size</em> of tool results and the <em>separation</em> of facts, not chunks of the dialogue.</li>
+        </ol>
+      </div>
+
+      <!-- DIAGRAM 1: lost-in-the-middle position effect -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-4 font-mono text-center">Position effect — where the model reliably "sees" a long input</p>
+        <div class="max-w-lg mx-auto space-y-2">
+          <div class="flex items-center gap-3">
+            <span class="w-24 shrink-0 text-right text-[11px] font-mono text-surface-400">BEGINNING</span>
+            <div class="grow bg-emerald-500/20 border border-emerald-400/50 rounded-lg px-3 py-2 flex items-center justify-between">
+              <span class="text-emerald-200 font-mono text-xs font-semibold">reliably processed</span>
+              <span class="flex gap-0.5"><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 shrink-0 text-right text-[11px] font-mono text-surface-400">MIDDLE</span>
+            <div class="grow bg-rose-500/10 border border-dashed border-rose-400/50 rounded-lg px-3 py-2 flex items-center justify-between">
+              <span class="text-rose-200 font-mono text-xs font-semibold">findings may be omitted</span>
+              <span class="flex gap-0.5"><span class="w-2 h-4 bg-rose-400/70 rounded-sm"></span><span class="w-2 h-4 bg-surface-600 rounded-sm"></span><span class="w-2 h-4 bg-rose-400/40 rounded-sm"></span><span class="w-2 h-4 bg-surface-600 rounded-sm"></span></span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="w-24 shrink-0 text-right text-[11px] font-mono text-surface-400">END</span>
+            <div class="grow bg-emerald-500/20 border border-emerald-400/50 rounded-lg px-3 py-2 flex items-center justify-between">
+              <span class="text-emerald-200 font-mono text-xs font-semibold">reliably processed</span>
+              <span class="flex gap-0.5"><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span><span class="w-2 h-4 bg-emerald-400 rounded-sm"></span></span>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-surface-700 mt-3">
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-3 py-2.5 text-center">
+              <span class="text-surface-200 font-mono text-xs">FIX: key findings summary FIRST + explicit section headers for the rest</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">النموذج «يشوف» البداية والنهاية بثبات — لذلك حط ملخص النتائج المفتاحية في البداية، ونظّم الوسط بعناوين أقسام صريحة.</span>
+        <span class="lang-en">The model reliably "sees" the beginning and end — so put the key-findings summary first and organize the middle with explicit section headers.</span>
+      </p>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">البداية والنهاية «عقارات فاخرة» في المدخل الطويل. الشيء اللي لا يجوز نسيانه أبدًا — حطّه في البداية. آخر شيء تبيه حاضرًا وقت التوليد — قرّبه من النهاية.</span>
+              <span class="lang-en">The beginning and end are the prime real estate of a long input. What must never be forgotten goes first; what you want freshest at generation time goes near the end.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: CASE FACTS LAYER ===== -->
+    <section id="case-facts" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">كتلة «حقائق القضية» — طبقة سياق منفصلة</span>
+        <span class="lang-en">The "case facts" block — a separate context layer</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الحل المعماري الأول: استخرج <strong>الحقائق المعاملاتية</strong> — المبالغ، التواريخ، أرقام الطلبات، الحالات — في كتلة «حقائق قضية» ثابتة تُحقَن في <em>كل</em> برومبت، <u>خارج</u> السجل المُلخَّص. التلخيص يضغط الحوار براحته، لأن الحقائق صارت محفوظة في طبقة ما يوصل لها الضغط.</p>
+        <p>وفي الجلسة اللي فيها <strong>أكثر من قضية</strong> (رجوع طلب + نزاع فوترة لطلب ثاني)، لا تخلط: استخرج بيانات كل قضية (رقم الطلب، المبلغ، الحالة) في <strong>طبقة سياق منفصلة لكل قضية</strong> — الخلط بين مبلغين هو بالضبط الخطأ اللي يصطاده الاختبار.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The first architectural fix: extract <strong>transactional facts</strong> — amounts, dates, order numbers, statuses — into a persistent "case facts" block injected into <em>every</em> prompt, <u>outside</u> the summarized history. Summarization can then compress the dialogue freely, because the facts live in a layer compression never touches.</p>
+        <p>And in a session with <strong>multiple issues</strong> (a return on one order + a billing dispute on another), don't blend them: extract each issue's data (order ID, amount, status) into a <strong>separate context layer per issue</strong> — mixing two amounts up is exactly the failure the exam hunts for.</p>
+      </div>
+
+      <!-- DIAGRAM 2: context layering stack -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-4 font-mono text-center">Context layering — what survives a long session</p>
+        <div class="space-y-2 max-w-lg mx-auto">
+          <div class="bg-rose-500/20 border border-rose-400/40 rounded-xl p-3 flex items-center justify-between gap-2">
+            <span class="text-rose-200 font-mono text-sm font-semibold">CASE FACTS (persistent)</span>
+            <span class="text-rose-300/70 text-xs text-right">re-injected every turn &middot; never summarized</span>
+          </div>
+          <div class="bg-rose-500/10 border border-dashed border-rose-400/30 rounded-xl p-2.5 flex items-center justify-between gap-2 ms-6">
+            <span class="text-rose-200/80 font-mono text-xs">ISSUE-2 FACTS (own layer)</span>
+            <span class="text-rose-300/60 text-[11px] text-right">multi-issue session: one layer per issue</span>
+          </div>
+          <div class="flex justify-center"><i data-lucide="plus" class="w-4 h-4 text-surface-500"></i></div>
+          <div class="bg-surface-700/50 border border-surface-600 rounded-xl p-3 flex items-center justify-between gap-2">
+            <span class="text-surface-200 font-mono text-sm">ROLLING SUMMARY</span>
+            <span class="text-surface-400 text-xs text-right">safe to compress — facts live above</span>
+          </div>
+          <div class="flex justify-center"><i data-lucide="plus" class="w-4 h-4 text-surface-500"></i></div>
+          <div class="bg-surface-700/50 border border-surface-600 rounded-xl p-3 flex items-center justify-between gap-2">
+            <span class="text-surface-200 font-mono text-sm">TRIMMED TOOL RESULTS</span>
+            <span class="text-surface-400 text-xs text-right">5 relevant fields, not 40+</span>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-rose-400"></i></div>
+          <div class="bg-gradient-to-r from-rose-600 to-rose-500 rounded-xl p-3 text-center">
+            <span class="text-white font-mono text-sm font-semibold">next API request (full history preserved)</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">الطبقات من فوق لتحت: حقائق ثابتة لا تُلخَّص أبدًا، ثم ملخص قابل للضغط، ثم نتائج أدوات مقصوصة — وكلها تدخل الطلب التالي مع كامل السجل.</span>
+        <span class="lang-en">Top to bottom: persistent facts that are never summarized, then a compressible summary, then trimmed tool results — all entering the next request with full history.</span>
+      </p>
+
+      <!-- CODE 1: case facts block -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="pin" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — كتلة «حقائق القضية» الثابتة (وطبقة لكل قضية)</span><span class="lang-en">Example — the persistent "case facts" block (one layer per issue)</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">python</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-python"><code class="language-python"># CASE FACTS: compact, structured, re-injected into EVERY request,
+# kept OUTSIDE the summarized history so numbers/dates never get lost.
+# Multi-issue session: ONE facts block PER issue (separate context layers).
+case_facts = {
+    "issue-1-return": {
+        "order_id":    "ORD-99155",
+        "order_total": "1,299.00 SAR",     # the exact amount the refund depends on
+        "order_date":  "2026-06-30",
+        "status":      "delivered_damaged",
+        "expectation": "full refund, not store credit",  # customer's words, verbatim
+    },
+    "issue-2-billing": {
+        "order_id":    "ORD-97002",
+        "disputed":    "duplicate charge 249.00 SAR",
+        "charge_date": "2026-07-11",
+        "status":      "under_review",
+    },
+}
+
+def build_request(rolling_summary, latest_user_turn):
+    return {
+        "system": SYSTEM_PROMPT,
+        "messages": [
+            # 1) Facts FIRST: high-salience position, survives summarization
+            {"role": "user",
+             "content": "## CASE FACTS (authoritative)\n" + json.dumps(case_facts, indent=2)},
+            # 2) Rolling summary of older turns (safe to compress — facts live above)
+            {"role": "user", "content": "## CONVERSATION SUMMARY\n" + rolling_summary},
+            # 3) The live turn (the full history is still passed each request)
+            {"role": "user", "content": latest_user_turn},
+        ],
+    }</code></pre>
+        </div>
+      </div>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">«حقائق القضية» ليست تلخيصًا — هي <strong>طبقة سياق منفصلة</strong>. التلخيص يضغط الحوار؛ حقائق القضية تُقتبَس حرفيًا وتبقى ثابتة. الفرق بين الاثنين هو الفرق بين «العميل يبي استرداد» و«استرداد كامل 1,299 ريال، يرفض رصيد المتجر».</span>
+              <span class="lang-en">"Case facts" is not a summary — it's a <strong>separate context layer</strong>. Summaries compress dialogue; case facts are quoted verbatim and stay fixed. The difference between the two is the difference between "customer wants a refund" and "full refund of 1,299 SAR, refuses store credit."</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: TRIMMING + POSITION-AWARE ORDERING ===== -->
+    <section id="trimming" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">قصّ نتائج الأدوات وترتيب المدخلات</span>
+        <span class="lang-en">Trimming tool results and ordering inputs</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>نتيجة الأداة الخام «مصدر ضجيج» يتراكم كل دورة. القاعدة: <strong>قُصّ المخرَج للحقول ذات الصلة قبل ما يدخل السياق</strong> — في وكيل الاسترداد، من 40+ حقلًا تبقى 5 فقط (رقم الطلب، الإجمالي، العملة، الحالة، قابلية الاسترداد). وعند تجميع مخرجات عدة وكلاء في مدخل واحد طويل: حُطّ <strong>ملخص النتائج المفتاحية في البداية</strong> ونظّم التفاصيل بعناوين أقسام صريحة — هذا العلاج المباشر لتأثير الموضع.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A raw tool result is a noise source that accumulates every turn. The rule: <strong>trim the output to relevant fields before it enters context</strong> — in a refund agent, 40+ fields become just 5 (order ID, total, currency, status, refundability). And when aggregating several agents' outputs into one long input: put the <strong>key-findings summary at the beginning</strong> and organize details with explicit section headers — the direct treatment for position effects.</p>
+      </div>
+
+      <!-- DIAGRAM 3: BEFORE/AFTER trimming panels -->
+      <div class="grid md:grid-cols-2 gap-4" dir="ltr">
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-red-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> BAD — raw result into context</p>
+          <div class="bg-white/70 rounded-xl border border-red-200 p-3 font-mono text-[11px] leading-relaxed text-surface-600 space-y-0.5">
+            <p>order_id, customer_id, total, currency,</p>
+            <p>status, refundable, billing_address{...},</p>
+            <p>shipping_address{...}, carrier_events[22],</p>
+            <p>tax_breakdown{...}, promo_codes[], gift_wrap,</p>
+            <p>warehouse_id, pick_path, loyalty_points,</p>
+            <p class="text-red-500">...25 more irrelevant fields...</p>
+          </div>
+          <p class="mt-3 text-xs text-red-700 font-semibold font-mono">40+ fields x every turn = noise crowds the facts</p>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-emerald-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> GOOD — trimmed before context</p>
+          <div class="bg-white/70 rounded-xl border border-emerald-200 p-3 font-mono text-[11px] leading-relaxed text-surface-700 space-y-0.5">
+            <p>order_id:   "ORD-99155"</p>
+            <p>total:      1299.00</p>
+            <p>currency:   "SAR"</p>
+            <p>status:     "delivered_damaged"</p>
+            <p>refundable: true</p>
+          </div>
+          <p class="mt-3 text-xs text-emerald-700 font-semibold font-mono">5 return-relevant fields = ~90% fewer tokens</p>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">نفس الاستدعاء، فرق جذري في السياق: اليسار يراكم الضجيج، واليمين يبقي الإشارة فقط.</span>
+        <span class="lang-en">Same call, radically different context: one accumulates noise, the other keeps only the signal.</span>
+      </p>
+
+      <!-- CODE 2: trimmed tool output -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="scissors" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — قصّ نتيجة الأداة: 40+ حقلًا تصير 5 حقول</span><span class="lang-en">Example — trimming a tool result: 40+ fields become 5</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">python</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-python"><code class="language-python"># lookup_order returns 40+ fields; only 5 matter for a return/refund decision.
+# Trim BEFORE the result ever lands in context (e.g. in a PostToolUse hook).
+
+def trim_order(raw):                     # keep ONLY return-relevant fields
+    return {
+        "order_id":   raw["order_id"],
+        "total":      raw["total"],
+        "currency":   raw["currency"],
+        "status":     raw["status"],
+        "refundable": raw["refundable"],
+    }
+
+# 40+ fields -> 5 fields : ~90% fewer tokens accumulating every turn.
+# Position-aware aggregation for long multi-agent inputs:
+aggregated_input = (
+    "## KEY FINDINGS (summary first — high-salience position)\n"
+    + findings_summary
+    + "\n\n## SECTION: web search results\n"   + web_results
+    + "\n\n## SECTION: document analysis\n"    + doc_results
+)  # explicit headers keep the middle navigable</code></pre>
+        </div>
+      </div>
+
+      <!-- tip callout -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-emerald-100 rounded-lg p-2 shrink-0"><i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600"></i></div>
+          <div>
+            <h4 class="font-bold text-emerald-900 mb-1"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></h4>
+            <p class="text-emerald-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">اقصّ عند <strong>الحدود</strong> — قبل دخول النتيجة للسياق (مثل hook بعد الأداة) — مو بعد ما تتراكم. القصّ المتأخر ما يرجّع التوكنز اللي احترقت ولا يصلّح الانتباه اللي تشتّت.</span>
+              <span class="lang-en">Trim at the <strong>boundary</strong> — before the result enters context (e.g. a post-tool hook) — not after it accumulates. Late trimming doesn't refund burned tokens or repair diluted attention.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION D: STRUCTURED SUBAGENT HANDOFFS ===== -->
+    <section id="handoffs" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">4</span>
+        <span class="lang-ar">تسليم منظّم بين الوكلاء — بيانات، لا سلاسل تفكير</span>
+        <span class="lang-en">Structured handoffs between agents — data, not reasoning chains</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>في الأنظمة متعددة الوكلاء، وكيل التجميع النهائي يعيش على <strong>ميزانية سياق محدودة</strong>. لو كل وكيل بحث يرسل له نصوصًا مطوّلة وسلاسل تفكيره كاملة، الميزانية تنتهي قبل التجميع. الحل من طرفين:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>ألزِم الوكلاء الفرعيين بالميتاداتا</strong>: كل نتيجة تتضمن التواريخ، مواقع المصادر، والسياق المنهجي — عشان التجميع اللاحق يكون دقيقًا وقابلًا للتتبع.</li>
+          <li><strong>عدّل الوكيل الأعلى (upstream)</strong> ليرجع بيانات منظّمة: حقائق مفتاحية، اقتباسات، درجات صلة (<span dir="ltr" class="font-mono">relevance scores</span>) — بدل محتوى مطوَّل وسلاسل استدلال، لما يكون الوكيل الأدنى محدود الميزانية.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>In multi-agent systems, the final synthesis agent lives on a <strong>limited context budget</strong>. If every research agent sends it verbose prose plus full reasoning chains, the budget is gone before synthesis starts. The fix works from both ends:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Require metadata from subagents</strong>: every finding includes dates, source locations, and methodological context — so downstream synthesis is accurate and traceable.</li>
+          <li><strong>Modify the upstream agent</strong> to return structured data — key facts, citations, <span dir="ltr" class="font-mono">relevance scores</span> — instead of verbose content and reasoning chains, when the downstream agent has a limited context budget.</li>
+        </ul>
+      </div>
+
+      <!-- CODE 3: structured subagent output -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="package" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — مخرَج وكيل فرعي منظّم (بدل نص مطوَّل)</span><span class="lang-en">Example — structured subagent output (instead of verbose prose)</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">json</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-json"><code class="language-json">{
+  "finding": "AI adoption in film post-production grew 3x between 2023 and 2026",
+  "key_facts": ["3x growth", "post-production segment", "2023-2026 window"],
+  "citation": {
+    "source": "MediaTech Annual Review",
+    "location": "https://example.com/mtar-2026, section 4.2",
+    "published": "2026-03-14",
+    "method_note": "survey of 240 studios, self-reported budgets"
+  },
+  "relevance_score": 0.92
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- warning callout -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-amber-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i></div>
+          <div>
+            <h4 class="font-bold text-amber-900 mb-1"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></h4>
+            <p class="text-amber-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">لا تحاول علاج ضيق ميزانية الوكيل الأدنى بتكبير ميزانيته — عالِج <strong>المنبع</strong>: خلّ الوكيل الأعلى يرجّع بيانات منظّمة أصغر وأدق. تكبير الميزانية يؤجّل المشكلة ويرفع التكلفة.</span>
+              <span class="lang-en">Don't treat the downstream agent's tight budget by enlarging it — fix the <strong>source</strong>: have the upstream agent return smaller, sharper structured data. Enlarging the budget postpones the problem and raises cost.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«بدّل لنموذج بنافذة سياق أكبر»</strong> — السعة الأكبر لا تصلّح جودة الانتباه ولا الضياع في المنتصف؛ المشكلة تنظيمية لا سعوية.</span><span class="lang-en"><strong>"Switch to a larger context window"</strong> — more capacity doesn't fix attention quality or lost-in-the-middle; the problem is organization, not size.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«لخّص بقوة أكبر»</strong> — يزيد الطين بلّة: التلخيص الأشرس يبلع أرقامًا أكثر. الصح: افصل الحقائق في طبقة، لا تضغطها.</span><span class="lang-en"><strong>"Summarize more aggressively"</strong> — makes it worse: harsher summarization swallows more numbers. Right move: separate the facts into a layer, don't compress them.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«خزّن نتيجة الأداة كاملة عشان ما نفقد شيئًا»</strong> — الحقول الأربعون تزاحم المهم وتسرّع الضياع في المنتصف؛ قُصّ قبل السياق.</span><span class="lang-en"><strong>"Keep the full tool result so we lose nothing"</strong> — the 40 fields crowd out what matters and accelerate lost-in-the-middle; trim before context.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="clipboard-list" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: المحقّق ولوحة القضية</span><span class="lang-en">Real-life example: the detective and the case board</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>محقّق يشتغل على قضية عمرها أسابيع. على الجدار <strong>لوحة قضية</strong> مثبّتة: الأسماء، التواريخ، المبالغ، أرقام الأدلة — مكتوبة بخط واضح وما تُمسح أبدًا. أما استجواباته اليومية فيلخّصها في دفتر. لو اعتمد على الدفتر الملخّص وحده، بينسى <em>بالضبط</em> كم كان المبلغ المسروق وأي يوم صار الحادث — وهذا حرفيًا اللي يسويه التلخيص التدريجي بالأرقام.</p>
+              <p>لوحة القضية = كتلة «حقائق القضية» الثابتة. الدفتر = الملخص المتدحرج. ولو عنده قضيتان في نفس الوقت؟ لوحة لكل قضية — عشان ما يركّب دليل قضية على متهم قضية ثانية.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A detective works a case that runs for weeks. On the wall hangs a <strong>case board</strong>: names, dates, amounts, evidence numbers — written clearly and never erased. His daily interviews he condenses into a notebook. If he relied on the summarized notebook alone, he'd forget <em>exactly</em> how much was stolen and on which day — which is literally what progressive summarization does to numbers.</p>
+              <p>The case board is the persistent "case facts" block. The notebook is the rolling summary. And if he's working two cases at once? One board per case — so he never pins one case's evidence on the other case's suspect.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>السؤال النموذجي: وكيل دعم أو منسّق بحث «ينسى» رقمًا أو توقعًا مصرّحًا به بعد محادثة طويلة، أو تجميع يُسقط نتائج من منتصف مدخل مجمّع — ويطلب منك «أنسب حل معماري» أو «السبب الجذري».</p>
+          <p>الإجابة الفائزة دائمًا تنظيمية: <strong>طبقة حقائق ثابتة خارج الملخص + قصّ نتائج الأدوات + ملخص في البداية مع عناوين أقسام + بيانات منظّمة من الوكلاء الفرعيين</strong>.</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>The typical question: a support agent or research coordinator "forgets" a number or stated expectation after a long conversation, or synthesis drops findings from the middle of an aggregated input — and asks for the "best architectural fix" or "root cause."</p>
+          <p>The winning answer is always organizational: <strong>a persistent facts layer outside the summary + trimmed tool results + summary-first ordering with section headers + structured data from subagents</strong>.</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">نافذة سياق أكبر / نموذج أعلى فئة — سعة، مو تنظيم.</span><span class="lang-en">Bigger context window / higher-tier model — capacity, not organization.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">تلخيص أشرس أو أكثر تكرارًا — يزيد فقدان الأرقام.</span><span class="lang-en">Harsher or more frequent summarization — loses more numbers.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">حذف دورات قديمة من السجل عشوائيًا — يكسر الترابط بدل ما يحفظه.</span><span class="lang-en">Arbitrarily dropping old turns from history — breaks coherence instead of preserving it.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <!-- compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">جلسة دعم واحدة فيها قضيتان مفتوحتان: رجوع للطلب <span dir="ltr" class="font-mono">ORD-A</span> ونزاع فوترة للطلب <span dir="ltr" class="font-mono">ORD-B</span>. الوكيل بدأ يخلط المبالغ بين القضيتين. ما الإصلاح الصحيح؟</span>
+            <span class="lang-en">One support session holds two open issues: a return on <span dir="ltr" class="font-mono">ORD-A</span> and a billing dispute on <span dir="ltr" class="font-mono">ORD-B</span>. The agent starts mixing the amounts up between them. What's the right fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اكتب ملخصًا واحدًا مدموجًا يغطي القضيتين معًا كل بضع دورات.</span><span class="lang-en">Write one blended summary covering both issues every few turns.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استخرج بيانات كل قضية (رقم الطلب، المبلغ، الحالة) في طبقة سياق منظّمة منفصلة لكل قضية، وتُحقَن الطبقتان في كل طلب.</span><span class="lang-en">Extract each issue's data (order ID, amount, status) into its own separate structured context layer, and inject both layers into every request.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اطلب من العميل تكرار تفاصيل كل قضية في بداية كل رسالة.</span><span class="lang-en">Ask the customer to repeat each issue's details at the start of every message.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">افتح جلسة API منفصلة لكل قضية وخلّ العميل يتنقل بينهما.</span><span class="lang-en">Open a separate API session per issue and make the customer switch between them.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">الجلسات متعددة القضايا تحتاج طبقة سياق منفصلة لكل قضية — الدليل الرسمي ينص عليها حرفيًا. الملخص المدموج هو مصدر الخلط أصلًا.</span><span class="lang-en">Multi-issue sessions need a separate context layer per issue — the official guide states it verbatim. A blended summary is the source of the mix-up in the first place.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">الصحيح: طبقة منظّمة منفصلة لكل قضية تُحقَن كل طلب. الملخص المدموج يخلط، وتحميل العميل عبء التكرار سوء تصميم، وتقسيم الجلسات يكسر تجربة المحادثة الواحدة.</span><span class="lang-en">Correct: a separate structured layer per issue injected every request. Blended summaries mix things up, making the customer repeat details is bad design, and splitting sessions breaks the single-conversation experience.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">منسّق بحث يجمع تقارير 12 وكيلًا فرعيًا في مدخل واحد طويل لوكيل التجميع. النتائج من التقارير الوسطى تختفي من المخرَج النهائي باستمرار. ما أنسب علاج؟</span>
+            <span class="lang-en">A research coordinator concatenates 12 subagent reports into one long input for the synthesis agent. Findings from the middle reports keep disappearing from the final output. Best treatment?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ارفع <span dir="ltr" class="font-mono">max_tokens</span> لوكيل التجميع ليتّسع مخرَج أطول.</span><span class="lang-en">Raise the synthesis agent's <span dir="ltr" class="font-mono">max_tokens</span> so it can produce longer output.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف تعليمة «اقرأ كل الأقسام بعناية متساوية» في البرومبت.</span><span class="lang-en">Add an instruction: "read all sections with equal care" to the prompt.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">حُطّ ملخص النتائج المفتاحية في بداية المدخل المجمّع، ونظّم التقارير التفصيلية بعناوين أقسام صريحة.</span><span class="lang-en">Place a key-findings summary at the beginning of the aggregated input and organize the detailed reports with explicit section headers.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">قسّم التقارير على 12 استدعاء تجميع منفصلة وادمج المخرجات نصيًا.</span><span class="lang-en">Split into 12 separate synthesis calls and concatenate the outputs textually.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذا تأثير «الضياع في المنتصف»، وعلاجه الموضعي: ملخص في البداية (موضع عالي الانتباه) + عناوين أقسام صريحة تنظّم الوسط.</span><span class="lang-en">This is lost-in-the-middle, and its positional treatment: a summary at the beginning (high-attention position) + explicit section headers organizing the middle.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar"><span dir="ltr" class="font-mono">max_tokens</span> يخص طول المخرَج لا انتباه المدخل، والتعليمات اللفظية لا تعالج تأثير الموضع، والتقسيم لـ 12 استدعاء يفقد الترابط بين النتائج. الصحيح: ملخص أولًا + عناوين أقسام.</span><span class="lang-en"><span dir="ltr" class="font-mono">max_tokens</span> concerns output length not input attention, verbal instructions don't fix position effects, and 12 separate calls lose cross-report coherence. Correct: summary first + section headers.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">وكيل تجميع بميزانية سياق محدودة يستقبل من وكلاء البحث نصوصًا مطوّلة مع سلاسل تفكير كاملة، فتنفد ميزانيته قبل اكتمال التجميع. أين يكون الإصلاح؟</span>
+            <span class="lang-en">A synthesis agent with a limited context budget receives verbose prose plus full reasoning chains from the research agents, exhausting its budget before synthesis completes. Where does the fix belong?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">عدّل الوكلاء الأعلى (upstream) ليرجعوا بيانات منظّمة: حقائق مفتاحية، اقتباسات، درجات صلة — بدل المحتوى المطوَّل وسلاسل التفكير.</span><span class="lang-en">Modify the upstream agents to return structured data — key facts, citations, relevance scores — instead of verbose content and reasoning chains.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">كبّر ميزانية سياق وكيل التجميع لتستوعب النصوص المطوّلة.</span><span class="lang-en">Enlarge the synthesis agent's context budget to absorb the verbose prose.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">خلّ وكيل التجميع يلخّص المدخلات بنفسه أولًا ثم يبدأ التجميع.</span><span class="lang-en">Have the synthesis agent summarize the inputs itself first, then start synthesizing.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اقطع مدخلات كل وكيل عند أول 2,000 توكن بغضّ النظر عن المحتوى.</span><span class="lang-en">Truncate each agent's input at the first 2,000 tokens regardless of content.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">الإصلاح عند المنبع: بيانات منظّمة (حقائق، اقتباسات، درجات صلة) بدل النثر المطوَّل — هذا نصّ مهارة رسمية في الدليل لحالة «الوكيل الأدنى محدود الميزانية».</span><span class="lang-en">The fix belongs upstream: structured data (facts, citations, relevance scores) instead of verbose prose — the guide's stated skill for the "downstream agent with a limited budget" case.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">تكبير الميزانية يؤجّل المشكلة، والتلخيص داخل وكيل التجميع يستهلك الميزانية نفسها اللي نحاول حمايتها، والقطع الأعمى يرمي معلومات حرجة. الصحيح: بيانات منظّمة من المنبع.</span><span class="lang-en">Enlarging the budget postpones the problem, summarizing inside the synthesis agent burns the very budget we're protecting, and blind truncation drops critical information. Correct: structured data from upstream.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">حقائق القضية (مبالغ، تواريخ، أرقام طلبات، حالات) في كتلة ثابتة خارج الملخص، تُحقَن كل طلب — وطبقة منفصلة لكل قضية.</span><span class="lang-en">Case facts (amounts, dates, order numbers, statuses) live in a persistent block outside the summary, injected every request — one layer per issue.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">قُصّ نتائج الأدوات للحقول ذات الصلة قبل دخولها السياق (40+ حقلًا تصير 5).</span><span class="lang-en">Trim tool results to relevant fields before they enter context (40+ fields become 5).</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">ضد الضياع في المنتصف: ملخص النتائج المفتاحية في البداية + عناوين أقسام صريحة.</span><span class="lang-en">Against lost-in-the-middle: key-findings summary first + explicit section headers.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">مرّر كامل سجل المحادثة في كل طلب API — الحذف العشوائي يكسر الترابط.</span><span class="lang-en">Pass the complete conversation history in every API request — arbitrary trimming breaks coherence.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">الوكلاء الفرعيون يرجعون بيانات منظّمة + ميتاداتا (تواريخ، مصادر، منهجية) — لا سلاسل تفكير مطوّلة.</span><span class="lang-en">Subagents return structured data + metadata (dates, sources, methodology) — not verbose reasoning chains.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">نظرة عامة على الدومين 5</span><span class="lang-en">Domain 5 overview</span></span>
+        </span>
+      </a>
+      <a href="5-2-escalation.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.2 التصعيد وحل الغموض</span><span class="lang-en">5.2 Escalation &amp; ambiguity resolution</span></span>
+        </span>
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

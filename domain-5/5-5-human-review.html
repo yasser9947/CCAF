@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.5 مراجعة البشر ومعايرة الثقة — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.5 من شهادة CCAF: خدعة الدقة الإجمالية، درجات الثقة على مستوى الحقل، المعايرة بمجموعات التحقق المعنونة، العينة الطبقية، وتوجيه المراجعة البشرية.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.5 مراجعة البشر</span><span class="lang-en">5.5 Human review</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.5</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">مراجعة البشر ومعايرة الثقة</span>
+            <span class="lang-en">Human review workflows &amp; confidence calibration</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن «دقة إجمالية 97%» ممكن تكون أخطر رقم في مشروعك — لو كانت تخفي حقلًا حرجًا يخطئ 40% من الوقت.</span>
+            <span class="lang-en">Why it matters: "97% aggregate accuracy" can be the most dangerous number in your project — if it hides a critical field that's wrong 40% of the time.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">كيف تخفي مقاييس الدقة الإجمالية (97% مثلًا) أداءً سيئًا على أنواع مستندات أو حقول محددة.</span><span class="lang-en">How aggregate accuracy metrics (e.g. 97%) can mask poor performance on specific document types or fields.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تحليل الدقة حسب نوع المستند والحقل والتحقق من الاتساق عبر كل الشرائح قبل تقليل المراجعة البشرية.</span><span class="lang-en">Analyzing accuracy by document type and field, verifying consistency across all segments before reducing human review.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">إخراج درجات ثقة على مستوى الحقل ومعايرة عتبات المراجعة باستخدام مجموعات تحقق مُعنوَنة.</span><span class="lang-en">Having models output field-level confidence scores and calibrating review thresholds with labeled validation sets.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تطبيق العينة العشوائية الطبقية على الاستخراجات عالية الثقة لقياس معدل الخطأ المستمر واكتشاف أنماط أخطاء جديدة.</span><span class="lang-en">Applying stratified random sampling to high-confidence extractions for ongoing error-rate measurement and novel-pattern detection.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">توجيه الاستخراجات منخفضة الثقة أو ذات المصادر الغامضة/المتناقضة للمراجعة البشرية مع ترتيب أولويات سعة المراجعين المحدودة.</span><span class="lang-en">Routing low-confidence or ambiguous/contradictory-source extractions to human review, prioritizing limited reviewer capacity.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: THE AGGREGATE DECEPTION ===== -->
+    <section id="aggregate" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">خدعة المتوسط — 97% اللي تخفي كارثة</span>
+        <span class="lang-en">The aggregate deception — the 97% that hides a disaster</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>في أنظمة استخراج البيانات المنظّمة، الرقم الإجمالي يكذب بلطف. تخيّل: 95% من مستنداتك فواتير رقمية نظيفة يستخرجها النظام بدقة 99%، و5% منها ملفات PDF ممسوحة ضوئيًا تُستخرج <em>مجاميعها</em> بدقة 60% فقط. المتوسط الحسابي؟ <span dir="ltr" class="font-mono">0.95 &times; 99% + 0.05 &times; 60% &asymp; 97%</span> — رقم يبدو ممتازًا بينما <strong>حقل مالي حرج يخطئ 40% من الوقت</strong>.</p>
+        <p>لهذا القاعدة الرسمية: قبل أتمتة الاستخراجات عالية الثقة أو تقليل المراجعة البشرية، <strong>حلّل الدقة حسب نوع المستند والحقل</strong> (segmentation) وتحقق من الاتساق عبر <u>كل</u> الشرائح. القرار يُبنى على أضعف شريحة، لا على المتوسط.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>In structured extraction systems, the aggregate number lies politely. Imagine: 95% of your documents are clean digital invoices extracted at 99% accuracy, and 5% are scanned PDFs whose <em>totals</em> extract at only 60%. The weighted average? <span dir="ltr" class="font-mono">0.95 &times; 99% + 0.05 &times; 60% &asymp; 97%</span> — a number that looks excellent while <strong>a critical financial field is wrong 40% of the time</strong>.</p>
+        <p>Hence the official rule: before automating high-confidence extractions or reducing human review, <strong>analyze accuracy by document type and field</strong> (segmentation) and verify consistency across <u>every</u> segment. The decision is built on the weakest segment, not the mean.</p>
+      </div>
+
+      <!-- DIAGRAM 1: aggregate mask -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">What a 97% aggregate can actually be made of</p>
+        <div class="max-w-xl mx-auto space-y-3">
+          <div class="flex rounded-xl overflow-hidden border border-surface-600">
+            <div class="bg-emerald-500/25 border-r border-surface-600 p-3 text-center" style="width:78%">
+              <p class="text-emerald-200 font-mono text-[11px] font-bold">digital invoices &middot; 95% of volume</p>
+              <p class="text-emerald-300/80 font-mono text-[10px] mt-0.5">accuracy 99%</p>
+            </div>
+            <div class="bg-red-500/25 p-3 text-center" style="width:22%">
+              <p class="text-red-200 font-mono text-[11px] font-bold">scanned PDFs &middot; 5%</p>
+              <p class="text-red-300/80 font-mono text-[10px] mt-0.5">totals: 60%</p>
+            </div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center">
+            <p class="text-surface-200 font-mono text-xs">aggregate = 0.95 &times; 99% + 0.05 &times; 60% &asymp; <span class="text-white font-bold">97%</span> — "looks great"</p>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-rose-400"></i></div>
+          <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl p-3 text-center">
+            <p class="text-rose-200 font-mono text-xs font-semibold">drop review on "97%" = auto-approving a field that is WRONG 40% of the time</p>
+          </div>
+          <div class="pt-2 border-t border-surface-700 text-center">
+            <p class="text-surface-400 font-mono text-[11px]">gate automation on EVERY doc_type &times; field segment — not the mean</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">شريحة صغيرة فاشلة تختبئ خلف متوسط ممتاز — التجزئة حسب النوع والحقل هي اللي تكشفها.</span>
+        <span class="lang-en">A small failing segment hides behind an excellent mean — segmentation by type and field is what exposes it.</span>
+      </p>
+
+      <!-- warning callout -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-amber-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i></div>
+          <div>
+            <h4 class="font-bold text-amber-900 mb-1"><span class="lang-ar">تنبيه: المتوسط يخفي القاتل</span><span class="lang-en">Warning: the average hides the killer</span></h4>
+            <p class="text-amber-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">كل ما زاد حجم الشريحة السهلة، زاد قدرة المتوسط على إخفاء الشريحة الفاشلة. 99% على مليون مستند سهل تغطي على 50% في عشرة آلاف مستند حرج. اسأل دائمًا: «97% <em>على ماذا</em> بالضبط؟»</span>
+              <span class="lang-en">The bigger the easy segment, the better the mean hides the failing one. 99% on a million easy documents papers over 50% on ten thousand critical ones. Always ask: "97% <em>of what</em>, exactly?"</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: FIELD-LEVEL CONFIDENCE + CALIBRATED ROUTING ===== -->
+    <section id="calibration" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">ثقة على مستوى الحقل — ومعايرة قبل التوجيه</span>
+        <span class="lang-en">Field-level confidence — calibrated before routing</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>خطة التوجيه الصحيحة تقوم على ثلاث لبنات:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>درجات ثقة على مستوى الحقل</strong> — مو درجة واحدة للمستند كله. حقل «التاريخ» قد يكون مؤكدًا وحقل «المجموع» مشكوكًا فيه في نفس الفاتورة.</li>
+          <li><strong>معايرة العتبات بمجموعة تحقق مُعنوَنة (labeled validation set)</strong> — الثقة الخام اللي يبلّغها النموذج ما تُترجم مباشرة لدقة؛ تقيس على بيانات معروفة الإجابة كيف ترتبط الثقة بالصحة الفعلية، ثم تحدد العتبة <em>لكل نوع مستند وحقل</em>.</li>
+          <li><strong>التوجيه</strong> — منخفض الثقة، أو الحقول من شرائح ضعيفة، أو المستندات ذات المصادر الغامضة/المتناقضة ← للمراجعة البشرية، مع <u>ترتيب أولويات</u> لأن سعة المراجعين محدودة.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A correct routing design stands on three building blocks:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Field-level confidence scores</strong> — not one score for the whole document. The "date" field may be certain while the "total" field is doubtful on the same invoice.</li>
+          <li><strong>Thresholds calibrated on a labeled validation set</strong> — the raw confidence a model reports doesn't translate directly to accuracy; you measure, on data with known answers, how confidence maps to actual correctness, then set the threshold <em>per document type and field</em>.</li>
+          <li><strong>Routing</strong> — low confidence, fields from weak segments, or documents with ambiguous/contradictory sources go to human review, with <u>prioritization</u> because reviewer capacity is limited.</li>
+        </ul>
+      </div>
+
+      <!-- DIAGRAM 2: confidence routing tree -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Confidence routing tree — per extracted field</p>
+        <div class="max-w-2xl mx-auto space-y-0">
+          <div class="flex justify-center">
+            <div class="bg-surface-800 border border-surface-600 rounded-xl px-4 py-2.5 text-surface-200 font-mono text-xs">extracted field + model confidence</div>
+          </div>
+          <div class="flex justify-center py-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">1) segment (doc_type &times; field) accuracy verified healthy?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-rose-400 font-mono text-[10px]">NO</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-40">HUMAN REVIEW<br><span class="text-rose-300/60">weak segment</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">YES</span></div>
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">2) confidence &gt;= CALIBRATED threshold for this doc_type &times; field?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-rose-400 font-mono text-[10px]">NO</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-40">HUMAN REVIEW<br><span class="text-rose-300/60">low confidence</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">YES</span></div>
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">3) source document ambiguous or self-contradictory?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-rose-400 font-mono text-[10px]">YES</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-40">HUMAN REVIEW<br><span class="text-rose-300/60">priority queue</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">NO</span></div>
+          <div class="flex justify-center">
+            <div class="bg-emerald-500/20 border border-emerald-400/50 rounded-xl px-5 py-3 text-emerald-200 font-mono text-xs font-semibold text-center">AUTO-ACCEPT<br><span class="text-emerald-300/70 font-normal">still subject to the ongoing stratified audit sample (section 3)</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">ثلاث بوابات قبل القبول الآلي: صحة الشريحة، عتبة مُعايَرة لكل نوع وحقل، وخلوّ المصدر من الغموض والتناقض.</span>
+        <span class="lang-en">Three gates before auto-accept: segment health, a calibrated per-type-and-field threshold, and a source free of ambiguity and contradiction.</span>
+      </p>
+
+      <!-- CODE: calibrated routing -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="git-branch" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — توجيه المراجعة حسب الثقة المُعايَرة</span><span class="lang-en">Example — confidence-based review routing, calibrated</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">python</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-python"><code class="language-python"># Route by CALIBRATED field-level confidence, not raw self-report.
+# Thresholds are fit on a labeled validation set, PER document type + field.
+
+def route(extraction, thresholds, validation_stats):
+    doc_type = extraction["doc_type"]
+    for field, value in extraction["fields"].items():
+        conf = value["confidence"]                  # model-reported, 0..1
+        t    = thresholds[doc_type][field]          # calibrated cutoff
+        seg  = validation_stats[doc_type][field]    # measured segment accuracy
+
+        # A 97% aggregate can hide a weak segment: gate on the SEGMENT, not overall
+        if seg["accuracy"] &lt; 0.98 or conf &lt; t or value.get("conflict_detected"):
+            yield to_human(field, reason="low_conf / contradiction / weak_segment")
+        else:
+            yield auto_accept(field)
+
+# Ongoing quality control: stratified random sample of AUTO-ACCEPTED high-conf
+# items, so novel error patterns surface BEFORE they scale.
+audit = stratified_sample(auto_accepted, by=["doc_type", "field"], rate=0.05)</code></pre>
+        </div>
+      </div>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">الثقة الخام <strong>إشارة</strong>، والمعايرة تحوّلها إلى <strong>قرار</strong>. بدون مجموعة تحقق مُعنوَنة، «ثقة 0.9» رقم بلا معنى تشغيلي — قد تعني دقة 99% في حقل، و70% في حقل آخر. عاير لكل نوع مستند وحقل، ثم وجّه.</span>
+              <span class="lang-en">Raw confidence is a <strong>signal</strong>; calibration turns it into a <strong>decision</strong>. Without a labeled validation set, "0.9 confidence" has no operational meaning — it might mean 99% accuracy on one field and 70% on another. Calibrate per document type and field, then route.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: STRATIFIED SAMPLING OF HIGH-CONFIDENCE ===== -->
+    <section id="sampling" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">العينة الطبقية — رقابة مستمرة على «الموثوق»</span>
+        <span class="lang-en">Stratified sampling — ongoing oversight of the "trusted"</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>بعد ما تؤتمت الاستخراجات عالية الثقة، تظهر مشكلة خبيثة: <strong>عالي الثقة هو بالضبط اللي ما أحد يراجعه</strong>. لو ظهر نمط خطأ جديد (قالب فاتورة جديد، لغة جديدة، تنسيق تاريخ مختلف) والنموذج «واثق» وهو مخطئ — ما فيه أي إنسان في المسار يكتشفه، وسيتوسع الخطأ بصمت.</p>
+        <p>العلاج الرسمي: <strong>عينة عشوائية طبقية (stratified random sampling)</strong> من الاستخراجات عالية الثقة المقبولة آليًا — «طبقية» يعني موزعة عمدًا على كل شرائح <span dir="ltr" class="font-mono">doc_type &times; field</span> عشان ما تفوتك شريحة صغيرة. تعطيك: قياسًا مستمرًا لمعدل الخطأ الحقيقي، وكشفًا مبكرًا لأنماط الأخطاء الجديدة قبل ما تتوسع.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Once high-confidence extractions are automated, a vicious problem appears: <strong>high-confidence items are exactly the ones nobody reviews</strong>. If a novel error pattern emerges (a new invoice template, a new language, a different date format) and the model is "confident" while wrong — no human is left in the path to catch it, and the error scales silently.</p>
+        <p>The official treatment: <strong>stratified random sampling</strong> of auto-accepted high-confidence extractions — "stratified" meaning deliberately spread across every <span dir="ltr" class="font-mono">doc_type &times; field</span> segment so no small segment escapes. It gives you: an ongoing measurement of the true error rate, and early detection of novel error patterns before they scale.</p>
+      </div>
+
+      <!-- DIAGRAM 3: stratified sampling flow -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Stratified audit loop — quality control that never fully stops</p>
+        <div class="flex flex-col items-center gap-3 max-w-2xl mx-auto">
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-emerald-200 font-mono text-xs font-semibold">AUTO-ACCEPTED pool (high-confidence extractions)</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-rose-500/20 border border-rose-400/40 rounded-xl px-5 py-3 text-center">
+            <p class="text-rose-200 font-mono text-xs font-semibold">stratified random sample (~5%)</p>
+            <p class="text-rose-300/70 font-mono text-[10px] mt-0.5">spread across EVERY doc_type &times; field segment</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-surface-200 font-mono text-xs">human audit of the sample</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="grid grid-cols-2 gap-2 w-full max-w-md">
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-3 py-2.5 text-center text-surface-200 text-xs font-mono">ongoing error-rate<br>measurement</div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-3 py-2.5 text-center text-surface-200 text-xs font-mono">novel error-pattern<br>detection</div>
+          </div>
+          <div class="flex items-center gap-2 text-brand-300 font-mono text-[11px] mt-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>findings feed back into thresholds and segment stats (re-calibration)</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">حتى بعد الأتمتة، عينة طبقية صغيرة تُراجع بشريًا باستمرار — فتنكشف الأنماط الجديدة قبل أن تتوسع.</span>
+        <span class="lang-en">Even after automation, a small stratified sample keeps getting human review — so novel patterns surface before they scale.</span>
+      </p>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">«راجِع منخفض الثقة فقط» يفترض أن النموذج يعرف متى يخطئ — وهذا عكس المشكلة الأصلية. العينة الطبقية هي شبكة الأمان للحالة الأخطر: <strong>واثق ومخطئ</strong>.</span>
+              <span class="lang-en">"Review only low-confidence" assumes the model knows when it's wrong — the opposite of the original problem. Stratified sampling is the safety net for the most dangerous state: <strong>confident and wrong</strong>.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«97% ممتازة — أتمِت كل شيء وألغِ المراجعة»</strong> — الإجمالي يخفي شرائح فاشلة؛ جزّئ حسب النوع والحقل أولًا.</span><span class="lang-en"><strong>"97% is great — automate everything and drop review"</strong> — the aggregate masks failing segments; segment by type and field first.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«راجِع منخفض الثقة فقط وثِق بعالي الثقة تمامًا»</strong> — عالي الثقة يحتاج عينة طبقية مستمرة لكشف الأنماط الجديدة.</span><span class="lang-en"><strong>"Review only low-confidence and fully trust high-confidence"</strong> — high-confidence needs ongoing stratified sampling to catch novel patterns.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«استخدم الثقة الخام كعتبة مباشرة»</strong> — بلا معايرة بمجموعة مُعنوَنة، الثقة الخام لا تعكس الدقة الفعلية.</span><span class="lang-en"><strong>"Use raw confidence directly as the threshold"</strong> — without calibration on a labeled set, raw confidence doesn't reflect actual accuracy.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«نموذج أكبر يرفع الإجمالي ويُغني عن المراجعة»</strong> — يحسّن المتوسط وربما يُبقي الشريحة الضعيفة كما هي؛ لا يستبدل التجزئة والمعايرة.</span><span class="lang-en"><strong>"A bigger model raises the aggregate and removes the need for review"</strong> — it may lift the mean while leaving the weak segment untouched; it doesn't replace segmentation and calibration.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="plane" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: أمن المطار ومسار «المسافر الموثوق»</span><span class="lang-en">Real-life example: airport security and the trusted-traveler lane</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>أمن المطار ما يفتش كل حقيبة تفتيشًا يدويًا — يوجّه <strong>سعته المحدودة</strong> بذكاء: الحقائب اللي تطلق إنذارًا في الجهاز (منخفضة الثقة) والحقائب ذات المحتوى الغامض في الأشعة (مصدر متناقض) تروح للتفتيش اليدوي المفصّل. هذا هو توجيه المراجعة حسب الثقة.</p>
+              <p>لكن اللمسة الذكية: حتى مسار «المسافر الموثوق» السريع، يسحبون منه <strong>عينات عشوائية</strong> للتفتيش الكامل — من كل الرحلات وكل الأوقات (طبقية). ليش؟ لأنه لو اكتفوا بمن يطلق الإنذار، أي أسلوب تهريب <em>جديد</em> ما يعرفه الجهاز بيعبر بثقة. ولو قال مدير المطار «نسبة الضبط عندنا 97%» ما يكفي — السؤال الصحيح: 97% <em>على أي نوع رحلات وأي بوابات</em>؟ ممكن بوابة واحدة قديمة الأجهزة تكشف 60% فقط.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>Airport security doesn't hand-search every bag — it routes its <strong>limited capacity</strong> intelligently: bags that trip the scanner alarm (low confidence) and bags with ambiguous X-ray contents (a contradictory source) go to detailed manual inspection. That's confidence-based review routing.</p>
+              <p>But here's the smart touch: even the fast "trusted traveler" lane gets <strong>random pulls</strong> for full inspection — drawn across all flights and all hours (stratified). Why? Because if they only checked whoever trips the alarm, any <em>novel</em> smuggling technique the machine doesn't recognize would sail through confidently. And when the airport director says "our detection rate is 97%," that's not enough — the right question is: 97% <em>on which flight types and which gates</em>? One gate with old scanners might be catching only 60%.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>يظهر هذا الموضوع في سيناريو استخراج البيانات: نظام بدقة إجمالية عالية ومدير متحمس لإلغاء المراجعة، أو سؤال عن «كيف تراقب الجودة بعد الأتمتة». الإجابة الفائزة دائمًا سلسلة كاملة: <strong>تجزئة حسب النوع والحقل، ثقة على مستوى الحقل مُعايَرة بمجموعة مُعنوَنة، توجيه منخفض الثقة والغامض للبشر، وعينة طبقية مستمرة على عالي الثقة</strong>.</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>This topic shows up in the data-extraction scenario: a system with high aggregate accuracy and a manager eager to drop review, or a question about "how to monitor quality after automating." The winning answer is always the full chain: <strong>segment by type and field, field-level confidence calibrated on a labeled set, route low-confidence and ambiguous items to humans, and continuously stratified-sample the high-confidence pool</strong>.</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">أي قرار أتمتة مبني على الرقم الإجمالي وحده.</span><span class="lang-en">Any automation decision built on the aggregate number alone.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">ثقة خام كعتبة بدون معايرة على بيانات مُعنوَنة.</span><span class="lang-en">Raw confidence as a threshold without calibration on labeled data.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">ثقة كاملة بعالي الثقة بلا أي عينة تدقيق مستمرة.</span><span class="lang-en">Full trust in high-confidence with no ongoing audit sample.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">فعّلت القبول الآلي للاستخراجات عالية الثقة. كيف تستمر بقياس معدل الخطأ فيها وتكتشف أنماط الأخطاء الجديدة قبل أن تتوسع؟</span>
+            <span class="lang-en">You've enabled auto-accept for high-confidence extractions. How do you keep measuring their error rate and detect novel error patterns before they scale?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">راجِع الاستخراجات منخفضة الثقة فقط — عالية الثقة أثبتت نفسها.</span><span class="lang-en">Review only the low-confidence extractions — high-confidence has proven itself.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">انتظر شكاوى العملاء والأنظمة اللاحقة — هي أصدق مقياس واقعي.</span><span class="lang-en">Wait for complaints from customers and downstream systems — the most realistic metric.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">طبّق عينة عشوائية طبقية مستمرة على الاستخراجات عالية الثقة المقبولة آليًا، موزعة على كل شرائح النوع والحقل، وراجعها بشريًا.</span><span class="lang-en">Apply ongoing stratified random sampling to auto-accepted high-confidence extractions, spread across all type and field segments, with human audit.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعِد تشغيل نفس مجموعة التحقق القديمة كل شهر وقارن النتائج.</span><span class="lang-en">Re-run the same old validation set monthly and compare results.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">العينة الطبقية على عالي الثقة هي المهارة الرسمية: تقيس الخطأ الحقيقي باستمرار وتكشف الأنماط الجديدة. مراجعة منخفض الثقة فقط تفوّت «الواثق المخطئ»، والمجموعة القديمة لا تحتوي الأنماط الجديدة أصلًا.</span><span class="lang-en">Stratified sampling of high-confidence is the official skill: it measures true error continuously and surfaces novel patterns. Reviewing only low-confidence misses "confident and wrong," and the old validation set doesn't contain the new patterns at all.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">منخفض الثقة فقط يفوّت الأخطاء الواثقة، والشكاوى اكتشاف متأخر ومكلف، والمجموعة الثابتة القديمة عمياء عن المدخلات الجديدة. الصحيح: عينة طبقية مستمرة على عالي الثقة.</span><span class="lang-en">Low-confidence-only misses confident errors, complaints are late and costly detection, and a frozen old set is blind to new inputs. Correct: ongoing stratified sampling of high-confidence.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">تريد استخدام درجات ثقة النموذج لتوجيه المراجعة، لكن عتبة موحدة 0.9 تعطي نتائج متفاوتة جدًا بين الحقول. ما التصميم الصحيح؟</span>
+            <span class="lang-en">You want to use the model's confidence scores to route review, but a uniform 0.9 threshold performs very unevenly across fields. What's the right design?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ارفع العتبة الموحدة إلى 0.95 لتكون أكثر أمانًا في كل الحقول.</span><span class="lang-en">Raise the uniform threshold to 0.95 to be safer across all fields.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أخرِج ثقة على مستوى الحقل، وعايِر عتبة كل نوع مستند وحقل باستخدام مجموعة تحقق مُعنوَنة تقيس علاقة الثقة بالدقة الفعلية.</span><span class="lang-en">Output field-level confidence, and calibrate each document type and field's threshold using a labeled validation set measuring how confidence maps to actual accuracy.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اطلب من النموذج نفسه اختيار العتبة المناسبة لكل حقل حسب تقديره.</span><span class="lang-en">Ask the model itself to choose the right threshold per field, at its own discretion.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">شغّل الاستخراج مرتين وقارن — التطابق يعني الصحة ويغني عن الثقة.</span><span class="lang-en">Run extraction twice and compare — agreement means correctness and replaces confidence.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">المعايرة بمجموعة مُعنوَنة لكل نوع وحقل هي المهارة الرسمية — تحوّل الثقة الخام إلى عتبات ذات معنى تشغيلي. العتبة الموحدة تفترض أن 0.9 يعني نفس الشيء في كل حقل، وهذا ما نفاه الواقع.</span><span class="lang-en">Calibration on a labeled set per type and field is the official skill — it turns raw confidence into operationally meaningful thresholds. A uniform threshold assumes 0.9 means the same thing on every field, which reality just disproved.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">رفع العتبة الموحدة يكرر نفس الافتراض الخاطئ، وترك النموذج يحدد عتبته ثقة ذاتية بلا معايرة، والتشغيل المزدوج قد يكرر نفس الخطأ الواثق مرتين. الصحيح: معايرة لكل نوع وحقل بمجموعة مُعنوَنة.</span><span class="lang-en">Raising the uniform threshold repeats the same false assumption, letting the model pick its own threshold is uncalibrated self-confidence, and double-running can repeat the same confident error twice. Correct: per-type-and-field calibration on a labeled set.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">فريق المراجعة البشرية عنده سعة لمراجعة 5% فقط من الاستخراجات اليومية. أي الحالات تعطيها الأولوية في التوجيه؟</span>
+            <span class="lang-en">Your human review team has capacity for only 5% of daily extractions. Which cases get routing priority?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الأحدث وصولًا أولًا — العدل الزمني أبسط نظام.</span><span class="lang-en">Newest arrivals first — chronological fairness is the simplest system.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">المستندات الأطول — احتمال الخطأ فيها أعلى رياضيًا.</span><span class="lang-en">The longest documents — mathematically likelier to contain an error.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">عينة عشوائية متساوية من كل شيء — كل استخراج يستحق نفس الفرصة.</span><span class="lang-en">An equal random sample of everything — every extraction deserves the same chance.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الاستخراجات منخفضة الثقة المُعايَرة والمستندات ذات المصادر الغامضة أو المتناقضة — حيث احتمال الخطأ والضرر أعلى.</span><span class="lang-en">Extractions with low calibrated confidence and documents with ambiguous or contradictory sources — where error likelihood and damage are highest.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">المهارة الرسمية: وجّه منخفض الثقة والمصادر الغامضة/المتناقضة للمراجعة مع أولوية لسعة المراجعين المحدودة — أعلى قيمة لكل دقيقة مراجعة. (وتبقى عينة طبقية صغيرة على عالي الثقة كشبكة أمان.)</span><span class="lang-en">The official skill: route low-confidence and ambiguous/contradictory-source items to review, prioritizing limited reviewer capacity — maximum value per review minute. (A small stratified sample of high-confidence remains as the safety net.)</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">الترتيب الزمني والطول والعشوائية المتساوية كلها تتجاهل إشارة الخطر. السعة المحدودة توجَّه حيث الاحتمال والضرر أعلى: منخفض الثقة والمصادر الغامضة/المتناقضة.</span><span class="lang-en">Chronology, length, and flat randomness all ignore the risk signal. Limited capacity goes where likelihood and damage are highest: low confidence and ambiguous/contradictory sources.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">الدقة الإجمالية تخفي شرائح فاشلة — حلّل حسب نوع المستند والحقل قبل أي تقليل للمراجعة.</span><span class="lang-en">Aggregate accuracy masks failing segments — analyze by document type and field before any review reduction.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">ثقة على مستوى الحقل، وعتبات مُعايَرة بمجموعة تحقق مُعنوَنة — الثقة الخام ليست قرارًا.</span><span class="lang-en">Field-level confidence, thresholds calibrated on a labeled validation set — raw confidence is not a decision.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">عينة عشوائية طبقية مستمرة على عالي الثقة — شبكة الأمان ضد «واثق ومخطئ» والأنماط الجديدة.</span><span class="lang-en">Ongoing stratified random sampling of high-confidence — the safety net against "confident and wrong" and novel patterns.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">وجّه سعة المراجعين المحدودة لمنخفض الثقة والمصادر الغامضة/المتناقضة — حيث الخطر الحقيقي.</span><span class="lang-en">Route limited reviewer capacity to low-confidence and ambiguous/contradictory sources — where the real risk lives.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="5-4-codebase-exploration.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.4 السياق في استكشاف الأكواد الكبيرة</span><span class="lang-en">5.4 Context in large-codebase exploration</span></span>
+        </span>
+      </a>
+      <a href="5-6-provenance.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.6 المرجعية والغموض في التجميع</span><span class="lang-en">5.6 Provenance &amp; uncertainty in synthesis</span></span>
+        </span>
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.3 القواعد الخاصة بالمسارات — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.3: ملفات .claude/rules/ بترويسة YAML وحقل paths بأنماط glob — تحميل الاتفاقيات شرطياً عند تحرير الملفات المطابقة فقط، ومتى تتفوق على CLAUDE.md المجلدي.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">قواعد المسارات</span><span class="lang-en">Path rules</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.3</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">القواعد الخاصة بالمسارات</span>
+            <span class="lang-en">Path-specific rules</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">الاتفاقية الذكية تحضر وقت الحاجة فقط: نمط <span dir="ltr" class="font-mono">glob</span> واحد يطارد الملف أينما كان — بدون حشو سياق كل جلسة.</span>
+            <span class="lang-en">Smart conventions show up only when needed: one <span class="font-mono">glob</span> pattern follows the file wherever it lives — without stuffing every session's context.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">كتابة ملفات <span dir="ltr" class="font-mono">.claude/rules/</span> بترويسة YAML فيها حقل <span dir="ltr" class="font-mono">paths</span> بأنماط <span dir="ltr" class="font-mono">glob</span> (مثل <span dir="ltr" class="font-mono">paths: ["terraform/**/*"]</span>)</span><span class="lang-en">Writing <span class="font-mono">.claude/rules/</span> files with YAML frontmatter whose <span class="font-mono">paths</span> field holds <span class="font-mono">glob</span> patterns (e.g. <span class="font-mono">paths: ["terraform/**/*"]</span>)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">كيف تُحمَّل القاعدة فقط عند تحرير ملف مطابق — فيقل السياق غير ذي الصلة وتوفَّر الـ tokens</span><span class="lang-en">How a rule loads only when editing a matching file — cutting irrelevant context and saving tokens</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">تطبيق الاتفاقيات بحسب <strong>نوع الملف لا موقعه</strong> (<span dir="ltr" class="font-mono">**/*.test.tsx</span> لكل ملفات الاختبار أينما كانت)</span><span class="lang-en">Applying conventions by <strong>file type, not location</strong> (<span class="font-mono">**/*.test.tsx</span> for all test files wherever they live)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">متى تختار قاعدة <span dir="ltr" class="font-mono">paths</span> بدل <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي — ومتى يبقى المجلدي كافياً</span><span class="lang-en">When to choose a <span class="font-mono">paths</span> rule over a directory <span class="font-mono">CLAUDE.md</span> — and when the directory file remains enough</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: how activation works ===== -->
+    <section id="activation" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="toggle-right" class="w-5 h-5"></i></span>
+        <span class="lang-ar">كيف يعمل التفعيل الشرطي</span>
+        <span class="lang-en">How conditional activation works</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>ملف القاعدة في <span dir="ltr" class="font-mono">.claude/rules/</span> يبدأ بترويسة YAML فيها حقل <span dir="ltr" class="font-mono">paths</span> يحوي أنماط <span dir="ltr" class="font-mono">glob</span>. الميكانيكية بسيطة وحتمية: <strong>عند تحرير ملف، يُقارن مساره بالأنماط — تطابق؟ تُحمَّل القاعدة. لا تطابق؟ لا تظهر في السياق إطلاقاً.</strong></p>
+        <p>الفائدة مزدوجة: أولاً <strong>دقة التطبيق</strong> — اتفاقيات الاختبارات تحضر مع ملفات الاختبار فقط، فلا تتزاحم التعليمات غير ذات الصلة في كل جلسة. وثانياً <strong>اقتصاد السياق</strong> — كل قاعدة غير محمَّلة هي tokens موفَّرة تترك مساحة لما يهم فعلاً.</p>
+        <p>وقوة <span dir="ltr" class="font-mono">glob</span> الحقيقية أنها تطابق <strong>بحسب النوع لا الموقع</strong>: النمط <span dir="ltr" class="font-mono">**/*.test.tsx</span> يلتقط <span dir="ltr" class="font-mono">Button.test.tsx</span> بجوار <span dir="ltr" class="font-mono">Button.tsx</span> في أي مجلد من المستودع، والنمط <span dir="ltr" class="font-mono">terraform/**/*</span> يغطي شجرة البنية التحتية كاملة بقاعدة واحدة.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>A rule file in <span class="font-mono">.claude/rules/</span> opens with YAML frontmatter whose <span class="font-mono">paths</span> field holds <span class="font-mono">glob</span> patterns. The mechanics are simple and deterministic: <strong>when a file is edited, its path is checked against the patterns — match? The rule loads. No match? It never enters context at all.</strong></p>
+        <p>The benefit is double: first, <strong>precision</strong> — testing conventions arrive with test files only, so unrelated instructions stop crowding every session. Second, <strong>context economy</strong> — every unloaded rule is saved tokens, leaving room for what actually matters.</p>
+        <p><span class="font-mono">glob</span>'s real power is matching <strong>by type, not location</strong>: <span class="font-mono">**/*.test.tsx</span> catches <span class="font-mono">Button.test.tsx</span> sitting next to <span class="font-mono">Button.tsx</span> in any folder of the repo, and <span class="font-mono">terraform/**/*</span> covers the whole infrastructure tree with a single rule.</p>
+      </div>
+
+      <!-- DIAGRAM 1: activation flow -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="workflow" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: مسار التفعيل عند التحرير</span><span class="lang-en">Diagram: the activation path on edit</span></div>
+        <div dir="ltr" class="space-y-3 max-w-3xl mx-auto">
+          <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+            <div class="flex-1 rounded-xl border-2 border-violet-300 bg-violet-50 p-3 text-center">
+              <div class="font-mono text-xs font-bold text-violet-800">edit src/ui/Button.test.tsx</div>
+            </div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 mx-auto md:rotate-0 rotate-90 shrink-0"></i>
+            <div class="flex-1 rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center">
+              <div class="font-mono text-xs font-bold text-surface-700">paths check</div>
+              <div class="font-mono text-[11px] text-surface-500">"**/*.test.tsx" ?</div>
+            </div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-500 mx-auto md:rotate-0 rotate-90 shrink-0"></i>
+            <div class="flex-1 rounded-xl border-2 border-emerald-400 bg-emerald-50 p-3 text-center">
+              <div class="font-mono text-xs font-bold text-emerald-700 flex items-center justify-center gap-1"><i data-lucide="check" class="w-3.5 h-3.5"></i> MATCH</div>
+              <div class="font-mono text-[11px] text-emerald-600">testing.md LOADS into context</div>
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row items-stretch md:items-center gap-2">
+            <div class="flex-1 rounded-xl border-2 border-surface-200 bg-white p-3 text-center">
+              <div class="font-mono text-xs font-bold text-surface-600">edit src/ui/Button.tsx</div>
+            </div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 mx-auto md:rotate-0 rotate-90 shrink-0"></i>
+            <div class="flex-1 rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center">
+              <div class="font-mono text-xs font-bold text-surface-700">paths check</div>
+              <div class="font-mono text-[11px] text-surface-500">"**/*.test.tsx" ?</div>
+            </div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-red-400 mx-auto md:rotate-0 rotate-90 shrink-0"></i>
+            <div class="flex-1 rounded-xl border-2 border-dashed border-red-300 bg-red-50/50 p-3 text-center">
+              <div class="font-mono text-xs font-bold text-red-600 flex items-center justify-center gap-1"><i data-lucide="x" class="w-3.5 h-3.5"></i> NO MATCH</div>
+              <div class="font-mono text-[11px] text-red-500">rule stays out — zero tokens spent</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">نفس المجلد، ملفان مختلفان: ملف الاختبار يفعّل القاعدة، وملف المكوّن لا يحمّلها أصلاً.</span>
+          <span class="lang-en">Same folder, two files: the test file activates the rule; the component file never loads it.</span>
+        </p>
+      </div>
+
+      <!-- Code: testing rule -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: .claude/rules/testing.md — اتفاقية بحسب النوع</span><span class="lang-en">Example: .claude/rules/testing.md — a by-type convention</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown">---
+# Loads ONLY when the edited file matches, wherever it lives.
+paths:
+  - "**/*.test.tsx"
+  - "**/*.test.ts"
+  - "**/__tests__/**"
+---
+# Testing conventions
+
+- Use React Testing Library; query by role/label, never by test-id.
+- One `describe` block per component; colocate the test next to its source.
+- Mock network calls with MSW handlers, never ad-hoc `fetch` stubs.
+- Cover the empty, null, and boundary cases for every new branch.</code></pre>
+        </div>
+      </div>
+
+      <!-- Code: terraform rule -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: .claude/rules/terraform.md — اتفاقية بحسب المنطقة</span><span class="lang-en">Example: .claude/rules/terraform.md — a by-area convention</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown">---
+paths:
+  - "terraform/**/*"
+---
+# Infrastructure conventions
+
+- Every resource gets `environment` and `owner` tags.
+- Never hardcode regions; use `var.region`.
+- State changes require a plan file reviewed in the PR.</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">كلمتان في نص السؤال تكشفان الإجابة: «<strong>تلقائياً</strong>» (تستبعد المهارات لأنها تُستدعى يدوياً) و«<strong>منتشرة</strong> عبر المستودع» (تستبعد <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي لأنه مقيّد بموقعه). ما يبقى: قاعدة <span dir="ltr" class="font-mono">paths</span>.</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">Two words in the question give the answer away: "<strong>automatically</strong>" (eliminates skills — manually invoked) and "<strong>spread</strong> across the repo" (eliminates a directory <span class="font-mono">CLAUDE.md</span> — location-bound). What remains: a <span class="font-mono">paths</span> rule.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: rules vs directory CLAUDE.md ===== -->
+    <section id="vs-directory" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="scale" class="w-5 h-5"></i></span>
+        <span class="lang-ar">قاعدة paths أم CLAUDE.md مجلدي؟</span>
+        <span class="lang-en">A paths rule or a directory CLAUDE.md?</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>القاعدة الفاصلة: <strong>الاتفاقية التي تتبع نوع الملف</strong> (اختبارات، ترحيلات، ملفات إعداد) <strong>منتشرة بطبيعتها</strong> عبر المجلدات — تحتاج قاعدة <span dir="ltr" class="font-mono">glob</span> واحدة تطاردها أينما كانت. أما <strong>الاتفاقية المرتبطة بمنطقة متماسكة واحدة</strong> (كل <span dir="ltr" class="font-mono">frontend/</span> مثلاً) فيكفيها <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل ذلك المجلد — وهو خيار مشروع تماماً هناك.</p>
+        <p>حاول تغطية ملفات منتشرة بملفات <span dir="ltr" class="font-mono">CLAUDE.md</span> مجلدية وستنتهي بعشرات النسخ المكررة التي تنحرف عن بعضها مع كل تعديل. هذا بالضبط السيناريو الذي صُمم له حقل <span dir="ltr" class="font-mono">paths</span>.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>The dividing rule: <strong>a convention that follows a file type</strong> (tests, migrations, config files) is <strong>inherently spread</strong> across directories — it needs one <span class="font-mono">glob</span> rule chasing it wherever it goes. A <strong>convention tied to one cohesive area</strong> (all of <span class="font-mono">frontend/</span>, say) is well served by a <span class="font-mono">CLAUDE.md</span> inside that folder — a perfectly legitimate choice there.</p>
+        <p>Try covering spread-out files with directory <span class="font-mono">CLAUDE.md</span> copies and you end up with dozens of duplicates drifting apart on every edit. That is exactly the scenario the <span class="font-mono">paths</span> field was designed for.</p>
+      </div>
+
+      <!-- DIAGRAM 2: good/bad panels -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="columns-2" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: تغطية ملفات الاختبار المنتشرة — طريقتان</span><span class="lang-en">Diagram: covering spread-out test files — two approaches</span></div>
+        <div dir="ltr" class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 p-4 space-y-2.5">
+            <div class="flex items-center gap-2 font-bold text-red-700 text-sm"><i data-lucide="x-circle" class="w-4 h-4"></i> DIRECTORY CLAUDE.md COPIES</div>
+            <div class="space-y-1.5 font-mono text-[11px] text-surface-600">
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5">src/ui/CLAUDE.md <span class="text-red-500">(copy 1)</span></div>
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5">src/api/CLAUDE.md <span class="text-red-500">(copy 2)</span></div>
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5">src/lib/CLAUDE.md <span class="text-red-500">(copy 3)</span></div>
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5">services/auth/CLAUDE.md <span class="text-red-500">(copy 4...)</span></div>
+            </div>
+            <div class="text-xs text-red-700">every folder needs a copy — copies drift apart over time</div>
+          </div>
+          <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-4 space-y-2.5">
+            <div class="flex items-center gap-2 font-bold text-emerald-700 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i> ONE GLOB RULE</div>
+            <div class="rounded-md bg-white border border-emerald-300 px-2 py-1.5 font-mono text-[11px] text-surface-700">.claude/rules/testing.md<br>paths: ["**/*.test.tsx"]</div>
+            <div class="space-y-1.5 font-mono text-[11px] text-emerald-700">
+              <div class="flex items-center gap-1.5"><i data-lucide="check" class="w-3 h-3 shrink-0"></i> src/ui/Button.test.tsx</div>
+              <div class="flex items-center gap-1.5"><i data-lucide="check" class="w-3 h-3 shrink-0"></i> src/api/routes.test.tsx</div>
+              <div class="flex items-center gap-1.5"><i data-lucide="check" class="w-3 h-3 shrink-0"></i> services/auth/login.test.tsx</div>
+            </div>
+            <div class="text-xs text-emerald-700">one source of truth follows the type everywhere</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">اليسار: نسخ مجلدية تتكاثر وتنحرف. اليمين: قاعدة واحدة بنمط glob تغطي الجميع.</span>
+          <span class="lang-en">Left: multiplying, drifting directory copies. Right: one glob rule covering them all.</span>
+        </p>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="space-y-3">
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">الموقف</th>
+                <th class="p-3 text-center font-semibold">.claude/rules/ + paths</th>
+                <th class="p-3 text-center font-semibold">CLAUDE.md مجلدي</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">ملفات منتشرة عبر مجلدات كثيرة (اختبارات)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">منطقة واحدة متماسكة (كل frontend/)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">تحميل مشروط بحسب نوع الملف</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">توفير tokens (يُحمَّل عند الحاجة فقط)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center">جزئياً</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مصدر حقيقة واحد بلا نسخ مكررة</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">Situation</th>
+                <th class="p-3 text-center font-semibold">.claude/rules/ + paths</th>
+                <th class="p-3 text-center font-semibold">Directory CLAUDE.md</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Files spread across many dirs (tests)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">One cohesive area (all of frontend/)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Conditional load by file type</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Token savings (loads only when needed)</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center">Partial</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">One source of truth, no duplicates</td><td class="p-3 text-center"><i data-lucide="check" class="inline w-4 h-4 text-emerald-500"></i></td><td class="p-3 text-center"><i data-lucide="x" class="inline w-4 h-4 text-red-400"></i></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed">أنماط <span dir="ltr" class="font-mono">glob</span> مطابقة <strong>صريحة وحتمية</strong>؛ الاعتماد على Claude «يستنتج» القسم المناسب من عناوين ملف موحّد مطابقة <strong>احتمالية</strong>. حين يطلب السؤال ضماناً تلقائياً بحسب المسار، الحتمي يفوز دائماً.</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed"><span class="font-mono">glob</span> patterns are <strong>explicit, deterministic</strong> matching; relying on Claude to "infer" the right section from a consolidated file's headers is <strong>probabilistic</strong>. When a question demands automatic, path-based application, deterministic always wins.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «وحّد كل الاتفاقيات في <span dir="ltr" class="font-mono">CLAUDE.md</span> الجذر تحت عناوين، ودع Claude يستنتج القسم المناسب». <strong class="text-emerald-700">الصح:</strong> الاستنتاج احتمالي وغير موثوق — المطابقة الصريحة بـ <span dir="ltr" class="font-mono">glob</span> حتمية.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "consolidate all conventions in the root <span class="font-mono">CLAUDE.md</span> under headers and let Claude infer the right section." <strong class="text-emerald-700">Reality:</strong> inference is probabilistic and unreliable — explicit <span class="font-mono">glob</span> matching is deterministic.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «أنشئ مهارة لكل نوع كود تحمل اتفاقياته في <span dir="ltr" class="font-mono">SKILL.md</span>». <strong class="text-emerald-700">الصح:</strong> المهارات تُستدعى يدوياً — يناقض شرط التطبيق «التلقائي» بحسب المسار.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "create a skill per code type carrying its conventions in <span class="font-mono">SKILL.md</span>." <strong class="text-emerald-700">Reality:</strong> skills are manually invoked — contradicting the "automatic" path-based requirement.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «ضع <span dir="ltr" class="font-mono">CLAUDE.md</span> في كل مجلد فرعي فيه ملف اختبار». <strong class="text-emerald-700">الصح:</strong> نسخ مكررة تنحرف مع الوقت — لملفات منتشرة، قاعدة <span dir="ltr" class="font-mono">glob</span> واحدة هي مصدر الحقيقة.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "put a <span class="font-mono">CLAUDE.md</span> in every subdirectory containing a test file." <strong class="text-emerald-700">Reality:</strong> duplicated copies drift over time — for spread files, one <span class="font-mono">glob</span> rule is the single source of truth.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="plane" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: أمن المطار</span><span class="lang-en">Real-life example: airport security</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>قاعدة أمن المطار «كل من يحمل سوائل يمر بفحص إضافي» تنطبق <strong>بحسب ما تحمله، لا بحسب البوابة التي دخلت منها</strong> — مسافر البوابة 3 ومسافر البوابة 47 يخضعان لنفس القاعدة تلقائياً. هذه هي قاعدة <span dir="ltr" class="font-mono">paths</span> بنمط <span dir="ltr" class="font-mono">glob</span>: تلتقط <span dir="ltr" class="font-mono">**/*.test.tsx</span> في أي مجلد.</p>
+              <p>البديل الساذج؟ لوحة تعليمات منفصلة عند <strong>كل بوابة من الأربعين</strong> (نسخة <span dir="ltr" class="font-mono">CLAUDE.md</span> في كل مجلد) — وستُحدَّث لوحة وتُنسى أخرى حتى تتناقض اللوحات. أما لوحة «تعليمات صالة كبار الزوار» المعلّقة داخل الصالة نفسها فمناسبة تماماً — لأنها تخص منطقة واحدة متماسكة، مثل <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل <span dir="ltr" class="font-mono">frontend/</span>.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>The airport rule "anyone carrying liquids goes through extra screening" applies <strong>by what you carry, not which gate you entered</strong> — the traveler at gate 3 and the one at gate 47 hit the same rule automatically. That is a <span class="font-mono">paths</span> rule with a <span class="font-mono">glob</span>: it catches <span class="font-mono">**/*.test.tsx</span> in any folder.</p>
+              <p>The naive alternative? A separate instruction board at <strong>each of the forty gates</strong> (a <span class="font-mono">CLAUDE.md</span> copy per directory) — one board gets updated, another forgotten, until they contradict each other. But the "VIP lounge rules" board hanging inside the lounge itself is perfectly fine — it governs one cohesive area, like a <span class="font-mono">CLAUDE.md</span> inside <span class="font-mono">frontend/</span>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">السؤال الرسمي النموذجي: مناطق كود بأنماط مختلفة + ملفات اختبار منتشرة بجوار مصادرها + مطلوب تطبيق «تلقائي» — الجواب قاعدة <span dir="ltr" class="font-mono">rules</span> بـ <span dir="ltr" class="font-mono">glob</span>.</span><span class="lang-en">The canonical official question: code areas with different styles + test files colocated everywhere + "automatic" application required — answered by a <span class="font-mono">rules</span> file with a <span class="font-mono">glob</span>.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">صيغة «تقليل السياق غير ذي الصلة / توفير tokens» — ميزة التحميل الشرطي لقواعد <span dir="ltr" class="font-mono">paths</span>.</span><span class="lang-en">The "reduce irrelevant context / save tokens" phrasing — the conditional-loading advantage of <span class="font-mono">paths</span> rules.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">قد يعكسون السؤال: منطقة واحدة متماسكة فقط — عندها <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي إجابة صحيحة مشروعة.</span><span class="lang-en">They may invert it: one cohesive area only — where a directory <span class="font-mono">CLAUDE.md</span> is a legitimate correct answer.</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«عناوين في ملف موحّد ويستنتج Claude» — احتمالي حيث يُطلب الحتمي.</span><span class="lang-en">"Headers in one consolidated file, Claude infers" — probabilistic where determinism is demanded.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«مهارة لكل نوع كود» — استدعاء يدوي يناقض «تلقائياً».</span><span class="lang-en">"A skill per code type" — manual invocation contradicting "automatically."</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«نسخة <span dir="ltr" class="font-mono">CLAUDE.md</span> في كل مجلد» لملفات منتشرة — عبء نسخ ينحرف.</span><span class="lang-en">"A <span class="font-mono">CLAUDE.md</span> copy per directory" for spread files — a drifting duplication burden.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">فريق البنية التحتية يريد اتفاقيات Terraform (وسوم إلزامية، منع كتابة الـ region يدوياً) أن تُحمَّل فقط عند تحرير ملفات داخل شجرة <span dir="ltr" class="font-mono">terraform/</span> — لا في جلسات الواجهة ولا الـ API. كيف تحقق ذلك؟</span>
+            <span class="lang-en">The infrastructure team wants Terraform conventions (mandatory tags, no hardcoded regions) loaded only when editing files inside the <span class="font-mono">terraform/</span> tree — never in frontend or API sessions. How do you achieve that?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف قسم Terraform إلى <span dir="ltr" class="font-mono">CLAUDE.md</span> الجذر ليقرأه Claude في كل جلسة</span>
+            <span class="lang-en">Add a Terraform section to the root <span class="font-mono">CLAUDE.md</span> so Claude reads it every session</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">ملف في <span dir="ltr" class="font-mono">.claude/rules/</span> بترويسة YAML فيها <span dir="ltr" class="font-mono">paths: ["terraform/**/*"]</span></span>
+            <span class="lang-en">A file in <span class="font-mono">.claude/rules/</span> with YAML frontmatter <span class="font-mono">paths: ["terraform/**/*"]</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">مهارة <span dir="ltr" class="font-mono">terraform-conventions</span> يشغّلها المهندس قبل كل تعديل بنية تحتية</span>
+            <span class="lang-en">A <span class="font-mono">terraform-conventions</span> skill the engineer runs before each infrastructure edit</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">اكتب الاتفاقيات في <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> لكل مهندس بنية تحتية</span>
+            <span class="lang-en">Write the conventions in each infra engineer's <span class="font-mono">~/.claude/CLAUDE.md</span></span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا المثال الحرفي من الدليل الرسمي: قاعدة <span dir="ltr" class="font-mono">paths: ["terraform/**/*"]</span> تُحمَّل فقط عند تحرير ملف مطابق. الخيار A يحمّلها في كل جلسة (عكس المطلوب)، وC استدعاء يدوي يُنسى، وD شخصي لا يُشارك ولا يضمن الاتساق.</div>
+            <div class="lang-en text-emerald-900">Correct. This is the guide's literal example: a <span class="font-mono">paths: ["terraform/**/*"]</span> rule loads only when a matching file is edited. Option A loads it in every session (the opposite of the requirement), C is a forgettable manual invocation, and D is personal, unshared, and inconsistent.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. المطلوب تحميل <em>شرطي</em> بحسب المسار — وهذه وظيفة حقل <span dir="ltr" class="font-mono">paths</span> في ملفات <span dir="ltr" class="font-mono">.claude/rules/</span> تحديداً. الملف الجذري دائم التحميل، والمهارة يدوية، والملف الشخصي لا يُشارَك.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. The requirement is <em>conditional</em>, path-based loading — precisely the job of the <span class="font-mono">paths</span> field in <span class="font-mono">.claude/rules/</span> files. The root file always loads, a skill is manual, and the personal file is unshared.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">متى تتفوّق قاعدة <span dir="ltr" class="font-mono">glob</span> في <span dir="ltr" class="font-mono">.claude/rules/</span> بوضوح على ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> مجلدي؟</span>
+            <span class="lang-en">When does a <span class="font-mono">glob</span> rule in <span class="font-mono">.claude/rules/</span> clearly beat a directory-level <span class="font-mono">CLAUDE.md</span>?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">عندما تخص الاتفاقية مجلداً واحداً متماسكاً مثل <span dir="ltr" class="font-mono">frontend/</span></span>
+            <span class="lang-en">When the convention concerns one cohesive folder like <span class="font-mono">frontend/</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">عندما نريد تحميل الاتفاقيات في كل جلسة دون شروط</span>
+            <span class="lang-en">When we want the conventions loaded unconditionally in every session</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">عندما تنطبق الاتفاقية على ملفات بحسب نوعها وهي منتشرة عبر مجلدات كثيرة</span>
+            <span class="lang-en">When the convention applies to files by type and they are spread across many directories</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">عندما نحتاج تقييد الأدوات المسموحة أثناء التحرير</span>
+            <span class="lang-en">When we need to restrict which tools are allowed during editing</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. الميزة الحاسمة لأنماط <span dir="ltr" class="font-mono">glob</span>: تطارد نوع الملف عبر حدود المجلدات (<span dir="ltr" class="font-mono">**/*.test.tsx</span>)، بينما <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي أسير مجلده. في A الخياران متكافئان تقريباً، وB عكس فكرة التحميل الشرطي، وD وظيفة <span dir="ltr" class="font-mono">allowed-tools</span> في المهارات لا القواعد.</div>
+            <div class="lang-en text-emerald-900">Correct. The decisive advantage of <span class="font-mono">glob</span> patterns: they chase a file type across directory boundaries (<span class="font-mono">**/*.test.tsx</span>), while a directory <span class="font-mono">CLAUDE.md</span> is captive to its folder. In A the two options are roughly equivalent, B is the opposite of conditional loading, and D is the job of <span class="font-mono">allowed-tools</span> on skills, not rules.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. الدليل الرسمي ينص على الميزة حرفياً: قواعد <span dir="ltr" class="font-mono">glob</span> تتفوّق على <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي «للاتفاقيات الممتدة عبر مجلدات متعددة» مثل ملفات الاختبار المنتشرة في المستودع.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. The official guide states the advantage verbatim: <span class="font-mono">glob</span> rules beat directory <span class="font-mono">CLAUDE.md</span> files "for conventions that span multiple directories," like test files scattered through a codebase.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">اتفاقيات تصميم مكونات React عندكم تخص مجلد <span dir="ltr" class="font-mono">frontend/</span> وحده — كل ملفاته هناك ولا يوجد كود واجهة في أي مكان آخر. أي خيار بسيط ومناسب تماماً هنا؟</span>
+            <span class="lang-en">Your React component design conventions concern the <span class="font-mono">frontend/</span> folder alone — all its files live there and no UI code exists anywhere else. Which simple option fits perfectly here?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل <span dir="ltr" class="font-mono">frontend/</span> يُحمَّل عند العمل هناك</span>
+            <span class="lang-en">A <span class="font-mono">CLAUDE.md</span> inside <span class="font-mono">frontend/</span>, loaded when working there</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">نسخ الاتفاقيات إلى <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> عند كل مطوّر واجهة</span>
+            <span class="lang-en">Copying the conventions into every frontend developer's <span class="font-mono">~/.claude/CLAUDE.md</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">مهارة <span dir="ltr" class="font-mono">react-conventions</span> يستدعيها المطوّر قبل أي تعديل</span>
+            <span class="lang-en">A <span class="font-mono">react-conventions</span> skill developers invoke before any edit</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">لا خيار صحيح غير قاعدة <span dir="ltr" class="font-mono">glob</span> — المجلدي خاطئ دائماً</span>
+            <span class="lang-en">Nothing but a <span class="font-mono">glob</span> rule is ever right — directory files are always wrong</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. الحكم الصحيح يعمل بالاتجاهين: منطقة واحدة متماسكة → <span dir="ltr" class="font-mono">CLAUDE.md</span> مجلدي حل بسيط ومشروع (وقاعدة <span dir="ltr" class="font-mono">glob</span> بنمط <span dir="ltr" class="font-mono">frontend/**/*</span> تعمل أيضاً — لكن المجلدي ليس خطأ هنا). الفخ هو الاعتقاد أن قواعد <span dir="ltr" class="font-mono">glob</span> «الإجابة الصحيحة دائماً» بلا نظر للسيناريو.</div>
+            <div class="lang-en text-emerald-900">Correct. Good judgment cuts both ways: one cohesive area → a directory <span class="font-mono">CLAUDE.md</span> is a simple, legitimate solution (a <span class="font-mono">glob</span> rule with <span class="font-mono">frontend/**/*</span> works too — but the directory file is not wrong here). The trap is believing <span class="font-mono">glob</span> rules are "always the right answer" regardless of scenario.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>A</strong>. قاعدة <span dir="ltr" class="font-mono">glob</span> تتفوّق للملفات <em>المنتشرة</em>؛ أما منطقة واحدة متماسكة فملف <span dir="ltr" class="font-mono">CLAUDE.md</span> داخلها مناسب تماماً. لا تحفظ «قواعد glob دائماً» — احفظ <em>لماذا</em> تتفوّق ومتى.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>A</strong>. A <span class="font-mono">glob</span> rule wins for <em>spread</em> files; for one cohesive area, a <span class="font-mono">CLAUDE.md</span> inside it fits perfectly. Do not memorize "glob rules always" — remember <em>why</em> they win and when.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">ملف في <span dir="ltr" class="font-mono">.claude/rules/</span> + ترويسة YAML فيها <span dir="ltr" class="font-mono">paths</span> بأنماط <span dir="ltr" class="font-mono">glob</span> = تحميل شرطي حتمي.</span><span class="lang-en">A <span class="font-mono">.claude/rules/</span> file + YAML frontmatter with <span class="font-mono">paths</span> globs = deterministic conditional loading.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">القاعدة تُحمَّل فقط عند تحرير ملف مطابق — سياق أنظف وtokens أوفر.</span><span class="lang-en">The rule loads only when editing a matching file — cleaner context, saved tokens.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">اتفاقية بحسب النوع ومنتشرة (<span dir="ltr" class="font-mono">**/*.test.tsx</span>) → قاعدة <span dir="ltr" class="font-mono">glob</span>؛ منطقة متماسكة واحدة → <span dir="ltr" class="font-mono">CLAUDE.md</span> مجلدي يكفي.</span><span class="lang-en">By-type, spread convention (<span class="font-mono">**/*.test.tsx</span>) → a <span class="font-mono">glob</span> rule; one cohesive area → a directory <span class="font-mono">CLAUDE.md</span> suffices.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">كلمتا «تلقائياً» و«منتشرة» في السؤال = مؤشر قاعدة <span dir="ltr" class="font-mono">paths</span>؛ المهارات يدوية والعناوين استنتاج احتمالي.</span><span class="lang-en">"Automatically" and "spread" in a question = the <span class="font-mono">paths</span>-rule signal; skills are manual and headers are probabilistic inference.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="3-2-commands-skills.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.2 الأوامر المخصّصة والمهارات</span>
+            <span class="lang-en">3.2 Custom commands &amp; skills</span>
+          </div>
+        </div>
+      </a>
+      <a href="3-4-plan-mode.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.4 وضع التخطيط مقابل التنفيذ المباشر</span>
+            <span class="lang-en">3.4 Plan mode vs direct execution</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

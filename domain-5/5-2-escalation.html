@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.2 التصعيد وحل الغموض — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.2 من شهادة CCAF: مشغّلات التصعيد الصحيحة، لماذا المشاعر والثقة الذاتية مؤشرات خادعة، معايير صريحة مع few-shot، والتعامل مع التطابقات المتعددة والسياسة الصامتة.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.2 التصعيد</span><span class="lang-en">5.2 Escalation</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.2</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">التصعيد وحل الغموض</span>
+            <span class="lang-en">Escalation &amp; ambiguity resolution</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن هدف 80%+ حل من أول تواصل ما يتحقق بمحاولة حل كل شيء — بل بمعرفة <em>متى</em> تسلّم القضية لإنسان.</span>
+            <span class="lang-en">Why it matters: the 80%+ first-contact resolution target isn't reached by attempting everything — it's reached by knowing <em>when</em> to hand off to a human.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">مشغّلات التصعيد الصحيحة الثلاثة: طلب صريح لإنسان، ثغرة/استثناء في السياسة (مو مجرد «حالة معقدة»)، وعدم القدرة على إحراز تقدّم فعلي.</span><span class="lang-en">The three correct escalation triggers: an explicit request for a human, a policy exception/gap (not just "a complex case"), and inability to make meaningful progress.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">الفرق بين التصعيد الفوري عند طلب العميل الصريح، وعرض الحل عندما تكون الحالة بسيطة وداخل قدرتك.</span><span class="lang-en">The distinction between escalating immediately when explicitly demanded and offering to resolve when the issue is straightforward and within capability.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">لماذا تحليل المشاعر ودرجات الثقة الذاتية مؤشران غير موثوقين لتعقيد الحالة الحقيقي.</span><span class="lang-en">Why sentiment-based escalation and self-reported confidence scores are unreliable proxies for actual case complexity.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">كتابة معايير تصعيد صريحة مع أمثلة few-shot في الـ system prompt توضح متى تصعّد ومتى تحسم.</span><span class="lang-en">Writing explicit escalation criteria with few-shot examples in the system prompt demonstrating when to escalate vs. resolve autonomously.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">التعامل مع التطابقات المتعددة: اطلب مُعرِّفًا إضافيًا بدل الاختيار بالحدس (heuristic).</span><span class="lang-en">Handling multiple customer matches: request an additional identifier instead of heuristic selection.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">الاعتراف بإحباط العميل مع عرض الحل، والتصعيد فقط إذا كرّر تفضيله للإنسان.</span><span class="lang-en">Acknowledging frustration while offering resolution, escalating only if the customer reiterates their preference.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: THE THREE TRIGGERS ===== -->
+    <section id="triggers" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">المشغّلات الثلاثة الصحيحة — لا أكثر ولا أقل</span>
+        <span class="lang-en">The three correct triggers — no more, no fewer</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>وكيل الدعم الجيد يعيش بين خطأين: يصعّد كل شي (فيفشل هدف الحل من أول تواصل)، أو يحاول حل كل شي (فيتورط في قرارات ليست له). الدليل الرسمي يحدد <strong>ثلاثة مشغّلات تصعيد صحيحة فقط</strong>:</p>
+        <ol class="space-y-3 list-decimal ps-6 marker:text-rose-500 marker:font-semibold">
+          <li><strong>العميل طلب إنسانًا صراحةً</strong> — تُكرِم طلبه <u>فورًا</u>، بدون ما «تحقق أول» أو تحاول تقنعه. بساطة الحالة لا تلغي تفضيله الصريح.</li>
+          <li><strong>ثغرة أو استثناء في السياسة</strong> — الانتباه: مو «الحالة معقدة»، بل السياسة <em>صامتة</em> أو غامضة تجاه طلبه بالذات. المثال الرسمي: عميل يطلب مطابقة سعر منافس، وسياستك تغطي تعديلات أسعار موقعك فقط — هذي فجوة سياسة تُرفَع للبشر.</li>
+          <li><strong>لا تقدّم فعلي</strong> — جمعت الحقائق اللازمة وما زلت عاجزًا عن التقدم نحو حل.</li>
+        </ol>
+        <p>أي شيء غير هذي الثلاثة — غضب العميل، «إحساس» النموذج بعدم الثقة، طول المحادثة — <strong>ليس مشغّل تصعيد</strong>.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A good support agent lives between two failure modes: escalating everything (killing first-contact resolution) or attempting everything (making decisions it doesn't own). The official guide defines exactly <strong>three correct escalation triggers</strong>:</p>
+        <ol class="space-y-3 list-decimal ps-6 marker:text-rose-500 marker:font-semibold">
+          <li><strong>The customer explicitly asks for a human</strong> — honor it <u>immediately</u>, without "investigating first" or trying to talk them out of it. The case being simple doesn't override their explicit preference.</li>
+          <li><strong>A policy exception or gap</strong> — note: not "the case is complex," but the policy being <em>silent</em> or ambiguous on this specific request. The official example: a customer asks for competitor price matching while your policy only covers own-site price adjustments — that's a policy gap that goes to humans.</li>
+          <li><strong>No meaningful progress</strong> — you've gathered the necessary facts and still cannot move toward a resolution.</li>
+        </ol>
+        <p>Anything outside these three — customer anger, the model's "feeling" of low confidence, conversation length — <strong>is not an escalation trigger</strong>.</p>
+      </div>
+
+      <!-- DIAGRAM 1: escalation decision tree -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Escalation decision tree — evaluated in order, top to bottom</p>
+        <div class="max-w-2xl mx-auto space-y-0">
+          <div class="flex justify-center">
+            <div class="bg-surface-800 border border-surface-600 rounded-xl px-4 py-2.5 text-surface-200 font-mono text-xs">customer message arrives</div>
+          </div>
+          <div class="flex justify-center py-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+          <!-- decision 1 -->
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">1) explicit request for a human?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-emerald-400 font-mono text-[10px]">YES</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-44">escalate_to_human NOW<br><span class="text-rose-300/60">no investigation first</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">NO</span></div>
+          <!-- decision 2 -->
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">2) does policy cover this request?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-rose-400 font-mono text-[10px]">NO / SILENT</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-44">escalate: policy gap<br><span class="text-rose-300/60">e.g. competitor match</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">YES, covered</span></div>
+          <!-- decision 3 -->
+          <div class="flex items-center gap-3">
+            <div class="grow bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-3 text-amber-200 font-mono text-xs font-semibold">3) meaningful progress possible with the facts gathered?</div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <span class="text-rose-400 font-mono text-[10px]">NO</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400"></i>
+              <div class="bg-rose-500/20 border border-rose-400/50 rounded-xl px-3 py-2 text-rose-200 font-mono text-[11px] w-44">escalate: stuck<br><span class="text-rose-300/60">include facts gathered</span></div>
+            </div>
+          </div>
+          <div class="flex ps-6 py-1.5 items-center gap-1.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i><span class="text-surface-500 font-mono text-[10px]">YES</span></div>
+          <div class="flex justify-center">
+            <div class="bg-emerald-500/20 border border-emerald-400/50 rounded-xl px-5 py-3 text-emerald-200 font-mono text-xs font-semibold text-center">resolve autonomously<br><span class="text-emerald-300/70 font-normal">acknowledge frustration if present; escalate only if the customer reiterates</span></div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-surface-700 text-center">
+            <span class="text-surface-400 font-mono text-[11px]">NOT triggers: sentiment &middot; self-reported confidence &middot; conversation length</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">ثلاثة فحوصات بالترتيب: طلب صريح، تغطية السياسة، إمكانية التقدّم — وما عداها ليس مشغّلًا.</span>
+        <span class="lang-en">Three checks in order: explicit request, policy coverage, ability to progress — nothing else is a trigger.</span>
+      </p>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">«ثغرة السياسة» تعني أن السياسة <strong>صامتة أو غامضة</strong> تجاه الطلب المحدد — مو أن الحالة «صعبة». حالة صعبة تغطيها السياسة؟ احسمها. حالة سهلة ما تغطيها السياسة؟ صعّدها. التصعيد قرار <em>صلاحيات</em>، مو قرار صعوبة.</span>
+              <span class="lang-en">A "policy gap" means the policy is <strong>silent or ambiguous</strong> on the specific request — not that the case is "hard." A hard case the policy covers? Resolve it. An easy case the policy doesn't cover? Escalate it. Escalation is an <em>authority</em> decision, not a difficulty decision.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: UNRELIABLE PROXIES + THE FIX ===== -->
+    <section id="proxies" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">المؤشرات الخادعة — والعلاج المتناسب</span>
+        <span class="lang-en">The deceptive proxies — and the proportionate fix</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>السيناريو الرسمي: وكيلك يحقق 55% حل من أول تواصل (والهدف 80%)، والسجلات توضح إنه <strong>يصعّد الحالات السهلة</strong> (استبدال تالف قياسي بصورة إثبات) بينما <strong>يحاول بنفسه معالجة حالات تحتاج استثناء سياسة</strong>. المشكلة الجذرية: <em>حدود قرار غير واضحة</em> — الوكيل ما يعرف متى يصعّد.</p>
+        <p>والمموِّهات الثلاثة اللي تبدو حلولًا وهي ليست كذلك:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>درجة ثقة ذاتية (1-10) مع عتبة تصعيد</strong>: ثقة النموذج المبلَّغ عنها ذاتيًا <u>سيئة المعايرة</u> — هو أصلًا «واثق بالغلط» في الحالات الصعبة، فكيف تبني عليها قرارًا؟</li>
+          <li><strong>تحليل مشاعر يصعّد عند السلبية</strong>: يحل مشكلة مختلفة تمامًا — الغضب لا يرتبط بتعقيد الحالة؛ عميل غاضب جدًا قد تكون حالته أسهل حالة في اليوم.</li>
+          <li><strong>مصنّف ML مدرَّب على التذاكر التاريخية</strong>: هندسة زائدة تتطلب بيانات مُعنوَنة وبنية تحتية — قبل حتى ما تجرّب تحسين البرومبت.</li>
+        </ul>
+        <p>العلاج المتناسب والصحيح: <strong>معايير تصعيد صريحة + أمثلة few-shot في الـ system prompt</strong> توضح الحالات الحدّية من الجهتين. هذا أول تدخل قبل أي بنية تحتية إضافية.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The official scenario: your agent achieves 55% first-contact resolution (target: 80%), and logs show it <strong>escalates easy cases</strong> (standard damage replacement with photo evidence) while <strong>autonomously attempting cases that need policy exceptions</strong>. The root cause: <em>unclear decision boundaries</em> — the agent doesn't know when to escalate.</p>
+        <p>And the three distractors that look like fixes but aren't:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>A self-reported confidence score (1-10) with an escalation threshold</strong>: LLM self-reported confidence is <u>poorly calibrated</u> — the agent is already confidently wrong on hard cases, so you can't build a decision on it.</li>
+          <li><strong>Sentiment analysis escalating on negativity</strong>: solves a different problem entirely — anger doesn't correlate with case complexity; a furious customer may have the day's easiest case.</li>
+          <li><strong>An ML classifier trained on historical tickets</strong>: over-engineered, requiring labeled data and infrastructure — before prompt optimization was even tried.</li>
+        </ul>
+        <p>The proportionate, correct fix: <strong>explicit escalation criteria + few-shot examples in the system prompt</strong> demonstrating the boundary cases from both sides. That's the first intervention, before any added infrastructure.</p>
+      </div>
+
+      <!-- DIAGRAM 2: escalate-vs-resolve comparison panels -->
+      <div class="grid md:grid-cols-2 gap-4" dir="ltr">
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-red-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> MIS-CALIBRATED (55% FCR)</p>
+          <div class="space-y-2.5">
+            <div class="bg-white/70 rounded-xl border border-red-200 p-3">
+              <p class="font-mono text-[11px] text-surface-500 mb-1">case: standard damage replacement + photo</p>
+              <p class="font-mono text-xs font-semibold text-red-600">-&gt; ESCALATED (should have resolved)</p>
+            </div>
+            <div class="bg-white/70 rounded-xl border border-red-200 p-3">
+              <p class="font-mono text-[11px] text-surface-500 mb-1">case: needs a policy exception</p>
+              <p class="font-mono text-xs font-semibold text-red-600">-&gt; ATTEMPTED ALONE (should have escalated)</p>
+            </div>
+          </div>
+          <p class="mt-3 text-xs text-red-700 font-semibold font-mono">boundaries unclear = both directions wrong</p>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-emerald-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> WELL-CALIBRATED (criteria + few-shot)</p>
+          <div class="space-y-2.5">
+            <div class="bg-white/70 rounded-xl border border-emerald-200 p-3">
+              <p class="font-mono text-[11px] text-surface-500 mb-1">case: standard damage replacement + photo</p>
+              <p class="font-mono text-xs font-semibold text-emerald-600">-&gt; RESOLVED (within policy)</p>
+            </div>
+            <div class="bg-white/70 rounded-xl border border-emerald-200 p-3">
+              <p class="font-mono text-[11px] text-surface-500 mb-1">case: needs a policy exception</p>
+              <p class="font-mono text-xs font-semibold text-emerald-600">-&gt; ESCALATED (authority boundary)</p>
+            </div>
+          </div>
+          <p class="mt-3 text-xs text-emerald-700 font-semibold font-mono">explicit boundaries = each case routed right</p>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">نفس الحالتين قبل وبعد المعايير الصريحة: سوء المعايرة يخطئ في الاتجاهين، والمعايير توجّه كل حالة لمكانها.</span>
+        <span class="lang-en">The same two cases before and after explicit criteria: mis-calibration errs in both directions; criteria route each case correctly.</span>
+      </p>
+
+      <!-- CODE: escalation criteria + few-shot -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — معايير التصعيد وأمثلة few-shot في الـ system prompt</span><span class="lang-en">Example — escalation criteria + few-shot in the system prompt</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">markdown</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-markdown"><code class="language-markdown">## Escalation policy (deterministic triggers — escalate, do NOT keep trying)
+1. Customer explicitly asks for a human -> call escalate_to_human IMMEDIATELY,
+   do not investigate first.
+2. Policy is silent/ambiguous on the request (e.g. competitor price-match when
+   policy only covers our own price drops) -> escalate the gap.
+3. No meaningful progress after gathering the needed facts -> escalate.
+
+Do NOT trigger on customer sentiment or a self-reported confidence score —
+neither correlates with actual case complexity.
+
+## Few-shot
+User: "Just refund me, I've asked three times. Give me a human."
+-> escalate_to_human(reason="explicit_request")          # honor immediately
+
+User: "This arrived cracked, here's the photo."          # standard, in-policy
+-> get_customer -> process_refund(...)                    # resolve autonomously
+
+User: "Match Souq.com's price on this item."             # policy is silent
+-> escalate_to_human(reason="policy_gap: competitor match not covered")
+
+User: "This is ridiculous, I'm so angry! The box came dented."
+-> acknowledge frustration + offer the in-policy replacement  # anger != complexity
+   (escalate only if the customer then reiterates wanting a human)
+
+Tool get_customer returned 2 matches for "Mohammed Al-Otaibi"
+-> ask for an additional identifier (email or order #)   # never pick by heuristic</code></pre>
+        </div>
+      </div>
+
+      <!-- warning callout -->
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-amber-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i></div>
+          <div>
+            <h4 class="font-bold text-amber-900 mb-1"><span class="lang-ar">تنبيه: التعقيد لا يساوي المشاعر ولا الثقة الذاتية</span><span class="lang-en">Warning: complexity is not sentiment, and not self-confidence</span></h4>
+            <p class="text-amber-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">ثلاثتها متغيرات مختلفة: <strong>التعقيد</strong> خاصية القضية، <strong>المشاعر</strong> حالة العميل، <strong>الثقة الذاتية</strong> انطباع النموذج عن نفسه. الاختبار يحب يلبّس الثاني والثالث بلبس الأول — لا تشتري.</span>
+              <span class="lang-en">They're three different variables: <strong>complexity</strong> is a property of the case, <strong>sentiment</strong> is the customer's state, <strong>self-confidence</strong> is the model's impression of itself. The exam loves dressing the latter two as the first — don't buy it.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: AMBIGUITY — MULTIPLE MATCHES + SILENT POLICY ===== -->
+    <section id="ambiguity" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">حل الغموض: تطابقات متعددة وسياسة صامتة</span>
+        <span class="lang-en">Resolving ambiguity: multiple matches and silent policy</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الغموض نوعان، ولكل نوع علاج مختلف:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>غموض الهوية</strong>: <span dir="ltr" class="font-mono">get_customer</span> يرجّع تطابقين أو أكثر لنفس الاسم. العلاج: <u>اطلب مُعرِّفًا إضافيًا</u> (إيميل، رقم طلب، رمز بريدي) — لا تختر «الأحدث نشاطًا» ولا «الأعلى قيمة». الاختيار بالحدس قبل عملية مالية = حساب خاطئ واسترداد خاطئ.</li>
+          <li><strong>غموض السياسة</strong>: الطلب خارج ما تنص عليه السياسة (مطابقة سعر منافس والسياسة تغطي موقعك فقط). العلاج: <u>تصعيد فجوة السياسة</u> — لا «اجتهاد» بتطبيق أقرب قاعدة، ولا رفض جازم لطلب ما نُصّ على رفضه.</li>
+        </ul>
+        <p>لاحظ الفرق الجوهري: غموض الهوية <strong>يُحَل بسؤال توضيحي</strong> ولا يحتاج تصعيدًا؛ غموض السياسة <strong>يُصعَّد</strong> لأنه قرار صلاحيات. الاختبار يعاكسها عمدًا في المموِّهات.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Ambiguity comes in two kinds, each with a different treatment:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Identity ambiguity</strong>: <span dir="ltr" class="font-mono">get_customer</span> returns two or more matches for the same name. Treatment: <u>ask for an additional identifier</u> (email, order number, postal code) — don't pick "most recently active" or "highest value." A heuristic pick before a financial operation = wrong account, wrong refund.</li>
+          <li><strong>Policy ambiguity</strong>: the request falls outside what policy states (competitor price matching when policy covers only your own site). Treatment: <u>escalate the policy gap</u> — no "improvising" by applying the nearest rule, and no flat denial of something policy never explicitly denied.</li>
+        </ul>
+        <p>Note the essential difference: identity ambiguity <strong>is resolved with a clarifying question</strong> and needs no escalation; policy ambiguity <strong>is escalated</strong> because it's an authority decision. The exam deliberately swaps these in its distractors.</p>
+      </div>
+
+      <!-- escalate vs resolve table (bilingual, duplicated) -->
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold">الموقف</th>
+              <th class="p-3 text-start font-semibold text-rose-700">صعّد</th>
+              <th class="p-3 text-start font-semibold text-emerald-700">حُلّ ذاتيًا</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">العميل يطلب إنسانًا صراحةً</td><td class="p-3 text-rose-700">فورًا، بدون تحقيق</td><td class="p-3 text-surface-400">—</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">استبدال قياسي بصورة إثبات</td><td class="p-3 text-surface-400">—</td><td class="p-3 text-emerald-700">نعم، داخل السياسة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">السياسة صامتة (مطابقة سعر منافس)</td><td class="p-3 text-rose-700">نعم، ثغرة سياسة</td><td class="p-3 text-surface-400">—</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">تطابقات عملاء متعددة</td><td class="p-3 text-surface-400">لا — اطلب مُعرِّفًا</td><td class="p-3 text-surface-400">لا تخمّن</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">عميل غاضب + طلب بسيط داخل القدرة</td><td class="p-3 text-surface-400">فقط لو كرّر</td><td class="p-3 text-emerald-700">اعترف بالإحباط واحسم</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold">Situation</th>
+              <th class="p-3 text-start font-semibold text-rose-700">Escalate</th>
+              <th class="p-3 text-start font-semibold text-emerald-700">Resolve autonomously</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Customer explicitly asks for a human</td><td class="p-3 text-rose-700">Immediately, no investigation</td><td class="p-3 text-surface-400">—</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Standard replacement w/ photo proof</td><td class="p-3 text-surface-400">—</td><td class="p-3 text-emerald-700">Yes, within policy</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Policy is silent (competitor match)</td><td class="p-3 text-rose-700">Yes, policy gap</td><td class="p-3 text-surface-400">—</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Multiple customer matches</td><td class="p-3 text-surface-400">No — ask for identifier</td><td class="p-3 text-surface-400">Don't guess</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Angry customer + simple, doable request</td><td class="p-3 text-surface-400">Only if reiterated</td><td class="p-3 text-emerald-700">Acknowledge &amp; resolve</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">العميل الغاضب بطلب بسيط: <strong>اعترف بإحباطه واعرض الحل</strong> — «أفهم انزعاجك، وأقدر أسوّي الاستبدال الآن». التصعيد فقط لو كرّر طلب الإنسان بعد العرض. تعاطف + حسم، مو تعاطف + تسليم.</span>
+              <span class="lang-en">Angry customer, simple request: <strong>acknowledge the frustration and offer the resolution</strong> — "I understand this is frustrating, and I can process the replacement right now." Escalate only if they reiterate wanting a human after the offer. Empathy + resolution, not empathy + surrender.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«درجة ثقة ذاتية 1-10 وصعّد تحت العتبة»</strong> — النموذج واثق بالغلط أصلًا في الصعب؛ الثقة الذاتية سيئة المعايرة.</span><span class="lang-en"><strong>"Self-report confidence 1-10 and route below a threshold"</strong> — the model is already confidently wrong on hard cases; self-reported confidence is poorly calibrated.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«تحليل مشاعر وصعّد عند السلبية»</strong> — يحل مشكلة أخرى؛ المشاعر لا ترتبط بتعقيد الحالة.</span><span class="lang-en"><strong>"Sentiment analysis, escalate on negativity"</strong> — solves a different problem; sentiment doesn't correlate with case complexity.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«مصنّف منفصل مدرَّب على التذاكر»</strong> — هندسة زائدة قبل تجربة تحسين البرومبت (المعايير + few-shot).</span><span class="lang-en"><strong>"A separate classifier trained on tickets"</strong> — over-engineering before prompt optimization (criteria + few-shot) was even tried.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«حقّق أولًا ثم صعّد إذا لزم» مع طلب صريح لإنسان</strong> — الطلب الصريح يُكرَم فورًا، بلا تحقيق مسبق.</span><span class="lang-en"><strong>"Investigate first, then escalate if needed" on an explicit human request</strong> — an explicit request is honored immediately, no prior investigation.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="landmark" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: موظف كاونتر البنك</span><span class="lang-en">Real-life example: the bank teller</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>موظف الكاونتر يحسم العمليات الروتينية بنفسه: كشف حساب، تحويل داخلي، استبدال بطاقة. لكن لو قال العميل «أبي أقابل المدير» — ينادي المدير <strong>فورًا</strong> حتى لو الطلب كان تحويلًا بسيطًا يقدر عليه؛ ما يقول «خلني أجرب أول». ولو جاء طلب ما تغطيه اللوائح (إعفاء من رسوم غير منصوص عليه) يرفعه للمدير بدل ما «يجتهد» — هذي مو صعوبة، هذي <em>صلاحيات</em>.</p>
+              <p>ولو حضر عميلان بنفس الاسم يستلمان حوالة؟ ما يعطي الفلوس «الأكثر شبهًا بالصورة» — يطلب الهوية الوطنية. ولو دخل عميل يصارخ من الزحمة وطلبه تجديد بطاقة عادي؟ يقول «أعتذر عن الانتظار» <em>وينجز الطلب</em> — ما يحوّل كل زعلان للمدير.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A teller resolves routine operations alone: statements, internal transfers, card replacements. But if the customer says "I want to see the manager" — the teller calls the manager <strong>immediately</strong>, even if the request was a simple transfer they could handle; they don't say "let me try first." And if a request falls outside the rulebook (a fee waiver no policy mentions), it goes up to the manager instead of improvising — that's not difficulty, that's <em>authority</em>.</p>
+              <p>Two customers with the same name collecting a wire? The teller doesn't hand cash to whoever "looks more like the photo" — they ask for a national ID. A customer storms in furious about the queue but just needs a routine card renewal? The teller says "sorry about the wait" <em>and completes the request</em> — they don't route every angry person to the manager.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>سؤال رسمي كامل مبني على هذا الموضوع: وكيل بنسبة حل 55% «يصعّد السهل ويحاول الصعب» — والإجابة الصحيحة كانت <strong>معايير تصعيد صريحة + few-shot في الـ system prompt</strong>. توقع أيضًا أسئلة عن عميل يطلب إنسانًا صراحةً، وعن تطابقات متعددة قبل استرداد.</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>A full official sample question is built on this topic: an agent at 55% FCR "escalating the easy and attempting the hard" — the correct answer was <strong>explicit escalation criteria + few-shot in the system prompt</strong>. Also expect questions on a customer explicitly requesting a human, and on multiple matches before a refund.</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">عتبة ثقة ذاتية — سيئة المعايرة بشهادة الدليل نفسه.</span><span class="lang-en">A self-confidence threshold — poorly calibrated, per the guide itself.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">تحليل مشاعر — يحل مشكلة مختلفة عن تعقيد الحالة.</span><span class="lang-en">Sentiment analysis — solves a different problem than case complexity.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">مصنّف ML مدرَّب — بنية تحتية قبل تحسين البرومبت.</span><span class="lang-en">A trained ML classifier — infrastructure before prompt optimization.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">اختيار عميل من التطابقات بالحدس — قبل عملية مالية بالذات.</span><span class="lang-en">Heuristic-picking a customer from multiple matches — especially before a financial operation.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">وكيلك يحقق 55% حل من أول تواصل (الهدف 80%). السجلات: يصعّد استبدالات تلف قياسية بصور إثبات، ويحاول بنفسه حالات تتطلب استثناءات سياسة. ما أنجع طريقة لتحسين معايرة التصعيد؟</span>
+            <span class="lang-en">Your agent hits 55% first-contact resolution (target 80%). Logs: it escalates standard damage replacements with photo evidence, while attempting policy-exception cases itself. What's the most effective way to improve escalation calibration?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضِف معايير تصعيد صريحة إلى الـ system prompt مع أمثلة few-shot توضح متى يصعّد ومتى يحسم ذاتيًا.</span><span class="lang-en">Add explicit escalation criteria to the system prompt with few-shot examples demonstrating when to escalate vs. resolve autonomously.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">خلّ الوكيل يبلّغ درجة ثقة (1-10) قبل كل رد ويحوّل تلقائيًا للبشر تحت العتبة.</span><span class="lang-en">Have the agent self-report a confidence score (1-10) before each response and auto-route to humans below a threshold.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">انشر مصنّفًا منفصلًا مدرَّبًا على التذاكر التاريخية يتنبأ بالتصعيد قبل بدء المعالجة.</span><span class="lang-en">Deploy a separate classifier trained on historical tickets to predict escalation before processing begins.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">طبّق تحليل مشاعر وصعّد تلقائيًا عندما تتجاوز السلبية عتبة معينة.</span><span class="lang-en">Implement sentiment analysis and auto-escalate when negativity exceeds a threshold.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">السبب الجذري حدود قرار غير واضحة، وعلاجه المتناسب معايير صريحة + few-shot — قبل أي بنية تحتية. الثقة الذاتية سيئة المعايرة، والمصنّف هندسة زائدة، والمشاعر مشكلة مختلفة.</span><span class="lang-en">The root cause is unclear decision boundaries; the proportionate fix is explicit criteria + few-shot — before any infrastructure. Self-confidence is poorly calibrated, the classifier is over-engineered, and sentiment is a different problem.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">هذا سؤال رسمي: الصحيح معايير صريحة + few-shot. الثقة الذاتية سيئة المعايرة (الوكيل واثق بالغلط في الصعب)، والمصنّف يتطلب بيانات وبنية قبل تجربة البرومبت، والمشاعر لا ترتبط بالتعقيد.</span><span class="lang-en">This is an official sample: the answer is explicit criteria + few-shot. Self-confidence is poorly calibrated (the agent is confidently wrong on hard cases), a classifier needs data and infra before prompting was tried, and sentiment doesn't correlate with complexity.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">عميل غاضب جدًا يكتب بحروف كبيرة عن شحنة وصلت مكسورة — وطلبه استبدال قياسي داخل السياسة تمامًا، ولم يطلب إنسانًا. وش يسوي الوكيل؟</span>
+            <span class="lang-en">A very angry customer writes in all caps about a shipment that arrived broken — a completely standard, in-policy replacement, and they haven't asked for a human. What should the agent do?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">صعّد فورًا لإنسان — مستوى الغضب يدل على حالة حساسة تتجاوز الوكيل.</span><span class="lang-en">Escalate to a human immediately — this level of anger signals a sensitive case beyond the agent.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اعترف بإحباط العميل واعرض إتمام الاستبدال الآن — وصعّد فقط إذا كرّر بعدها رغبته في إنسان.</span><span class="lang-en">Acknowledge the frustration and offer to complete the replacement now — escalating only if they then reiterate wanting a human.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">تجاهل نبرة الرسالة تمامًا ونفّذ الاستبدال بدون أي إشارة لانزعاجه.</span><span class="lang-en">Ignore the tone entirely and process the replacement without acknowledging the upset at all.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اطلب من العميل التهدئة أولًا وأخبره أنك ستكمل عندما تصبح الرسائل أوضح.</span><span class="lang-en">Ask the customer to calm down first and say you'll proceed when the messages get clearer.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">الغضب ليس مشغّل تصعيد — والطلب داخل القدرة. المهارة الرسمية: اعترف بالإحباط واعرض الحل، وصعّد فقط عند تكرار طلب الإنسان.</span><span class="lang-en">Anger is not an escalation trigger — and the request is within capability. The official skill: acknowledge frustration while offering resolution, escalating only if the human request is reiterated.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">التصعيد على الغضب يستخدم المشاعر كمؤشر (غير موثوق)، والتجاهل التام يفقد التعاطف، وطلب التهدئة يصعّد التوتر. الصحيح: اعتراف + عرض الحل، والتصعيد فقط عند التكرار.</span><span class="lang-en">Escalating on anger uses sentiment as a signal (unreliable), ignoring it entirely loses the empathy, and demanding calm escalates tension. Correct: acknowledge + offer resolution, escalate only on reiteration.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">عميل يطلب مطابقة سعر منافس لمنتج اشتراه، وسياسة شركتك تنص فقط على تعويض فروقات الأسعار <em>داخل موقعكم</em> — ولا تذكر المنافسين إطلاقًا. ما التصرف الصحيح؟</span>
+            <span class="lang-en">A customer requests competitor price matching on a purchase, and your company policy only covers price adjustments <em>on your own site</em> — it never mentions competitors at all. What's the right move?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">طبّق قاعدة موقعكم كأقرب قياس وسوِّ المطابقة — العميل يستاهل حسن النية.</span><span class="lang-en">Apply your own-site rule as the nearest analog and do the match — the customer deserves good faith.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ارفض الطلب نهائيًا لأن السياسة لا تنص على مطابقة المنافسين.</span><span class="lang-en">Flatly deny the request since the policy doesn't state competitor matching.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">صعّد الحالة كثغرة سياسة — السياسة صامتة عن هذا الطلب بالذات، والقرار يتجاوز صلاحيات الوكيل.</span><span class="lang-en">Escalate it as a policy gap — the policy is silent on this specific request, and the decision exceeds the agent's authority.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اعرض قسيمة خصم كتسوية وسط بدون الرجوع لأحد.</span><span class="lang-en">Offer a discount voucher as a middle-ground settlement without consulting anyone.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذا المثال الرسمي لثغرة السياسة: السياسة تغطي موقعكم فقط والطلب عن منافس — تصعيد، لا اجتهاد بالقياس ولا رفض جازم ولا تسوية مخترعة.</span><span class="lang-en">This is the official policy-gap example: policy covers own-site only, the request concerns a competitor — escalate; no improvised analogies, no flat denial, no invented settlements.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">القياس والرفض والتسوية ثلاثتها «اجتهاد» في منطقة صامتة — قرار صلاحيات لا يملكه الوكيل. الصحيح: تصعيد ثغرة السياسة.</span><span class="lang-en">The analogy, the denial, and the settlement are all improvising in a silent zone — an authority decision the agent doesn't own. Correct: escalate the policy gap.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">ثلاثة مشغّلات فقط: طلب صريح لإنسان (فورًا، بلا تحقيق)، ثغرة/غموض سياسة، عدم تقدّم فعلي.</span><span class="lang-en">Only three triggers: explicit human request (immediately, no investigation), a policy gap/ambiguity, and no meaningful progress.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">المشاعر والثقة الذاتية مؤشران غير موثوقين لتعقيد الحالة — لا تبنِ عليهما تصعيدًا.</span><span class="lang-en">Sentiment and self-reported confidence are unreliable proxies for complexity — never build escalation on them.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">علاج سوء المعايرة: معايير صريحة + few-shot في الـ system prompt — قبل أي بنية تحتية.</span><span class="lang-en">The fix for mis-calibration: explicit criteria + few-shot in the system prompt — before any infrastructure.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">تطابقات متعددة: اطلب مُعرِّفًا إضافيًا — الاختيار بالحدس قبل عملية مالية كارثة.</span><span class="lang-en">Multiple matches: ask for an additional identifier — a heuristic pick before a financial operation is a disaster.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">العميل الغاضب بطلب بسيط: اعترف بالإحباط واعرض الحل — وصعّد فقط إذا كرّر.</span><span class="lang-en">Angry customer, simple request: acknowledge frustration and offer resolution — escalate only if reiterated.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="5-1-context-preservation.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.1 حفظ السياق عبر المحادثات الطويلة</span><span class="lang-en">5.1 Context preservation</span></span>
+        </span>
+      </a>
+      <a href="5-3-error-propagation.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.3 انتشار الأخطاء بين الوكلاء</span><span class="lang-en">5.3 Error propagation</span></span>
+        </span>
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

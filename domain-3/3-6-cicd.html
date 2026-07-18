@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.6 دمج Claude Code في CI/CD — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.6: تشغيل Claude Code في خطوط CI/CD — العلم -p للوضع غير التفاعلي، --output-format json مع --json-schema للإخراج المنظّم، سياق CLAUDE.md، وعزل جلسة المولّد عن المراجع.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">Claude Code في CI/CD</span><span class="lang-en">Claude Code in CI/CD</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.6</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">دمج Claude Code في CI/CD</span>
+            <span class="lang-en">Integrating Claude Code into CI/CD</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">في خط الأنابيب ما فيه إنسان يجاوب الأسئلة: تشغيل غير تفاعلي، إخراج تفهمه الآلة، ومراجِع مستقل عن المولِّد.</span>
+            <span class="lang-en">In a pipeline there is no human to answer prompts: non-interactive runs, machine-readable output, and a reviewer independent of the generator.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">تشغيل Claude Code في الأتمتة بالعلم <span dir="ltr" class="font-mono">-p</span> (أو <span dir="ltr" class="font-mono">--print</span>) — الوضع غير التفاعلي الذي يمنع تعليق الوظيفة</span><span class="lang-en">Running Claude Code in automation with the <span class="font-mono">-p</span> (or <span class="font-mono">--print</span>) flag — the non-interactive mode that stops jobs hanging</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">فرض إخراج منظّم قابل للتحليل الآلي بـ <span dir="ltr" class="font-mono">--output-format json</span> مع <span dir="ltr" class="font-mono">--json-schema</span> — لنشر النتائج تعليقاتٍ مضمّنة على الـ PR</span><span class="lang-en">Enforcing machine-parseable structured output with <span class="font-mono">--output-format json</span> plus <span class="font-mono">--json-schema</span> — for posting findings as inline PR comments</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">تزويد Claude في الـ CI بسياق المشروع عبر <span dir="ltr" class="font-mono">CLAUDE.md</span>: معايير الاختبار، اتفاقيات الـ fixtures، ومعايير المراجعة</span><span class="lang-en">Feeding CI-invoked Claude project context via <span class="font-mono">CLAUDE.md</span>: testing standards, fixture conventions, review criteria</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">عزل الجلسات: لماذا الجلسة التي ولّدت الكود أضعف في مراجعته من نسخة مستقلة بلا سياق التوليد</span><span class="lang-en">Session isolation: why the session that generated the code reviews it worse than an independent instance without the generation context</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100 md:col-span-2">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">منع التكرار: تضمين نتائج المراجعة السابقة عند إعادة التشغيل (الجديد وغير المعالَج فقط)، وتوفير ملفات الاختبار الموجودة كي لا تُقترح سيناريوهات مكررة</span><span class="lang-en">Preventing duplication: including prior review findings on re-runs (new or unaddressed only), and providing existing test files so duplicate scenarios are not suggested</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: non-interactive ===== -->
+    <section id="non-interactive" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="terminal" class="w-5 h-5"></i></span>
+        <span class="lang-ar">الوضع غير التفاعلي: العلم -p</span>
+        <span class="lang-en">Non-interactive mode: the -p flag</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>المشهد الكلاسيكي في أسئلة الاختبار: سكربت CI يشغّل <span dir="ltr" class="font-mono">claude "Analyze this pull request..."</span> والوظيفة <strong>تتعلق إلى ما لا نهاية</strong> — والسجلات تكشف أن Claude Code ينتظر إدخالاً تفاعلياً لن يأتي أبداً، لأن ما من إنسان على الطرف الآخر.</p>
+        <p>التصحيح الموثّق واحد: العلم <strong><span dir="ltr" class="font-mono">-p</span> (أو <span dir="ltr" class="font-mono">--print</span>)</strong>. به يعالج Claude Code الطلب، يطبع النتيجة إلى <span dir="ltr" class="font-mono">stdout</span>، ويخرج — بلا أي انتظار لإدخال. هذا هو نمط التشغيل الوحيد الصالح داخل أي خط أنابيب آلي.</p>
+        <p>واحذر الخيارات المزيفة التي تحوم حول هذا السؤال: متغير بيئة <span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span> <strong>غير موجود</strong>، وعلم <span dir="ltr" class="font-mono">--batch</span> <strong>غير موجود</strong>، وتحويل الإدخال بـ <span dir="ltr" class="font-mono">&lt; /dev/null</span> حيلة نظام تشغيل لا تعالج صيغة أمر Claude Code نفسها.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>The classic exam scene: a CI script runs <span class="font-mono">claude "Analyze this pull request..."</span> and the job <strong>hangs indefinitely</strong> — logs reveal Claude Code waiting for interactive input that will never come, because there is no human on the other end.</p>
+        <p>The documented fix is singular: the <strong><span class="font-mono">-p</span> (or <span class="font-mono">--print</span>) flag</strong>. With it, Claude Code processes the prompt, prints the result to <span class="font-mono">stdout</span>, and exits — never waiting for input. It is the only correct run mode inside any automated pipeline.</p>
+        <p>And beware the fake options circling this question: a <span class="font-mono">CLAUDE_HEADLESS=true</span> environment variable <strong>does not exist</strong>, a <span class="font-mono">--batch</span> flag <strong>does not exist</strong>, and redirecting stdin with <span class="font-mono">&lt; /dev/null</span> is an OS workaround that never addresses Claude Code's own command syntax.</p>
+      </div>
+
+      <!-- DIAGRAM 1: CI pipeline flow -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="workflow" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: خط أنابيب المراجعة الآلية من البداية للنهاية</span><span class="lang-en">Diagram: the automated review pipeline end to end</span></div>
+        <div dir="ltr" class="flex flex-wrap items-center justify-center gap-2">
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center min-w-[120px]">
+            <div class="font-mono text-xs font-bold text-surface-700 flex items-center justify-center gap-1"><i data-lucide="git-pull-request" class="w-3.5 h-3.5"></i> PR OPENED</div>
+            <div class="font-mono text-[10px] text-surface-500">triggers workflow</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-violet-400 bg-violet-50 p-3 text-center min-w-[120px]">
+            <div class="font-mono text-xs font-bold text-violet-800">claude -p "review..."</div>
+            <div class="font-mono text-[10px] text-violet-600">non-interactive: no hang</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-violet-400 bg-violet-50 p-3 text-center min-w-[120px]">
+            <div class="font-mono text-xs font-bold text-violet-800">--output-format json<br>--json-schema</div>
+            <div class="font-mono text-[10px] text-violet-600">structured findings</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center min-w-[120px]">
+            <div class="font-mono text-xs font-bold text-surface-700">findings.json</div>
+            <div class="font-mono text-[10px] text-surface-500">machine-parseable</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-3 text-center min-w-[120px]">
+            <div class="font-mono text-xs font-bold text-emerald-700 flex items-center justify-center gap-1"><i data-lucide="message-square-text" class="w-3.5 h-3.5"></i> INLINE COMMENTS</div>
+            <div class="font-mono text-[10px] text-emerald-600">posted on the PR</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">كل حلقة في السلسلة لها علمها: <span dir="ltr" class="font-mono">-p</span> يمنع التعليق، والمخطط يضمن شكل الإخراج، فيُنشر آلياً بثقة.</span>
+          <span class="lang-en">Each link has its flag: <span class="font-mono">-p</span> prevents the hang, the schema guarantees the output shape, so posting is automated with confidence.</span>
+        </p>
+      </div>
+
+      <!-- Code: GitHub Actions -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: خطوة المراجعة في GitHub Actions</span><span class="lang-en">Example: the review step in GitHub Actions</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-yaml !bg-surface-900 scrollbar-thin"><code class="language-yaml">name: AI Code Review
+on: [pull_request]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Claude Code review (non-interactive)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # -p prevents the pipeline from hanging on interactive input.
+          # --json-schema forces machine-parseable, structured findings.
+          # CLAUDE.md in the repo supplies review criteria + test standards.
+          claude -p "Review the changes in this PR against our checklist.
+                     Prior findings are in prior-findings.json: report ONLY
+                     new or still-unaddressed issues." \
+            --output-format json \
+            --json-schema review-schema.json > findings.json
+
+      - name: Post findings as inline PR comments
+        run: node scripts/post-review.js findings.json</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">ثلاث عبارات تحسم ثلاثة أجوبة: «الوظيفة تنتظر إدخالاً» = <span dir="ltr" class="font-mono">-p</span>. «نشر آلي للنتائج» = <span dir="ltr" class="font-mono">--output-format json</span> + <span dir="ltr" class="font-mono">--json-schema</span>. «المراجعة ضعيفة على كودها» = نسخة مراجعة مستقلة.</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">Three phrases settle three answers: "job waiting for input" = <span class="font-mono">-p</span>. "automated posting of findings" = <span class="font-mono">--output-format json</span> + <span class="font-mono">--json-schema</span>. "weak review of its own code" = an independent review instance.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: structured output ===== -->
+    <section id="structured-output" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="braces" class="w-5 h-5"></i></span>
+        <span class="lang-ar">إخراج تفهمه الآلة: json و json-schema</span>
+        <span class="lang-en">Output machines understand: json &amp; json-schema</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>مخرجات المراجعة في CI لا يقرؤها إنسان أولاً — يقرؤها <strong>سكربت</strong> ينشرها تعليقات مضمّنة على الـ PR. النص الحر يجعل هذا التحليل هشاً وينكسر مع كل تغيير صياغة. الحل من علمين متكاملين:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span dir="ltr" class="font-mono">--output-format json</span> — يجعل الإخراج بنية JSON بدل نص حر.</li>
+          <li><span dir="ltr" class="font-mono">--json-schema review-schema.json</span> — يفرض <strong>شكل</strong> تلك البنية: الحقول وأنواعها وقيم الـ enum المسموحة، فيضمن أن كل نتيجة فيها <span dir="ltr" class="font-mono">file</span> و<span dir="ltr" class="font-mono">line</span> و<span dir="ltr" class="font-mono">severity</span> و<span dir="ltr" class="font-mono">message</span> — جاهزة للنشر الآلي مباشرة.</li>
+        </ul>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>CI review output is not read by a human first — it is read by a <strong>script</strong> that posts it as inline PR comments. Free text makes that parsing brittle, breaking with every phrasing change. The fix is two complementary flags:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span class="font-mono">--output-format json</span> — makes the output JSON structure instead of free text.</li>
+          <li><span class="font-mono">--json-schema review-schema.json</span> — enforces that structure's <strong>shape</strong>: fields, types, and allowed enum values, guaranteeing every finding carries <span class="font-mono">file</span>, <span class="font-mono">line</span>, <span class="font-mono">severity</span>, and <span class="font-mono">message</span> — ready for direct automated posting.</li>
+        </ul>
+      </div>
+
+      <!-- Code: schema -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: review-schema.json</span><span class="lang-en">Example: review-schema.json</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-json !bg-surface-900 scrollbar-thin"><code class="language-json">{
+  "type": "object",
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "file":     { "type": "string" },
+          "line":     { "type": "integer" },
+          "severity": { "type": "string", "enum": ["blocker", "warning", "nit"] },
+          "message":  { "type": "string" }
+        },
+        "required": ["file", "line", "severity", "message"]
+      }
+    }
+  },
+  "required": ["findings"]
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Flags cheat sheet -->
+      <div class="space-y-3">
+        <h3 class="font-bold text-surface-900 text-lg"><span class="lang-ar">أعلام CI السريعة</span><span class="lang-en">CI flags cheat sheet</span></h3>
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700"><tr><th class="p-3 text-start font-semibold">العلم</th><th class="p-3 text-start font-semibold">الغرض</th><th class="p-3 text-start font-semibold">إشارته في السؤال</th></tr></thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs" dir="ltr">-p / --print</td><td class="p-3">وضع غير تفاعلي: يعالج، يطبع، يخرج</td><td class="p-3">«الوظيفة معلّقة تنتظر إدخالاً»</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs" dir="ltr">--output-format json</td><td class="p-3">إخراج JSON بدل النص الحر</td><td class="p-3">«نتائج قابلة للتحليل الآلي»</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs" dir="ltr">--json-schema file.json</td><td class="p-3">فرض شكل الإخراج بالضبط</td><td class="p-3">«نشر آلي كتعليقات مضمّنة»</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700"><tr><th class="p-3 text-start font-semibold">Flag</th><th class="p-3 text-start font-semibold">Purpose</th><th class="p-3 text-start font-semibold">Its cue in a question</th></tr></thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs">-p / --print</td><td class="p-3">Non-interactive: process, print, exit</td><td class="p-3">"the job hangs waiting for input"</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs">--output-format json</td><td class="p-3">JSON output instead of free text</td><td class="p-3">"machine-parseable findings"</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-xs">--json-schema file.json</td><td class="p-3">Enforce the exact output shape</td><td class="p-3">"automated posting as inline comments"</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Warning: batch API confusion -->
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></div>
+          <div class="lang-ar text-amber-900/90 text-sm leading-relaxed">لا تخلط بين تشغيل <span dir="ltr" class="font-mono">claude -p</span> في CI وبين <span dir="ltr" class="font-mono">Message Batches API</span>: الدفعات توفّر 50% لكنها قد تستغرق حتى 24 ساعة بلا ضمان زمني — مناسبة للتقارير الليلية المتسامحة مع التأخير، و<strong>غير مناسبة أبداً</strong> لفحص pre-merge يحجب الدمج وينتظره المطورون. طابق الأداة مع متطلبات الزمن: حاجز يحجب = استدعاء متزامن، تحليل ليلي = دفعات.</div>
+          <div class="lang-en text-amber-900/90 text-sm leading-relaxed">Do not confuse running <span class="font-mono">claude -p</span> in CI with the <span class="font-mono">Message Batches API</span>: batches save 50% but may take up to 24 hours with no latency SLA — right for overnight, delay-tolerant reports and <strong>never right</strong> for a blocking pre-merge check developers wait on. Match the tool to the latency requirement: blocking gate = synchronous call, overnight analysis = batches.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: context & isolation ===== -->
+    <section id="isolation" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="split" class="w-5 h-5"></i></span>
+        <span class="lang-ar">السياق والعزل: من يراجع، وماذا يعرف؟</span>
+        <span class="lang-en">Context &amp; isolation: who reviews, and what do they know?</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>ثلاثة قرارات سياق تصنع جودة المراجعة والتوليد في CI:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>عزل الجلسات</strong>: الجلسة التي ولّدت الكود تحمل سياق تبريراتها، فهي <strong>أقل ميلاً للتشكيك في قراراتها</strong> عند مراجعة تغييراتها. نسخة مستقلة بلا سياق التوليد تراجع بموضوعية أعلى وتلتقط ما تحيّزت عنه المولِّدة.</li>
+          <li><strong>إعادة التشغيل بلا تكرار</strong>: عند المراجعة بعد commits جديدة، ضمّن <strong>نتائج المراجعة السابقة</strong> في السياق واطلب الإبلاغ عن <strong>الجديد أو غير المعالَج فقط</strong> — وإلا أغرق البوت الـ PR بنفس التعليقات في كل تشغيل.</li>
+          <li><strong>توليد اختبارات بلا تكرار</strong>: وفّر <strong>ملفات الاختبار الموجودة</strong> في السياق كي لا تُقترح سيناريوهات مغطاة أصلاً، ووثّق في <span dir="ltr" class="font-mono">CLAUDE.md</span> معايير الاختبار ومعايير «الاختبار القيّم» والـ fixtures المتاحة — فترتفع جودة التوليد وتقل الاختبارات منخفضة القيمة.</li>
+        </ul>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>Three context decisions make or break CI review and generation quality:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>Session isolation</strong>: the session that generated the code carries its own reasoning context, so it is <strong>less likely to question its own decisions</strong> when reviewing its changes. An independent instance without the generation context reviews more objectively and catches what the generator was biased past.</li>
+          <li><strong>Re-runs without duplication</strong>: when reviewing after new commits, include the <strong>prior review findings</strong> in context and instruct Claude to report <strong>only new or still-unaddressed issues</strong> — otherwise the bot floods the PR with the same comments every run.</li>
+          <li><strong>Test generation without duplication</strong>: provide the <strong>existing test files</strong> in context so already-covered scenarios are not re-suggested, and document in <span class="font-mono">CLAUDE.md</span> the testing standards, what makes a test valuable, and the available fixtures — raising generation quality and cutting low-value tests.</li>
+        </ul>
+      </div>
+
+      <!-- DIAGRAM 2: generator vs independent reviewer -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="columns-2" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: من يراجع الكود المولَّد؟</span><span class="lang-en">Diagram: who reviews the generated code?</span></div>
+        <div dir="ltr" class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 p-4 space-y-2.5">
+            <div class="flex items-center gap-2 font-bold text-red-700 text-sm"><i data-lucide="x-circle" class="w-4 h-4"></i> SAME SESSION SELF-REVIEW</div>
+            <div class="space-y-1.5 font-mono text-[11px]">
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5 text-surface-600">session A: generates code<br><span class="text-red-500">+ keeps its reasoning context</span></div>
+              <div class="flex justify-center text-red-400"><i data-lucide="arrow-down" class="w-4 h-4"></i></div>
+              <div class="rounded-md bg-white border border-red-200 px-2 py-1.5 text-surface-600">session A: reviews the SAME code<br><span class="text-red-500">"I already justified these choices"</span></div>
+            </div>
+            <div class="text-xs text-red-700">biased toward its own decisions — subtle issues slip through</div>
+          </div>
+          <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-4 space-y-2.5">
+            <div class="flex items-center gap-2 font-bold text-emerald-700 text-sm"><i data-lucide="check-circle-2" class="w-4 h-4"></i> INDEPENDENT REVIEW INSTANCE</div>
+            <div class="space-y-1.5 font-mono text-[11px]">
+              <div class="rounded-md bg-white border border-emerald-300 px-2 py-1.5 text-surface-600">session A: generates code</div>
+              <div class="flex justify-center text-emerald-500"><i data-lucide="arrow-down" class="w-4 h-4"></i></div>
+              <div class="rounded-md bg-white border border-emerald-300 px-2 py-1.5 text-surface-600">session B (fresh): reviews the diff<br><span class="text-emerald-600">no generation context, no attachment</span></div>
+            </div>
+            <div class="text-xs text-emerald-700">questions every choice on its merits — catches what A cannot see</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">نفس النموذج، فرق السياق: المولِّد يحمل تبريراته فيجاملها؛ النسخة المستقلة تحاكم الكود كما هو.</span>
+          <span class="lang-en">Same model, different context: the generator carries its justifications and goes easy on them; the fresh instance judges the code as it stands.</span>
+        </p>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed">جودة Claude في CI = <strong>تشغيل صحيح + إخراج منظّم + سياق صحيح</strong>. التشغيل بـ <span dir="ltr" class="font-mono">-p</span>، والإخراج بـ <span dir="ltr" class="font-mono">json</span> + <span dir="ltr" class="font-mono">schema</span>، والسياق ثلاثي: <span dir="ltr" class="font-mono">CLAUDE.md</span> للمعايير، النتائج السابقة لمنع التكرار، والاختبارات الموجودة لمنع الاقتراحات المكررة — مع مراجعٍ معزول عن المولِّد.</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed">Claude quality in CI = <strong>correct invocation + structured output + correct context</strong>. Invocation via <span class="font-mono">-p</span>, output via <span class="font-mono">json</span> + <span class="font-mono">schema</span>, and three-part context: <span class="font-mono">CLAUDE.md</span> for standards, prior findings to prevent duplicates, and existing tests to prevent repeated suggestions — with a reviewer isolated from the generator.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> حلّ التعليق بـ <span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span> أو <span dir="ltr" class="font-mono">--batch</span> أو <span dir="ltr" class="font-mono">&lt; /dev/null</span>. <strong class="text-emerald-700">الصح:</strong> <span dir="ltr" class="font-mono">-p</span> — الأول والثاني غير موجودين أصلاً، والثالث حيلة نظام لا تعالج صيغة الأمر.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> fixing the hang with <span class="font-mono">CLAUDE_HEADLESS=true</span>, <span class="font-mono">--batch</span>, or <span class="font-mono">&lt; /dev/null</span>. <strong class="text-emerald-700">Reality:</strong> <span class="font-mono">-p</span> — the first two do not exist, and the third is an OS workaround that never addresses the command syntax.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «اجعل نفس الجلسة المولِّدة تراجع لأنها تعرف الكود أفضل». <strong class="text-emerald-700">الصح:</strong> معرفتها هي انحيازها — النسخة المستقلة بلا سياق التوليد تراجع أدق.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "have the generating session review since it knows the code best." <strong class="text-emerald-700">Reality:</strong> its knowledge is its bias — the independent instance without generation context reviews more sharply.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> مراجعة 14 ملفاً بنتائج متناقضة → «نموذج أكبر بنافذة أكبر» أو «إجماع 2 من 3 تشغيلات» أو «ألزم المطورين بتقسيم الـ PR». <strong class="text-emerald-700">الصح:</strong> قسّم المراجعة نفسها: تمريرة لكل ملف للمشاكل المحلية + تمريرة تكامل للتدفق العابر للملفات — النافذة الأكبر لا تصلح تخفف الانتباه، والإجماع يكتم الأخطاء الملتقطة تقطعاً.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> a 14-file review with contradictory results → "a bigger model with a larger window", "2-of-3 run consensus", or "force developers to split PRs". <strong class="text-emerald-700">Reality:</strong> split the review itself: a per-file pass for local issues + an integration pass for cross-file flow — a larger window does not fix attention dilution, and consensus suppresses intermittently-caught real bugs.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="scale" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: المدقق الخارجي وماكينة البيع</span><span class="lang-en">Real-life example: the external auditor and the vending machine</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>ما في شركة محترمة تخلي <strong>محاسبها يدقق دفاتره بنفسه</strong> — اللي كتب القيود عنده ألف مبرر جاهز لكل رقم فيها. التدقيق الحقيقي يجي من <strong>مدقق خارجي</strong> ما شارك في كتابتها ولا يجامل قراراتها: هذا هو عزل جلسة المراجعة عن جلسة التوليد. والمدقق ما يسلّمك خواطر إنشائية — يعبّي <strong>نموذجاً معتمداً</strong> ببنود محددة (الملف، البند، درجة الخطورة، الملاحظة): هذا هو <span dir="ltr" class="font-mono">--json-schema</span>.</p>
+              <p>أما تشغيل Claude في الخط الآلي بـ <span dir="ltr" class="font-mono">-p</span> فهو <strong>ماكينة البيع الذاتية</strong>: تضغط، تستلم، تمشي. البديل موظف يسألك «تبي الحجم الكبير؟» — والطابور خلفك (الـ pipeline) واقف ينتظر جواباً لن يأتي. وفي المراجعة الشهرية التالية، المدقق الشاطر <strong>يفتح تقرير الشهر الماضي أولاً</strong> ويعلّق فقط على الجديد وغير المعالَج — ما يعيد كتابة نفس الملاحظات كل شهر.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>No serious company lets <strong>its accountant audit their own books</strong> — whoever wrote the entries has a ready justification for every number. Real assurance comes from an <strong>external auditor</strong> who took no part in writing them and owes their decisions nothing: that is isolating the review session from the generation session. And the auditor does not hand you free-form musings — they fill in an <strong>approved form</strong> with fixed fields (file, item, severity, note): that is <span class="font-mono">--json-schema</span>.</p>
+              <p>Running Claude in the automated line with <span class="font-mono">-p</span> is the <strong>vending machine</strong>: press, collect, go. The alternative is a clerk asking "want the large size?" — with the queue behind you (the pipeline) stuck waiting for an answer that will never come. And at next month's review, the sharp auditor <strong>opens last month's report first</strong> and comments only on what is new or still unfixed — never rewriting the same notes every month.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">السؤال الرسمي النموذجي: «وظيفة الـ CI معلّقة تنتظر إدخالاً — ما التصحيح؟» والجواب إضافة <span dir="ltr" class="font-mono">-p</span>.</span><span class="lang-en">The canonical official question: "the CI job hangs waiting for input — what is the fix?" Answered by adding <span class="font-mono">-p</span>.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«فحص pre-merge يحجب + تقرير ليلي، والإدارة تقترح الدفعات للاثنين» — الدفعات للتقرير الليلي فقط؛ الفحص الحاجب يبقى متزامناً.</span><span class="lang-en">"A blocking pre-merge check + an overnight report, management proposes batches for both" — batches for the overnight report only; the blocking check stays synchronous.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«مراجعة PR من 14 ملفاً غير متسقة ومتناقضة» — قسّمها: تمريرة لكل ملف + تمريرة تكامل عابرة للملفات.</span><span class="lang-en">"A 14-file PR review is inconsistent and contradictory" — split it: a per-file pass + a cross-file integration pass.</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span> و<span dir="ltr" class="font-mono">--batch</span> — ميزات غير موجودة؛ <span dir="ltr" class="font-mono">&lt; /dev/null</span> — حيلة لا تعالج الصيغة.</span><span class="lang-en"><span class="font-mono">CLAUDE_HEADLESS=true</span> and <span class="font-mono">--batch</span> — nonexistent features; <span class="font-mono">&lt; /dev/null</span> — a workaround that fixes nothing.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«نفس الجلسة تراجع كودها لأنها تعرفه» — الانحياز للتوليد يضعف المراجعة.</span><span class="lang-en">"The same session reviews its own code since it knows it" — generation bias weakens the review.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«نموذج أكبر» أو «إجماع تشغيلات متعددة» لمشكلة تخفف الانتباه — الحل تقسيم التمريرات لا تضخيم الموارد.</span><span class="lang-en">"A bigger model" or "multi-run consensus" for an attention-dilution problem — the fix is splitting passes, not inflating resources.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">خطوة في GitHub Actions تشغّل <span dir="ltr" class="font-mono">claude "Generate release notes for this diff"</span> وتتعلق الوظيفة بلا نهاية، والسجلات تُظهر انتظار إدخال تفاعلي. أي تعديل يصلح الخطوة؟</span>
+            <span class="lang-en">A GitHub Actions step runs <span class="font-mono">claude "Generate release notes for this diff"</span> and the job hangs forever, with logs showing it waiting for interactive input. Which change fixes the step?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف <span dir="ltr" class="font-mono">timeout-minutes: 10</span> للخطوة حتى لا تتعلق طويلاً</span>
+            <span class="lang-en">Add <span class="font-mono">timeout-minutes: 10</span> to the step so it cannot hang long</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">صدّر <span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span> في بيئة الوظيفة</span>
+            <span class="lang-en">Export <span class="font-mono">CLAUDE_HEADLESS=true</span> in the job environment</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">استخدم الوضع غير التفاعلي: <span dir="ltr" class="font-mono">claude -p "Generate release notes for this diff"</span></span>
+            <span class="lang-en">Use non-interactive mode: <span class="font-mono">claude -p "Generate release notes for this diff"</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">وجّه الإدخال: <span dir="ltr" class="font-mono">claude "..." &lt; /dev/null</span></span>
+            <span class="lang-en">Redirect stdin: <span class="font-mono">claude "..." &lt; /dev/null</span></span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. <span dir="ltr" class="font-mono">-p</span> / <span dir="ltr" class="font-mono">--print</span> هو الوضع غير التفاعلي الموثّق: يعالج، يطبع، يخرج. المهلة (A) تحوّل التعليق إلى فشل مؤقت دون حل المشكلة، و<span dir="ltr" class="font-mono">CLAUDE_HEADLESS</span> (B) غير موجود، وتحويل stdin (D) حيلة نظام لا تعالج صيغة أمر Claude Code.</div>
+            <div class="lang-en text-emerald-900">Correct. <span class="font-mono">-p</span> / <span class="font-mono">--print</span> is the documented non-interactive mode: process, print, exit. A timeout (A) converts the hang into a timed failure without solving anything, <span class="font-mono">CLAUDE_HEADLESS</span> (B) does not exist, and redirecting stdin (D) is an OS workaround that never addresses Claude Code's command syntax.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. «ينتظر إدخالاً تفاعلياً» في سياق CI = العلم <span dir="ltr" class="font-mono">-p</span> دائماً وبلا استثناء. المتغيرات والأعلام المخترعة والحيل الالتفافية كلها فخاخ حول نفس الجواب الواحد.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. "Waiting for interactive input" in a CI context = the <span class="font-mono">-p</span> flag, always and without exception. Invented variables, invented flags, and workarounds are all traps circling the same single answer.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">تريد أن يلتقط سكربت الـ CI نتائج مراجعة Claude Code وينشرها تلقائياً كتعليقات مضمّنة على الـ PR (ملف، سطر، خطورة، رسالة) دون تحليل نص حر هش. ما التركيبة الصحيحة؟</span>
+            <span class="lang-en">You want the CI script to capture Claude Code's review findings and automatically post them as inline PR comments (file, line, severity, message) without brittle free-text parsing. What is the correct combination?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">--output-format json</span> مع <span dir="ltr" class="font-mono">--json-schema</span> يحدد حقول النتيجة</span>
+            <span class="lang-en"><span class="font-mono">--output-format json</span> with <span class="font-mono">--json-schema</span> defining the finding fields</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">اطلب في البرومبت «رتّب النتائج في جدول markdown» وحلّله بسكربت regex</span>
+            <span class="lang-en">Ask in the prompt to "format findings as a markdown table" and parse it with a regex script</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">استخدم <span dir="ltr" class="font-mono">Message Batches API</span> لأنها ترجع نتائج منظمة تلقائياً</span>
+            <span class="lang-en">Use the <span class="font-mono">Message Batches API</span> since it returns structured results automatically</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">شغّل المراجعة مرتين وانشر النتائج المشتركة بين التشغيلين فقط</span>
+            <span class="lang-en">Run the review twice and post only findings common to both runs</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذان العلمان صُمما لهذا بالضبط: <span dir="ltr" class="font-mono">json</span> للإخراج المنظم و<span dir="ltr" class="font-mono">schema</span> لضمان الحقول (file/line/severity/message) فيصبح النشر الآلي موثوقاً. تحليل markdown بـ regex (B) هش وينكسر مع كل تغيير صياغة، والدفعات (C) آلية معالجة مؤجلة لا علاقة لها بشكل إخراج CLI، والتشغيل المزدوج (D) يكلّف الضعف ويكتم نتائج حقيقية.</div>
+            <div class="lang-en text-emerald-900">Correct. These two flags were built for exactly this: <span class="font-mono">json</span> for structured output and <span class="font-mono">schema</span> to guarantee the fields (file/line/severity/message), making automated posting reliable. Regex-parsing markdown (B) is brittle and breaks on every phrasing change, batches (C) are a deferred-processing mechanism unrelated to CLI output shape, and double-running (D) doubles cost while suppressing real findings.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>A</strong>. «نشر آلي كتعليقات مضمّنة» هي إشارة الثنائي <span dir="ltr" class="font-mono">--output-format json</span> + <span dir="ltr" class="font-mono">--json-schema</span>: بنية مضمونة الحقول يستهلكها السكربت مباشرة بلا تحليل هش.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>A</strong>. "Automated posting as inline comments" is the cue for the <span class="font-mono">--output-format json</span> + <span class="font-mono">--json-schema</span> pair: field-guaranteed structure the script consumes directly, no brittle parsing.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">سير عملكم يجعل جلسة Claude Code التي ولّدت الكود تراجع تغييراتها بنفسها في نهاية المهمة، لكن المراجعات نادراً ما تكتشف مشاكل حقيقية رغم وجودها. ما التفسير والحل الأصح؟</span>
+            <span class="lang-en">Your workflow has the Claude Code session that generated the code review its own changes at the end of the task, but the reviews rarely catch real issues even when they exist. What is the correct diagnosis and fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">النموذج ضعيف في المراجعة عموماً — استبدله بأداة تحليل ساكن تقليدية</span>
+            <span class="lang-en">The model is weak at review in general — replace it with a traditional static-analysis tool</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">البرومبت قصير — أضف تعليمات مشددة مثل «راجع بصرامة قصوى وشكك في كل شيء»</span>
+            <span class="lang-en">The prompt is short — add stern instructions like "review with maximum rigor and question everything"</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">الجلسة المولِّدة تحمل سياق تبريراتها فلا تشكك في قراراتها — مرّر الكود لنسخة مراجعة مستقلة بلا سياق التوليد</span>
+            <span class="lang-en">The generating session carries its own justification context and will not question its decisions — pass the code to an independent review instance without the generation context</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">وسّع نافذة السياق بنموذج أكبر لتتسع المراجعة والتوليد معاً</span>
+            <span class="lang-en">Use a bigger model with a larger context window to fit generation and review together</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا مبدأ عزل الجلسات في الدليل: الجلسة التي ولّدت الكود تحتفظ بسياق استدلالها فتكون أقل ميلاً للتشكيك في قراراتها — والنسخة المستقلة تراجع أدق. المشكلة ليست قدرة النموذج (A) ولا حزم الصياغة (B — تعليمات «شكك في كل شيء» لا تزيل انحياز السياق)، وتكبير النافذة (D) يعمّق المشكلة بإبقاء سياق التوليد حاضراً.</div>
+            <div class="lang-en text-emerald-900">Correct. This is the guide's session-isolation principle: the session that generated the code retains its reasoning context and is less likely to question its own decisions — an independent instance reviews more sharply. The problem is not model capability (A) nor prompt sternness (B — "question everything" instructions do not remove context bias), and a bigger window (D) deepens the problem by keeping the generation context present.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. «المراجعة الذاتية ضعيفة» عرض لسبب واحد في هذا الدومين: سياق التوليد يحابي قراراته. العلاج معماري لا صياغي — نسخة مراجعة مستقلة بلا ذلك السياق.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. "Weak self-review" is a symptom with one cause in this domain: the generation context favors its own decisions. The cure is architectural, not phrasing — an independent review instance without that context.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">وظيفة CI معلّقة تنتظر إدخالاً = أضف <span dir="ltr" class="font-mono">-p / --print</span> — <span dir="ltr" class="font-mono">CLAUDE_HEADLESS</span> و<span dir="ltr" class="font-mono">--batch</span> غير موجودين.</span><span class="lang-en">A CI job hanging on input = add <span class="font-mono">-p / --print</span> — <span class="font-mono">CLAUDE_HEADLESS</span> and <span class="font-mono">--batch</span> do not exist.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">نشر آلي كتعليقات مضمّنة = <span dir="ltr" class="font-mono">--output-format json</span> + <span dir="ltr" class="font-mono">--json-schema</span>.</span><span class="lang-en">Automated posting as inline comments = <span class="font-mono">--output-format json</span> + <span class="font-mono">--json-schema</span>.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">CLAUDE.md</span> يزوّد CI بمعايير الاختبار والـ fixtures ومعايير المراجعة — فيرتفع ناتج التوليد وتنخفض الاختبارات منخفضة القيمة.</span><span class="lang-en"><span class="font-mono">CLAUDE.md</span> supplies CI with testing standards, fixtures, and review criteria — raising generation quality and cutting low-value tests.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">المولِّد لا يراجع نفسه: نسخة مستقلة بلا سياق التوليد تراجع أدق.</span><span class="lang-en">The generator never reviews itself: an independent instance without generation context reviews more sharply.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">ضد التكرار: ضمّن النتائج السابقة عند إعادة التشغيل (الجديد وغير المعالَج فقط)، ووفّر الاختبارات الموجودة لتوليد الاختبارات.</span><span class="lang-en">Against duplication: include prior findings on re-runs (new or unaddressed only), and provide existing tests for test generation.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="3-5-iterative-refinement.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.5 التحسين التكراري</span>
+            <span class="lang-en">3.5 Iterative refinement</span>
+          </div>
+        </div>
+      </a>
+      <a href="../domain-4/index.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">الدومين 4: هندسة البرومبت والإخراج المنظّم</span>
+            <span class="lang-en">Domain 4: Prompt Engineering &amp; Structured Output</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

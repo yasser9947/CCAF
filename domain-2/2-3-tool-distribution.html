@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.3 توزيع الأدوات وtool_choice — CCAF مرجع</title>
+  <meta name="description" content="الموضوع 2.3 من شهادة CCAF: لماذا 18 أداة تضعف الاختيار مقابل 4-5، الوصول المُنطّق ومبدأ أقل صلاحية، أدوات مشتركة محدودة مثل verify_fact، واستبدال fetch_url بـ load_document، وإعدادات tool_choice الثلاثة.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-4">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">توزيع الأدوات</span><span class="lang-en">Tool distribution</span></span>
+      </nav>
+
+      <div class="flex items-start gap-4">
+        <span class="bg-white/10 border border-white/20 text-emerald-200 font-mono font-bold text-lg px-3.5 py-2 rounded-xl shrink-0">2.3</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl sm:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">توزيع الأدوات على الوكلاء وضبط tool_choice</span>
+            <span class="lang-en">Distributing Tools Across Agents &amp; Configuring tool_choice</span>
+          </h1>
+          <p class="text-emerald-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن الوكيل اللي بيده 18 أداة يتوه، واللي بيده أداة خارج تخصصه يسيء استخدامها — والتوزيع الصح يحسم النقاش قبل ما يبدأ.</span>
+            <span class="lang-en">Why it matters: an agent holding 18 tools gets lost, and one holding an out-of-specialization tool misuses it — the right distribution settles the debate before it starts.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش إعطاء وكيل 18 أداة بدل 4-5 يضعف موثوقية الاختيار برفع تعقيد القرار، وليش الأدوات خارج التخصص تُساء (وكيل التوليف يسوّي بحث ويب).</span><span class="lang-en">Why giving an agent 18 tools instead of 4-5 degrades selection reliability by raising decision complexity, and why out-of-specialization tools get misused (a synthesis agent running web searches).</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">الوصول المُنطّق: أدوات الدور فقط + أدوات مشتركة محدودة للاحتياجات عالية التردد (<span dir="ltr" class="font-mono">verify_fact</span>)، مع توجيه المعقّد عبر المنسّق.</span><span class="lang-en">Scoped access: role tools only + limited cross-role tools for high-frequency needs (<span dir="ltr" class="font-mono">verify_fact</span>), routing complex cases through the coordinator.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">استبدال الأدوات العامة ببدائل مُقيّدة: <span dir="ltr" class="font-mono">fetch_url</span> تصير <span dir="ltr" class="font-mono">load_document</span> تتحقق من روابط المستندات.</span><span class="lang-en">Replacing generic tools with constrained alternatives: <span dir="ltr" class="font-mono">fetch_url</span> becomes <span dir="ltr" class="font-mono">load_document</span> that validates document URLs.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">إعدادات <span dir="ltr" class="font-mono">tool_choice</span> الثلاثة: <span dir="ltr" class="font-mono">"auto"</span> و<span dir="ltr" class="font-mono">"any"</span> والإجبار بالاسم — ومتى تستخدم كل واحد (إجبار <span dir="ltr" class="font-mono">extract_metadata</span> أولًا ثم أدوار لاحقة).</span><span class="lang-en">The three <span dir="ltr" class="font-mono">tool_choice</span> configurations: <span dir="ltr" class="font-mono">"auto"</span>, <span dir="ltr" class="font-mono">"any"</span>, and forced by name — and when to use each (forcing <span dir="ltr" class="font-mono">extract_metadata</span> first, then follow-up turns).</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== SECTION 1: TOO MANY TOOLS ===== -->
+    <section id="too-many-tools" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">1</span>
+        <span><span class="lang-ar">كثرة الأدوات تضعف الاختيار</span><span class="lang-en">Too many tools degrade selection</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>المبدأ الأول في هذا الموضوع رقمي وصريح: <strong>وكيل بيده 18 أداة يواجه تعقيد قرار أعلى بكثير من وكيل بيده 4-5 أدوات مركّزة</strong> — وكل أداة إضافية تزيد احتمال الالتباس بين المتشابهات. المشكلة مو بس التوهان: <strong>الوكيل اللي يملك أدوات خارج تخصصه يميل لإساءة استخدامها</strong>. المثال الكلاسيكي من السيناريو 3: وكيل التوليف (synthesis) اللي أُعطي أدوات بحث الويب صار أحيانًا "يتحمس" ويسوّي عمليات بحث بنفسه بدل ما يولّف نتائج الوكلاء الآخرين — فتطلع استشهادات متضاربة.</p>
+          <p>لاحظ الفرق الجوهري بين هذا الموضوع والموضوع 2.1: هناك كانت المشكلة <em>وصفًا غامضًا</em> والعلاج تحسين الوصف؛ هنا المشكلة <em>حيازة أدوات ما كان المفروض يملكها أصلًا</em> والعلاج إعادة التوزيع. سؤال الاختبار الذكي يعطيك أعراضًا متشابهة (استدعاء أداة غلط) ويشوف هل تشخّص السبب صح.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The first principle here is numeric and explicit: <strong>an agent holding 18 tools faces far higher decision complexity than one holding 4-5 focused tools</strong> — every extra tool raises the odds of confusion among lookalikes. And the problem is not just getting lost: <strong>an agent holding tools outside its specialization tends to misuse them</strong>. The classic Scenario 3 example: a synthesis agent that was handed web-search tools occasionally gets "enthusiastic" and runs its own searches instead of synthesizing the other agents' findings — producing inconsistent citations.</p>
+          <p>Note the essential difference from topic 2.1: there the problem was <em>a vague description</em> and the fix was improving it; here the problem is <em>holding tools it should never have had</em> and the fix is redistribution. A clever exam question gives you similar symptoms (a wrong tool call) and checks whether you diagnose the cause correctly.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 1: 18 tools vs 4-5 tools -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-compare" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط مقارنة: 18 أداة لوكيل واحد مقابل توزيع مُنطّق</span>
+          <span class="lang-en">Comparison: 18 tools on one agent vs scoped distribution</span>
+        </p>
+        <div class="grid lg:grid-cols-2 gap-4" dir="ltr">
+          <!-- BAD: 18 tools -->
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 overflow-hidden">
+            <div class="bg-red-100 border-b border-red-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="x-octagon" class="w-4 h-4 text-red-600"></i>
+              <span class="font-mono text-xs font-bold text-red-700">BAD — every agent gets all 18</span>
+            </div>
+            <div class="p-4 space-y-3 font-mono text-xs">
+              <div class="bg-white/70 rounded-lg p-3 border border-red-200">
+                <p class="font-bold text-red-900 mb-2">synthesis_agent</p>
+                <div class="flex flex-wrap gap-1">
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">web_search</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">fetch_url</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">query_db</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">extract_pdf</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">summarize</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">cite_sources</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">translate</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">send_email</span>
+                  <span class="bg-red-200/70 text-red-900 rounded px-1.5 py-0.5">+10 more...</span>
+                </div>
+              </div>
+              <ul class="space-y-1 text-red-800">
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>high decision complexity per call</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>runs its OWN web searches</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>inconsistent citations</li>
+              </ul>
+            </div>
+          </div>
+          <!-- GOOD: scoped -->
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 overflow-hidden">
+            <div class="bg-emerald-100 border-b border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              <span class="font-mono text-xs font-bold text-emerald-700">GOOD — 4-5 tools per role</span>
+            </div>
+            <div class="p-4 space-y-2 font-mono text-xs">
+              <div class="bg-white/70 rounded-lg p-2.5 border border-emerald-200 flex items-center justify-between gap-2">
+                <span class="font-bold text-emerald-900">research_agent</span>
+                <span class="text-emerald-700">web_search · fetch_page · rank_results</span>
+              </div>
+              <div class="bg-white/70 rounded-lg p-2.5 border border-emerald-200 flex items-center justify-between gap-2">
+                <span class="font-bold text-emerald-900">data_agent</span>
+                <span class="text-emerald-700">query_db · extract_pdf · load_document</span>
+              </div>
+              <div class="bg-white/70 rounded-lg p-2.5 border border-emerald-200 flex items-center justify-between gap-2">
+                <span class="font-bold text-emerald-900">synthesis_agent</span>
+                <span class="text-emerald-700">summarize · cite_sources · <span class="bg-emerald-200/80 rounded px-1">verify_fact</span></span>
+              </div>
+              <ul class="space-y-1 text-emerald-800 pt-1">
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>small, role-relevant tool sets</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>verify_fact = scoped cross-role tool</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>complex cases -&gt; via coordinator</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">نفس الأدوات الـ18 موجودة في النظام — لكنها موزّعة حسب الدور، وكل وكيل يشوف قراره الصغير الواضح فقط.</span>
+          <span class="lang-en">All 18 tools still exist in the system — but distributed by role, so each agent faces only its own small, clear decision.</span>
+        </p>
+      </div>
+
+      <!-- quick insight -->
+      <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-cyan-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+            <p class="lang-ar text-cyan-800 leading-relaxed text-sm">قلّص عدد الأدوات، ترتفع جودة الاختيار — نفس منطق 2.1 من زاوية ثانية: هناك ترفع <em>وضوح</em> الخيارات، وهنا تقلّل <em>عددها</em>. الاثنان يخدمان نفس الهدف: قرار أسهل للنموذج.</p>
+            <p class="lang-en text-cyan-800 leading-relaxed text-sm">Shrink the tool count and selection quality rises — the same logic as 2.1 from another angle: there you raise the <em>clarity</em> of options, here you cut their <em>number</em>. Both serve the same goal: an easier decision for the model.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: SCOPED ACCESS ===== -->
+    <section id="scoped-access" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">2</span>
+        <span><span class="lang-ar">الوصول المُنطّق وأدوات العبور المحدودة</span><span class="lang-en">Scoped access &amp; limited cross-role tools</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>العلاج اسمه <strong>الوصول المُنطّق (scoped access)</strong>: كل وكيل ياخذ أدوات دوره فقط — تطبيق مباشر لمبدأ <em>أقل صلاحية</em>. لكن الدليل يضيف لمسة مهمة: <strong>أدوات مشتركة محدودة للاحتياجات عالية التردد</strong>. المثال الذهبي: وكيل التوليف يحتاج كثيرًا يتحقق من حقيقة بسيطة (تاريخ، اسم، رقم). لو رجع للمنسّق في كل مرة صارت عنق زجاجة؛ ولو أعطيته كل أدوات البحث كسرنا التخصص. الحل الوسط: أداة <span dir="ltr" class="font-mono">verify_fact</span> <em>مُنطّقة</em> تغطي التحققات البسيطة عالية التردد، بينما تظل الحالات المعقّدة تمر عبر المنسّق.</p>
+          <p>وفي نفس الروح، <strong>استبدل الأدوات العامة ببدائل مُقيّدة</strong>: أداة <span dir="ltr" class="font-mono">fetch_url</span> اللي تجيب أي رابط في الإنترنت أوسع من حاجة وكيل تحليل المستندات — استبدلها بـ <span dir="ltr" class="font-mono">load_document</span> اللي تتحقق أن الرابط رابط مستند مسموح. القيد صار جزءًا من عقد الأداة نفسه، فما عاد تعتمد على "حسن نية" النموذج.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The remedy is called <strong>scoped access</strong>: each agent gets only its role's tools — a direct application of <em>least privilege</em>. But the guide adds an important nuance: <strong>limited cross-role tools for high-frequency needs</strong>. The golden example: the synthesis agent frequently needs to verify a simple fact (a date, a name, a number). Returning to the coordinator every time becomes a bottleneck; handing it all the search tools breaks specialization. The middle path: a <em>scoped</em> <span class="font-mono">verify_fact</span> tool covering the simple high-frequency checks, while complex cases still route through the coordinator.</p>
+          <p>In the same spirit, <strong>replace generic tools with constrained alternatives</strong>: a <span class="font-mono">fetch_url</span> tool that fetches anything on the internet is broader than a document-analysis agent needs — replace it with <span class="font-mono">load_document</span>, which validates that the URL is an allowed document URL. The constraint becomes part of the tool's own contract, so you no longer rely on the model's "good intentions."</p>
+        </div>
+      </div>
+
+      <!-- constrained alternative code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">استبدال أداة عامة ببديل مُقيّد</span>
+          <span class="lang-en">Replacing a generic tool with a constrained alternative</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">// BEFORE: generic and over-broad for a document-analysis agent
+{ "name": "fetch_url",
+  "description": "Fetches the content of any URL" }
+
+// AFTER: constrained to the agent's actual need, with validation
+{ "name": "load_document",
+  "description": "Load a document for analysis from an approved document URL (PDF, DOCX, TXT under docs.company.com or the research bucket). Validates the URL points to a document before fetching; rejects non-document URLs with a validation error. NOT a general web fetcher -> web research is the research agent's job.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "document_url": { "type": "string", "description": "URL of an approved document source" }
+    },
+    "required": ["document_url"]
+  } }</code></pre>
+        </div>
+        <p class="text-xs text-surface-500 leading-relaxed">
+          <span class="lang-ar">لاحظ كيف اجتمع الموضوعان: البديل المُقيّد (2.3) مكتوب بوصف يحمل حدودًا صريحة (2.1).</span>
+          <span class="lang-en">Notice the two topics meeting: the constrained alternative (2.3) is written with a description carrying explicit boundaries (2.1).</span>
+        </p>
+      </div>
+
+      <!-- tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-emerald-900"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+            <p class="lang-ar text-emerald-800 leading-relaxed text-sm">قاعدة سريعة لأسئلة التوزيع: الاحتياج <strong>بسيط ومتكرر</strong>؟ أعطِ الوكيل أداة مُنطّقة له. الاحتياج <strong>معقّد أو نادر</strong>؟ وجّهه عبر المنسّق. الإجابات المتطرفة (كل الأدوات / لا أدوات) شبه دائمًا مشتتات.</p>
+            <p class="lang-en text-emerald-800 leading-relaxed text-sm">A quick rule for distribution questions: is the need <strong>simple and frequent</strong>? Give the agent a scoped tool for it. Is it <strong>complex or rare</strong>? Route it through the coordinator. The extreme answers (all tools / no tools) are almost always distractors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: TOOL_CHOICE ===== -->
+    <section id="tool-choice" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">3</span>
+        <span><span class="lang-ar">ضبط tool_choice: من يقرر ومتى</span><span class="lang-en">Configuring tool_choice: who decides, and when</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>بعد ما وزّعت الأدوات صح، يبقى سؤال الدور الواحد: <strong>هل النموذج مُلزَم باستدعاء أداة في هذا الدور؟</strong> هذا اللي يضبطه <span dir="ltr" class="font-mono">tool_choice</span> بثلاث درجات:</p>
+          <ul class="space-y-2 ps-4">
+            <li><span dir="ltr" class="font-mono">"auto"</span> (الافتراضي): النموذج حر — يستدعي أداة أو يرد نصًا حواريًا.</li>
+            <li><span dir="ltr" class="font-mono">"any"</span>: يضمن استدعاء <em>أداة ما</em> — مستحيل يرجع نصًا حواريًا — لكن النموذج يختار <em>أيّها</em>. مثالي لما تبي مخرجًا منظّمًا مضمونًا ونوع المستند مجهول فيختار النموذج الـ schema المناسب.</li>
+            <li><span dir="ltr" class="font-mono">{"type":"tool","name":"..."}</span> (الإجبار): يفرض أداة <em>محددة بالاسم</em>. النمط الرسمي: إجبار <span dir="ltr" class="font-mono">extract_metadata</span> أولًا على كل مرفق، ثم معالجة أدوات الإثراء في <em>أدوار لاحقة</em>.</li>
+          </ul>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>Once tools are distributed correctly, the single-turn question remains: <strong>is the model obligated to call a tool this turn?</strong> That is what <span class="font-mono">tool_choice</span> governs, in three grades:</p>
+          <ul class="space-y-2 ps-4">
+            <li><span class="font-mono">"auto"</span> (default): the model is free — call a tool or answer with conversational text.</li>
+            <li><span class="font-mono">"any"</span>: guarantees <em>some</em> tool gets called — conversational text is impossible — but the model picks <em>which</em>. Ideal when you need guaranteed structured output and the document type is unknown, so the model chooses the fitting schema.</li>
+            <li><span class="font-mono">{"type":"tool","name":"..."}</span> (forced): mandates a <em>specific named</em> tool. The official pattern: force <span class="font-mono">extract_metadata</span> first on each attachment, then process enrichment tools in <em>follow-up turns</em>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: tool_choice decision tree -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-fork" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: شجرة قرار tool_choice</span>
+          <span class="lang-en">Diagram: the tool_choice decision tree</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[660px] flex flex-col items-center gap-2 font-mono text-xs">
+            <div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-3 text-amber-900 font-semibold">MUST the model call a tool this turn?</div>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-[620px] mt-1">
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-surface-500 text-white rounded-md px-2.5 py-1 font-bold">NO — text is fine</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+                <div class="bg-surface-100 border-2 border-surface-300 rounded-xl px-4 py-3 text-surface-800 text-center w-full">
+                  <p class="font-bold">tool_choice: "auto"</p>
+                  <p class="text-surface-600">model may answer in text<br>or call a tool</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-emerald-600 text-white rounded-md px-2.5 py-1 font-bold">YES — force a call</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-emerald-500"></i>
+                <div class="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-amber-900 font-semibold text-center w-full">Must it be one SPECIFIC tool?</div>
+                <div class="grid grid-cols-2 gap-3 w-full">
+                  <div class="flex flex-col items-center gap-2">
+                    <span class="bg-surface-500 text-white rounded-md px-2 py-0.5 font-bold">NO</span>
+                    <i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i>
+                    <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-3 py-3 text-emerald-900 text-center w-full">
+                      <p class="font-bold">"any"</p>
+                      <p class="text-emerald-700">some tool,<br>model picks which</p>
+                    </div>
+                  </div>
+                  <div class="flex flex-col items-center gap-2">
+                    <span class="bg-emerald-600 text-white rounded-md px-2 py-0.5 font-bold">YES</span>
+                    <i data-lucide="arrow-down" class="w-4 h-4 text-emerald-500"></i>
+                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl px-3 py-3 text-emerald-900 text-center w-full">
+                      <p class="font-bold">{"type":"tool",<br>"name":"..."}</p>
+                      <p class="text-emerald-700">you pick the tool<br>(this turn only)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">سؤالان فقط يحسمان الإعداد: "أداة إلزامية؟" ثم "أداة محددة؟" — احفظ الشجرة وخلاص.</span>
+          <span class="lang-en">Two questions settle the config: "mandatory tool?" then "specific tool?" — memorize the tree and you are done.</span>
+        </p>
+      </div>
+
+      <!-- tool_choice code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="sliders-horizontal" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">الإعدادات الثلاثة في كود Python</span>
+          <span class="lang-en">The three configurations in Python</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-python">import anthropic
+client = anthropic.Anthropic()
+
+# 1) "auto" — model may answer in text OR call a tool (default).
+client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=1024, tools=tools,
+    tool_choice={"type": "auto"},
+    messages=[{"role": "user", "content": "Summarize this ticket."}],
+)
+
+# 2) "any" — GUARANTEE a tool call (no conversational text);
+#    the model still chooses which extraction schema fits an unknown doc.
+client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=1024, tools=extraction_tools,
+    tool_choice={"type": "any"},
+    messages=[{"role": "user", "content": document}],
+)
+
+# 3) Forced — run a SPECIFIC tool first (metadata before enrichment),
+#    then handle the remaining steps in follow-up turns.
+client.messages.create(
+    model="claude-sonnet-4-5", max_tokens=1024, tools=tools,
+    tool_choice={"type": "tool", "name": "extract_metadata"},
+    messages=[{"role": "user", "content": document}],
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- comparison table -->
+      <div class="space-y-3">
+        <!-- AR -->
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold font-mono">tool_choice</th>
+                <th class="p-3 text-start font-semibold">يضمن استدعاء أداة؟</th>
+                <th class="p-3 text-start font-semibold">من يختار الأداة؟</th>
+                <th class="p-3 text-start font-semibold">متى تستخدمه</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">"auto"</td><td class="p-3 text-red-600">لا — قد يرجّع نصًا</td><td class="p-3">النموذج</td><td class="p-3">حوار عام قد يحتاج أداة أو لا</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">"any"</td><td class="p-3 text-emerald-600 font-semibold">نعم</td><td class="p-3">النموذج</td><td class="p-3">ضمان مخرج منظّم ونوع المستند مجهول</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">forced (name)</td><td class="p-3 text-emerald-600 font-semibold">نعم</td><td class="p-3">أنت</td><td class="p-3">إجبار أداة محددة أولًا (<span dir="ltr" class="font-mono">extract_metadata</span>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- EN -->
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-left font-semibold font-mono">tool_choice</th>
+                <th class="p-3 text-left font-semibold">Guarantees a tool call?</th>
+                <th class="p-3 text-left font-semibold">Who picks the tool?</th>
+                <th class="p-3 text-left font-semibold">When to use</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">"auto"</td><td class="p-3 text-red-600">No — may return text</td><td class="p-3">The model</td><td class="p-3">General chat that may or may not need a tool</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">"any"</td><td class="p-3 text-emerald-600 font-semibold">Yes</td><td class="p-3">The model</td><td class="p-3">Guarantee structured output, unknown doc type</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">forced (name)</td><td class="p-3 text-emerald-600 font-semibold">Yes</td><td class="p-3">You</td><td class="p-3">Force a specific tool first (<span class="font-mono">extract_metadata</span>)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+            <p class="lang-ar text-brand-800 leading-relaxed text-sm"><span dir="ltr" class="font-mono">"any"</span> يضمن <strong>أن</strong> أداة ستُستدعى، والإجبار بالاسم يضمن <strong>أي</strong> أداة ستُستدعى. لو السؤال يطلب "ضمان تشغيل أداة محددة أولًا"، الجواب الإجبار بالاسم — و<span dir="ltr" class="font-mono">"any"</span> مشتت مصمّم لمن حفظ نصف القاعدة.</p>
+            <p class="lang-en text-brand-800 leading-relaxed text-sm"><span class="font-mono">"any"</span> guarantees <strong>that</strong> a tool gets called; forcing by name guarantees <strong>which</strong> tool gets called. If the question asks to "guarantee a specific tool runs first," the answer is forced-by-name — and <span class="font-mono">"any"</span> is a distractor built for whoever memorized half the rule.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+            <p class="lang-ar text-amber-800 leading-relaxed text-sm"><span dir="ltr" class="font-mono">tool_choice</span> يشتغل في <em>دور واحد</em>. فرض تسلسل حتمي عبر عدة خطوات (تحقق قبل استرجاع مثلًا) يحتاج إنفاذًا برمجيًا (hook / بوابة مسبقة) — ذاك موضوع الدومين 1، لكنه يظهر هنا كمشتت. لا تخلط "توفّر الأداة في دور" مع "ترتيب الأدوات عبر الأدوار".</p>
+            <p class="lang-en text-amber-800 leading-relaxed text-sm"><span class="font-mono">tool_choice</span> operates within a <em>single turn</em>. Enforcing a deterministic sequence across steps (verify-before-refund, say) needs programmatic enforcement (a hook / prerequisite gate) — that is Domain 1 material, but it appears here as a distractor. Never conflate "tool availability in a turn" with "tool ordering across turns."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"أعطِ وكيل التوليف كل أدوات البحث ليتعامل مع أي تحقق":</strong> إفراط في الصلاحيات يكسر فصل المسؤوليات. الصح: <span dir="ltr" class="font-mono">verify_fact</span> مُنطّقة للبسيط المتكرر فقط.</span>
+              <span class="lang-en"><strong>"Give the synthesis agent all web-search tools so it can handle any verification":</strong> over-provisioning that breaks separation of concerns. Right answer: a scoped <span class="font-mono">verify_fact</span> for the simple frequent cases only.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"اجمع كل احتياجات التحقق وأرسلها دفعة للمنسّق في النهاية":</strong> يخلق تبعيات حاجبة لأن خطوات التوليف تعتمد على حقائق مُتحقَّقة أثناء الشغل.</span>
+              <span class="lang-en"><strong>"Batch all verification needs and send them to the coordinator at the end":</strong> creates blocking dependencies since synthesis steps depend on facts verified mid-work.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>خلط <span dir="ltr" class="font-mono">"any"</span> بالإجبار المحدد:</strong> <span dir="ltr" class="font-mono">"any"</span> يضمن أداةً ما، لا أداة بعينها. تبي أداة معينة أولًا؟ الإجبار بالاسم.</span>
+              <span class="lang-en"><strong>Confusing <span class="font-mono">"any"</span> with forced selection:</strong> <span class="font-mono">"any"</span> guarantees some tool, not a particular one. Need a specific tool first? Force it by name.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="chef-hat" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg">
+              <span class="lang-ar">مثال من الحياة: محطات مطبخ المطعم</span>
+              <span class="lang-en">Real-life example: restaurant kitchen stations</span>
+            </h2>
+            <p class="lang-ar text-amber-900/90 leading-loose">
+              مطبخ مطعم محترف مقسّم محطات: الشوّاية، السلطات، الحلويات. كل محطة عندها <strong>عدّتها فقط</strong> — طباخ الشوّاية ما يلقى قدّامه 18 سكينًا لكل الأغراض، بل 4-5 أدوات تخصّه، فيمسك الصح بلا تفكير (التوزيع المُنطّق). طباخ الحلويات يحتاج أحيانًا رشّة ملح — بدل ما يمشي لمخزن التوابل المركزي كل مرة، عنده <strong>ملّاحة صغيرة في محطته</strong> (أداة العبور المُنطّقة <span dir="ltr" class="font-mono">verify_fact</span>)، أما طلبية التوابل الكبيرة فتمر عبر الشيف التنفيذي (المنسّق). ولما يصيح الشيف "كل واحد يمسك أداة الحين!" فهذا <span dir="ltr" class="font-mono">"any"</span> — لازم تمسك شيئًا لكن تختاره أنت؛ ولما يقول "أنت بالذات، امسك سكين الفيليه أولًا" فهذا الإجبار بالاسم. وسكين اللحم النيء المخصّصة (بدل سكين عامة لكل شيء) هي <span dir="ltr" class="font-mono">load_document</span> بدل <span dir="ltr" class="font-mono">fetch_url</span> — أداة مقيّدة بغرضها تمنع التلوث قبل حدوثه.
+            </p>
+            <p class="lang-en text-amber-900/90 leading-loose">
+              A professional kitchen is split into stations: grill, salads, pastry. Each station holds <strong>only its own kit</strong> — the grill cook does not face 18 all-purpose knives, but the 4-5 tools of his craft, so he grabs the right one without thinking (scoped distribution). The pastry cook occasionally needs a pinch of salt — rather than walking to the central spice store every time, she keeps <strong>a small salt shaker at her station</strong> (the scoped cross-role tool, <span class="font-mono">verify_fact</span>), while a full spice order still goes through the executive chef (the coordinator). When the chef shouts "everyone grab a utensil now!" that is <span class="font-mono">"any"</span> — you must hold something, but you choose what; when he says "you specifically, take the filleting knife first," that is forced-by-name. And the dedicated raw-meat knife (instead of one universal knife) is <span class="font-mono">load_document</span> replacing <span class="font-mono">fetch_url</span> — a purpose-constrained tool that prevents contamination before it can happen.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+      </div>
+      <div class="lang-ar space-y-3 text-sm leading-relaxed">
+        <p>نمطان يتكرران: (1) وكيل يسيء استخدام أدوات خارج تخصصه، (2) مطلوب ضمان استدعاء أداة (ما / محددة). طريقة الحل:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>مشكلة سوء استخدام؟ الجواب الصحيح يجمع: <strong>قصّ الأدوات على الدور</strong> + <strong>أداة عبور مُنطّقة</strong> للاحتياج البسيط المتكرر + توجيه المعقّد للمنسّق.</li>
+          <li>"يضمن استدعاء أداة" = <span dir="ltr" class="font-mono">"any"</span> · "يضمن أداة محددة أولًا" = الإجبار بالاسم · "قد يرد نصًا" = <span dir="ltr" class="font-mono">"auto"</span>.</li>
+          <li>تعليمات الـ prompt ("ابدأ دائمًا بالميتاداتا") احتمالية — لا تضمن؛ الضمان الحتمي من <span dir="ltr" class="font-mono">tool_choice</span>.</li>
+          <li>ترتيب عبر خطوات متعددة؟ هذا hook (دومين 1) — استبعد إجابات tool_choice.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 text-sm leading-relaxed">
+        <p>Two recurring patterns: (1) an agent misusing out-of-specialization tools, (2) needing to guarantee a tool call (some / specific). How to solve:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>A misuse problem? The correct answer combines: <strong>scope tools to the role</strong> + <strong>a scoped cross-role tool</strong> for the simple frequent need + routing complex cases through the coordinator.</li>
+          <li>"Guarantees a tool call" = <span class="font-mono">"any"</span> · "guarantees a specific tool first" = forced-by-name · "may answer in text" = <span class="font-mono">"auto"</span>.</li>
+          <li>Prompt instructions ("always start with metadata") are probabilistic — no guarantee; the deterministic guarantee comes from <span class="font-mono">tool_choice</span>.</li>
+          <li>Ordering across multiple steps? That is a hook (Domain 1) — eliminate the tool_choice answers.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">3 أسئلة على هذا الموضوع</span><span class="lang-en">3 questions on this topic</span></p>
+        </div>
+        <div class="ms-auto flex items-center gap-2 bg-white border border-surface-200 rounded-xl px-4 py-2 text-sm">
+          <span class="font-bold text-emerald-600"><span id="score">0</span>/<span id="total-q">3</span></span>
+          <span class="text-surface-400">·</span>
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+          <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">وكيل تحليل مستندات يملك أداة <span dir="ltr" class="font-mono">fetch_url</span> عامة، وأحيانًا يجيب صفحات ويب عشوائية بدل مستندات الشركة. وش الإصلاح الأنسب حسب الدليل؟</span>
+            <span class="lang-en">A document-analysis agent holds a generic <span dir="ltr" class="font-mono">fetch_url</span> tool and sometimes pulls random web pages instead of company documents. What is the guide-approved fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استبدلها ببديل مُقيّد مثل <span dir="ltr" class="font-mono">load_document</span> يتحقق من أن الرابط رابط مستند مسموح قبل الجلب.</span>
+            <span class="lang-en">Replace it with a constrained alternative like <span dir="ltr" class="font-mono">load_document</span> that validates the URL is an allowed document URL before fetching.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف تعليمة في الـ system prompt: "لا تجلب إلا مستندات الشركة".</span>
+            <span class="lang-en">Add a system-prompt instruction: "only fetch company documents."</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">راقب سجلات الاستدعاءات وصحّح الأخطاء يدويًا بعد وقوعها.</span>
+            <span class="lang-en">Monitor the call logs and fix mistakes manually after they happen.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">انزع أي أداة جلب نهائيًا واطلب من المستخدم لصق محتوى المستند.</span>
+            <span class="lang-en">Remove any fetching tool entirely and ask the user to paste document contents.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذا مثال الدليل الحرفي: استبدال الأداة العامة ببديل مُقيّد يجعل القيد جزءًا من عقد الأداة نفسها — إنفاذ حتمي لا يعتمد على التزام النموذج. التعليمة النصية احتمالية، والمراقبة اليدوية علاج بعد الضرر، والنزع الكامل يعطّل الوظيفة.</span>
+            <span class="lang-en"><strong>Correct.</strong> This is the guide's literal example: replacing the generic tool with a constrained alternative bakes the constraint into the tool's own contract — deterministic enforcement that does not rely on the model's compliance. A text instruction is probabilistic, manual monitoring fixes damage after the fact, and full removal kills the function.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>البديل المُقيّد <span dir="ltr" class="font-mono">load_document</span> المتحقِّق</em> — القيد داخل عقد الأداة أقوى من أي تعليمة أو مراقبة لاحقة.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is the <em>validating constrained alternative <span dir="ltr" class="font-mono">load_document</span></em> — a constraint inside the tool contract beats any instruction or after-the-fact monitoring.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">نظام يستقبل مستندات بأنواع مجهولة، وعندك ثلاث أدوات استخلاص (فواتير، عقود، سِيَر ذاتية). تبي تضمن أن النموذج <em>يستدعي أداة دائمًا</em> (لا نص حواري)، مع ترك اختيار الـ schema المناسب له. وش الإعداد؟</span>
+            <span class="lang-en">A system receives documents of unknown types, and you have three extraction tools (invoices, contracts, resumes). You want to guarantee the model <em>always calls a tool</em> (no conversational text), while leaving the schema choice to it. Which setting?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "any"}</span> — يضمن استدعاء أداة ما، والنموذج يختار الأنسب لنوع المستند.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">tool_choice: {"type": "any"}</span> — guarantees some tool gets called, and the model picks the best fit for the document type.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type": "auto"}</span> — النموذج بيستدعي أداة غالبًا.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">tool_choice: {"type": "auto"}</span> — the model will probably call a tool.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الإجبار بالاسم على أداة الفواتير لأنها الأكثر شيوعًا.</span>
+            <span class="lang-en">Force-by-name the invoice tool since it is the most common type.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">تعليمة في الـ prompt: "يجب أن تستدعي أداة، ممنوع الرد نصًا".</span>
+            <span class="lang-en">A prompt instruction: "you must call a tool, no text replies."</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> <span dir="ltr" class="font-mono">"any"</span> صُمم بالضبط لهذا: ضمان صارم لاستدعاء أداة مع حرية النموذج في اختيار أيّها — مثالي لنوع مستند مجهول. "auto" ما يضمن، والإجبار على الفواتير يفرض schema غلط على العقود والسير، والتعليمة النصية احتمالية.</span>
+            <span class="lang-en"><strong>Correct.</strong> <span dir="ltr" class="font-mono">"any"</span> was built exactly for this: a hard guarantee of a tool call with the model free to pick which — ideal for an unknown document type. "auto" does not guarantee, forcing invoices imposes the wrong schema on contracts and resumes, and a text instruction is probabilistic.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em><span dir="ltr" class="font-mono">"any"</span></em> — ضمان استدعاء أداة + حرية اختيار الـ schema. الإجبار بالاسم يناسب "أداة محددة أولًا"، وهنا النوع مجهول.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em><span dir="ltr" class="font-mono">"any"</span></em> — a guaranteed tool call + schema choice left to the model. Forced-by-name fits "a specific tool first," but here the type is unknown.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">وكيل دعم عملاء بيده 18 أداة (طلبات، فواتير، شحن، تسويق، تقارير داخلية...) بدأ يستدعي أدوات غير مناسبة للتذاكر البسيطة. حسب مبدأ الدليل، وش الخطوة الصحيحة؟</span>
+            <span class="lang-en">A customer-support agent holding 18 tools (orders, billing, shipping, marketing, internal reports...) starts calling inappropriate tools on simple tickets. Per the guide's principle, what is the right move?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">قلّص طقمه إلى 4-5 أدوات ذات صلة مباشرة بدور الدعم، ووزّع البقية على وكلاء/مسارات متخصصة.</span>
+            <span class="lang-en">Cut its set to the 4-5 tools directly relevant to the support role, distributing the rest to specialized agents/paths.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اضبط <span dir="ltr" class="font-mono">tool_choice:"any"</span> ليلتزم باستدعاء أداة في كل دور.</span>
+            <span class="lang-en">Set <span dir="ltr" class="font-mono">tool_choice:"any"</span> so it commits to a tool call every turn.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اكتب وصفًا أطول لكل أداة من الأدوات الـ18.</span>
+            <span class="lang-en">Write a longer description for each of the 18 tools.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف نموذجًا ثانيًا يراجع اختيار الأداة قبل كل تنفيذ.</span>
+            <span class="lang-en">Add a second model that reviews the tool choice before every execution.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> المشكلة هنا حجم الطقم نفسه (18 مقابل 4-5) — التقليص حسب الدور هو العلاج المباشر لتعقيد القرار. "any" يجبر استدعاءً لكنه لا يحسّن الاختيار، وتطويل 18 وصفًا يحسّن الوضوح لكن يُبقي التعقيد العددي، والنموذج المراجع طبقة زائدة مكلفة.</span>
+            <span class="lang-en"><strong>Correct.</strong> The problem here is the set size itself (18 vs 4-5) — cutting to the role is the direct fix for decision complexity. "any" forces a call without improving selection, lengthening 18 descriptions improves clarity but keeps the numeric complexity, and a reviewer model is an expensive extra layer.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>تقليص الطقم إلى 4-5 أدوات الدور</em>. لما يذكر السؤال عددًا كبيرًا من الأدوات صراحة، فالسبب الجذري هو الحجم — مو الوصف ولا الإجبار.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>cutting the set to the role's 4-5 tools</em>. When the question explicitly cites a large tool count, the root cause is the size — not descriptions, not forcing.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20 bg-gradient-to-bl from-emerald-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-white/10 border border-white/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 text-emerald-300"></i></span>
+        <h2 class="text-2xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+      </div>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">18 أداة تضعف الاختيار مقابل 4-5 مركّزة؛ والأدوات خارج التخصص تُساء (وكيل توليف يسوّي بحث ويب).</span><span class="lang-en">18 tools degrade selection versus 4-5 focused ones; out-of-specialization tools get misused (a synthesis agent running web searches).</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">وصول مُنطّق = أدوات الدور فقط + أداة عبور محدودة (<span dir="ltr" class="font-mono">verify_fact</span>) للبسيط المتكرر، والمعقّد عبر المنسّق.</span><span class="lang-en">Scoped access = role tools only + a limited cross-role tool (<span dir="ltr" class="font-mono">verify_fact</span>) for the simple and frequent, with complex cases via the coordinator.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">استبدل العام بالمُقيّد: <span dir="ltr" class="font-mono">fetch_url</span> تصير <span dir="ltr" class="font-mono">load_document</span> المتحقِّقة — القيد في عقد الأداة لا في النوايا.</span><span class="lang-en">Replace generic with constrained: <span dir="ltr" class="font-mono">fetch_url</span> becomes the validating <span dir="ltr" class="font-mono">load_document</span> — the constraint lives in the tool contract, not in intentions.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">auto</span> = حر · <span dir="ltr" class="font-mono">any</span> = أداة ما مضمونة · الإجبار بالاسم = أداة محددة أولًا ثم أدوار لاحقة.</span><span class="lang-en"><span dir="ltr" class="font-mono">auto</span> = free · <span dir="ltr" class="font-mono">any</span> = some tool guaranteed · forced-by-name = a specific tool first, then follow-up turns.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice</span> لدور واحد؛ التسلسل عبر الخطوات إنفاذ برمجي (hooks — دومين 1).</span><span class="lang-en"><span dir="ltr" class="font-mono">tool_choice</span> is single-turn; cross-step sequencing is programmatic enforcement (hooks — Domain 1).</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="2-2-error-responses.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق · 2.2</span><span class="lang-en">Previous · 2.2</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">استجابات الأخطاء المنظّمة</span><span class="lang-en">Structured error responses</span></p>
+        </div>
+      </a>
+      <a href="2-4-mcp-servers.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · 2.4</span><span class="lang-en">Next · 2.4</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">دمج خوادم MCP</span><span class="lang-en">MCP server integration</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

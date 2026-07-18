@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.2 الأوامر المخصّصة والمهارات — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.2: أوامر slash المخصّصة في .claude/commands/ مقابل ~/.claude/commands/، والمهارات مع frontmatter ملف SKILL.md: context: fork و allowed-tools و argument-hint.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">الأوامر والمهارات</span><span class="lang-en">Commands &amp; skills</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.2</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">الأوامر المخصّصة والمهارات</span>
+            <span class="lang-en">Custom slash commands &amp; skills</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">سير عمل الفريق المتكرر يستحق أمراً يُكتب مرة ويُستدعى بضغطة — ومهارة تعرف حدود صلاحياتها وسياقها.</span>
+            <span class="lang-en">Repeated team workflows deserve a command written once and invoked instantly — and a skill that knows its privilege and context boundaries.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">أوامر المشروع في <span dir="ltr" class="font-mono">.claude/commands/</span> (تُشارَك عبر Git) مقابل الأوامر الشخصية في <span dir="ltr" class="font-mono">~/.claude/commands/</span></span><span class="lang-en">Project commands in <span class="font-mono">.claude/commands/</span> (shared via Git) vs personal commands in <span class="font-mono">~/.claude/commands/</span></span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">بنية المهارة: مجلد في <span dir="ltr" class="font-mono">.claude/skills/</span> بملف <span dir="ltr" class="font-mono">SKILL.md</span> له frontmatter يضبط سلوكها</span><span class="lang-en">Skill anatomy: a folder in <span class="font-mono">.claude/skills/</span> with a <span class="font-mono">SKILL.md</span> whose frontmatter configures behavior</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> لعزل المخرجات الطويلة والاستكشافية، و<span dir="ltr" class="font-mono">allowed-tools</span> لتقييد الأدوات، و<span dir="ltr" class="font-mono">argument-hint</span> لطلب المعطى الناقص</span><span class="lang-en"><span class="font-mono">context: fork</span> to isolate verbose or exploratory output, <span class="font-mono">allowed-tools</span> to restrict tools, <span class="font-mono">argument-hint</span> to prompt for missing parameters</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">التخصيص الشخصي: نسخة في <span dir="ltr" class="font-mono">~/.claude/skills/</span> <strong>باسم مختلف</strong> حتى لا تؤثر على الزملاء</span><span class="lang-en">Personal customization: a variant in <span class="font-mono">~/.claude/skills/</span> with a <strong>different name</strong> so teammates are unaffected</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100 md:col-span-2">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">قرار التصميم الجوهري: مهارة (تُستدعى عند الطلب لسير عمل محدد) أم <span dir="ltr" class="font-mono">CLAUDE.md</span> (معايير عامة محمَّلة دائماً)؟</span><span class="lang-en">The core design decision: a skill (on-demand, task-specific workflow) or <span class="font-mono">CLAUDE.md</span> (universal, always-loaded standards)?</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: slash commands ===== -->
+    <section id="commands" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="terminal" class="w-5 h-5"></i></span>
+        <span class="lang-ar">أوامر slash: الموقع يحدد من يستفيد</span>
+        <span class="lang-en">Slash commands: location decides who benefits</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p><strong>الأمر المخصّص</strong> ملف <span dir="ltr" class="font-mono">markdown</span> بسيط: تكتب فيه البرومبت مرة واحدة، ويستدعيه أي مطوّر بكتابة <span dir="ltr" class="font-mono">/اسم-الملف</span>. السطر الفاصل في كل أسئلة هذا الموضوع هو <strong>مكان الملف</strong>:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span dir="ltr" class="font-mono">.claude/commands/</span> داخل المستودع — <strong>أوامر المشروع</strong>: تدخل التحكم بالإصدارات، فيستلمها تلقائياً كل من يستنسخ أو يسحب. هذا هو البيت الصحيح لأمر <span dir="ltr" class="font-mono">/review</span> يشغّل قائمة مراجعة الفريق.</li>
+          <li><span dir="ltr" class="font-mono">~/.claude/commands/</span> في مجلد المنزل — <strong>أوامر شخصية</strong>: على جهازك فقط، لا يراها أحد غيرك.</li>
+        </ul>
+        <p>ولاحظ ما <em>ليس</em> مكاناً للأوامر: <span dir="ltr" class="font-mono">CLAUDE.md</span> (للتعليمات والسياق، لا لتعريف أوامر)، وملف <span dir="ltr" class="font-mono">.claude/config.json</span> بمصفوفة <span dir="ltr" class="font-mono">commands</span> (آلية <strong>غير موجودة</strong> يحبها كتّاب الأسئلة كخيار فخ).</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>A <strong>custom slash command</strong> is a simple <span class="font-mono">markdown</span> file: write the prompt once, and any developer invokes it by typing <span class="font-mono">/file-name</span>. The dividing line in every question on this topic is <strong>where the file lives</strong>:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span class="font-mono">.claude/commands/</span> inside the repository — <strong>project commands</strong>: version-controlled, automatically received by everyone who clones or pulls. This is the right home for a team <span class="font-mono">/review</span> command running the shared checklist.</li>
+          <li><span class="font-mono">~/.claude/commands/</span> in your home directory — <strong>personal commands</strong>: on your machine only, invisible to everyone else.</li>
+        </ul>
+        <p>Note what is <em>not</em> a command location: <span class="font-mono">CLAUDE.md</span> (instructions and context, not command definitions), and a <span class="font-mono">.claude/config.json</span> with a <span class="font-mono">commands</span> array (a mechanism that <strong>does not exist</strong> — a favorite trap option).</p>
+      </div>
+
+      <!-- DIAGRAM 1: scope x mechanism panels -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="layout-grid" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: النطاق × الآلية — أربعة بيوت لا خامس لها</span><span class="lang-en">Diagram: scope by mechanism — four homes, no fifth</span></div>
+        <div dir="ltr" class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 space-y-2">
+            <div class="flex items-center gap-2 font-mono font-bold text-violet-800 text-sm"><i data-lucide="users" class="w-4 h-4"></i> PROJECT command — shared</div>
+            <div class="font-mono text-xs text-violet-700">.claude/commands/review.md</div>
+            <div class="text-xs text-surface-600">in git — everyone gets /review on clone/pull</div>
+          </div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-4 space-y-2">
+            <div class="flex items-center gap-2 font-mono font-bold text-surface-700 text-sm"><i data-lucide="user" class="w-4 h-4"></i> PERSONAL command — yours</div>
+            <div class="font-mono text-xs text-surface-600">~/.claude/commands/scratch.md</div>
+            <div class="text-xs text-surface-500">home dir — never shared, never in git</div>
+          </div>
+          <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 space-y-2">
+            <div class="flex items-center gap-2 font-mono font-bold text-violet-800 text-sm"><i data-lucide="users" class="w-4 h-4"></i> PROJECT skill — shared</div>
+            <div class="font-mono text-xs text-violet-700">.claude/skills/audit-deps/SKILL.md</div>
+            <div class="text-xs text-surface-600">in git — frontmatter controls context + tools</div>
+          </div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-4 space-y-2">
+            <div class="flex items-center gap-2 font-mono font-bold text-surface-700 text-sm"><i data-lucide="user" class="w-4 h-4"></i> PERSONAL skill — different name</div>
+            <div class="font-mono text-xs text-surface-600">~/.claude/skills/my-audit-deps/SKILL.md</div>
+            <div class="text-xs text-surface-500">personal variant — renamed so teammates are unaffected</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">العمود الأيسر (بنفسجي) يعيش في المستودع ويصل للجميع؛ الأيمن (رمادي) شخصي على جهازك — والنسخة الشخصية من مهارة الفريق تأخذ اسماً مختلفاً.</span>
+          <span class="lang-en">The violet column lives in the repo and reaches everyone; the gray column is personal on your machine — and a personal variant of a team skill takes a different name.</span>
+        </p>
+      </div>
+
+      <!-- Code: command file -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: أمر مشروع .claude/commands/review.md</span><span class="lang-en">Example: project command .claude/commands/review.md</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown">---
+description: Run the team's standard code-review checklist
+argument-hint: [pr-number]
+---
+Review the changes for PR #$ARGUMENTS against our checklist:
+
+- Correctness and edge cases (null, empty, boundary values)
+- Test coverage for every new branch
+- No secrets, debug logging, or commented-out code left behind
+- Naming and error handling match .claude/rules/api-conventions.md
+
+Report findings grouped by severity: blocker / warning / nit.</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">عبارة «متاح لكل مطوّر عند الاستنساخ / available on clone» في السؤال = المكان داخل المستودع (<span dir="ltr" class="font-mono">.claude/…</span>). عبارة «بدون التأثير على الزملاء / without affecting teammates» = المكان الشخصي (<span dir="ltr" class="font-mono">~/.claude/…</span>) وباسم مختلف للمهارات.</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">"Available to every developer on clone" in a question = the in-repo location (<span class="font-mono">.claude/…</span>). "Without affecting teammates" = the personal location (<span class="font-mono">~/.claude/…</span>), with a different name for skills.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: skills & frontmatter ===== -->
+    <section id="skills" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="wand-sparkles" class="w-5 h-5"></i></span>
+        <span class="lang-ar">المهارات: تشريح SKILL.md وقوة الـ frontmatter</span>
+        <span class="lang-en">Skills: SKILL.md anatomy &amp; frontmatter powers</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p><strong>المهارة</strong> أقوى من الأمر: مجلد كامل في <span dir="ltr" class="font-mono">.claude/skills/</span> قلبه ملف <span dir="ltr" class="font-mono">SKILL.md</span>، وترويسته (frontmatter) تمنحك ثلاث أدوات تحكم يسأل عنها الاختبار بالاسم:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span dir="ltr" class="font-mono">context: fork</span> — يشغّل المهارة في <strong>سياق فرعي معزول</strong>: المخرجات الطويلة (تحليل شامل للكود) أو الاستكشافية (عصف ذهني لبدائل) تبقى في الفرع، ويعود <em>الملخص فقط</em> إلى المحادثة الرئيسية فلا تتلوث.</li>
+          <li><span dir="ltr" class="font-mono">allowed-tools</span> — يقيّد الأدوات المتاحة <strong>أثناء تنفيذ المهارة</strong>: مثلاً السماح بعمليات الملفات فقط لمنع أي إجراء مدمّر. هذا مبدأ أقل صلاحية مطبقاً على المهارات.</li>
+          <li><span dir="ltr" class="font-mono">argument-hint</span> — لو استدعى المطوّر المهارة <strong>بدون وسيطها المطلوب</strong>، يظهر له التلميح ليعرف ما الذي يجب تمريره.</li>
+        </ul>
+        <p>وتذكّر التخصيص الشخصي: لو أردت تعديل مهارة فريق لذوقك، أنشئ نسختك في <span dir="ltr" class="font-mono">~/.claude/skills/</span> <strong>باسم مختلف</strong> — تعديل مهارة المشروع نفسها سيصل للجميع مع أول commit.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>A <strong>skill</strong> goes beyond a command: a full folder in <span class="font-mono">.claude/skills/</span> centered on a <span class="font-mono">SKILL.md</span> file whose frontmatter gives you three controls the exam asks about by name:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><span class="font-mono">context: fork</span> — runs the skill in an <strong>isolated sub-agent context</strong>: verbose output (a full codebase analysis) or exploratory context (brainstorming alternatives) stays in the fork, and only the <em>summary</em> returns to the main conversation, keeping it clean.</li>
+          <li><span class="font-mono">allowed-tools</span> — restricts which tools are available <strong>during skill execution</strong>: e.g. file operations only, preventing any destructive action. Least privilege, applied to skills.</li>
+          <li><span class="font-mono">argument-hint</span> — if a developer invokes the skill <strong>without its required argument</strong>, the hint prompts them for what to pass.</li>
+        </ul>
+        <p>And remember personal customization: to tweak a team skill to your taste, create your variant in <span class="font-mono">~/.claude/skills/</span> <strong>under a different name</strong> — editing the project skill itself ships to everyone with the next commit.</p>
+      </div>
+
+      <!-- Code: SKILL.md -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: .claude/skills/audit-deps/SKILL.md</span><span class="lang-en">Example: .claude/skills/audit-deps/SKILL.md</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown">---
+name: audit-deps
+description: Audit dependencies for security and license issues
+context: fork            # verbose scan stays in an isolated sub-agent
+allowed-tools: Read, Grep, Glob    # read-only: no Bash, no destructive writes
+argument-hint: [package-name]      # shown if invoked without an argument
+---
+Audit the dependency tree for `$ARGUMENTS`:
+
+1. Find every place it is imported (Grep) and how it is used.
+2. Flag known-vulnerable or unmaintained versions.
+3. Return a SHORT summary table only — the full scan stays in the fork,
+   so the main conversation is not flooded with hundreds of lines.</code></pre>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: fork isolation flow -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="git-fork" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: كيف يعزل context: fork المخرجات</span><span class="lang-en">Diagram: how context: fork isolates output</span></div>
+        <div dir="ltr" class="flex flex-col md:flex-row items-stretch gap-3">
+          <div class="flex-1 rounded-xl border-2 border-violet-300 bg-violet-50 p-4 space-y-2">
+            <div class="font-mono text-xs font-bold text-violet-800 flex items-center gap-1.5"><i data-lucide="messages-square" class="w-4 h-4"></i> MAIN CONVERSATION</div>
+            <div class="rounded-lg bg-white border border-violet-200 p-2 font-mono text-xs text-surface-600">/audit-deps lodash</div>
+            <div class="rounded-lg bg-white border border-emerald-300 p-2 font-mono text-xs text-emerald-700">summary: 3 findings (short)</div>
+            <div class="text-xs text-surface-500">context stays small and clean</div>
+          </div>
+          <div class="flex md:flex-col items-center justify-center gap-1 text-surface-400 px-1">
+            <i data-lucide="arrow-right" class="w-5 h-5 md:rotate-0 rotate-90"></i>
+            <span class="font-mono text-[10px]">fork</span>
+            <i data-lucide="arrow-left" class="w-5 h-5 md:rotate-0 rotate-90"></i>
+            <span class="font-mono text-[10px]">summary</span>
+          </div>
+          <div class="flex-1 rounded-xl border-2 border-dashed border-surface-300 bg-surface-50 p-4 space-y-2">
+            <div class="font-mono text-xs font-bold text-surface-700 flex items-center gap-1.5"><i data-lucide="box" class="w-4 h-4"></i> FORKED SUB-AGENT CONTEXT</div>
+            <div class="rounded-lg bg-white border border-surface-200 p-2 font-mono text-xs text-surface-500">scan file 1/400 ... 400/400</div>
+            <div class="rounded-lg bg-white border border-surface-200 p-2 font-mono text-xs text-surface-500">hundreds of verbose lines</div>
+            <div class="text-xs text-surface-500">verbose output lives and dies here</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">المسح الكامل يحدث في الفرع المعزول ويفنى فيه — المحادثة الرئيسية تستلم الملخص القصير فقط.</span>
+          <span class="lang-en">The full scan happens and dies inside the isolated fork — the main conversation receives only the short summary.</span>
+        </p>
+      </div>
+
+      <!-- Tip -->
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex items-start gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-emerald-900"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></div>
+          <div class="lang-ar text-emerald-900/90 text-sm leading-relaxed">اسأل عن كل مهارة سؤالين مستقلين: «هل مخرجاتها طويلة أو استكشافية؟» → <span dir="ltr" class="font-mono">context: fork</span>. «هل يمكن أن تفعل شيئاً مدمّراً؟» → <span dir="ltr" class="font-mono">allowed-tools</span>. حقلان مختلفان لمشكلتين مختلفتين — تلوّث السياق شيء، والصلاحيات شيء آخر.</div>
+          <div class="lang-en text-emerald-900/90 text-sm leading-relaxed">Ask two independent questions of every skill: "Is its output long or exploratory?" → <span class="font-mono">context: fork</span>. "Could it do something destructive?" → <span class="font-mono">allowed-tools</span>. Two different fields for two different problems — context pollution is one thing, privileges another.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: skill or CLAUDE.md ===== -->
+    <section id="skill-or-claudemd" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="scale" class="w-5 h-5"></i></span>
+        <span class="lang-ar">مهارة أم CLAUDE.md؟</span>
+        <span class="lang-en">Skill or CLAUDE.md?</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>القاعدة الفاصلة: <strong>المهارة تُستدعى عند الطلب</strong> لسير عمل خاص بمهمة (تدقيق تبعيات، توليد تقرير)، بينما <strong><span dir="ltr" class="font-mono">CLAUDE.md</span> يُحمَّل دائماً</strong> في كل جلسة للمعايير العامة الثابتة. الخطآن المتقابلان: تحويل معيار دائم إلى مهارة (لن تُطبَّق إلا لو تذكّر أحدهم استدعاءها)، وحشر سير عمل ثقيل نادر الاستخدام في <span dir="ltr" class="font-mono">CLAUDE.md</span> (يستهلك سياق كل جلسة بلا داعٍ).</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>The dividing rule: <strong>skills are invoked on demand</strong> for task-specific workflows (dependency audit, report generation), while <strong><span class="font-mono">CLAUDE.md</span> is always loaded</strong> in every session for universal standing standards. The two symmetric mistakes: turning an always-on standard into a skill (it only applies if someone remembers to invoke it), and cramming a heavy, rarely-used workflow into <span class="font-mono">CLAUDE.md</span> (burning every session's context for nothing).</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">البُعد</th>
+                <th class="p-3 text-start font-semibold">Skill (مهارة)</th>
+                <th class="p-3 text-start font-semibold">CLAUDE.md</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">متى يُحمَّل</td><td class="p-3">عند الطلب (استدعاء صريح)</td><td class="p-3">دائماً في كل جلسة</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">الاستخدام الأمثل</td><td class="p-3">سير عمل خاص بمهمة (تحليل، تدقيق)</td><td class="p-3">معايير عامة ثابتة</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">عزل السياق</td><td class="p-3"><span dir="ltr" class="font-mono">context: fork</span> متاح</td><td class="p-3">لا — يبقى في السياق الرئيسي</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">تقييد الأدوات</td><td class="p-3"><span dir="ltr" class="font-mono">allowed-tools</span></td><td class="p-3">لا يوجد</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">طلب وسيط ناقص</td><td class="p-3"><span dir="ltr" class="font-mono">argument-hint</span></td><td class="p-3">لا ينطبق</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">Dimension</th>
+                <th class="p-3 text-start font-semibold">Skill</th>
+                <th class="p-3 text-start font-semibold">CLAUDE.md</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">When it loads</td><td class="p-3">On demand (explicit invocation)</td><td class="p-3">Always, every session</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Best for</td><td class="p-3">Task-specific workflow (analysis, audit)</td><td class="p-3">Universal, always-on standards</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Context isolation</td><td class="p-3"><span class="font-mono">context: fork</span> available</td><td class="p-3">No — stays in main context</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Tool restriction</td><td class="p-3"><span class="font-mono">allowed-tools</span></td><td class="p-3">None</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Missing-argument prompt</td><td class="p-3"><span class="font-mono">argument-hint</span></td><td class="p-3">Not applicable</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed"><span dir="ltr" class="font-mono">context: fork</span> يعزل <strong>السياق</strong>، و<span dir="ltr" class="font-mono">allowed-tools</span> يقيّد <strong>الصلاحيات</strong> — لا يستبدل أحدهما الآخر أبداً. سؤال يطلب «منع الأوامر المدمّرة» جوابه <span dir="ltr" class="font-mono">allowed-tools</span> حتى لو ظهر <span dir="ltr" class="font-mono">fork</span> بين الخيارات بصياغة مغرية.</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed"><span class="font-mono">context: fork</span> isolates <strong>context</strong>; <span class="font-mono">allowed-tools</span> restricts <strong>privileges</strong> — neither ever substitutes for the other. A question asking to "prevent destructive commands" is answered by <span class="font-mono">allowed-tools</span>, even when <span class="font-mono">fork</span> appears among the options in tempting wording.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> أمر للفريق كله → وضعه في <span dir="ltr" class="font-mono">~/.claude/commands/</span> أو داخل <span dir="ltr" class="font-mono">CLAUDE.md</span> أو <span dir="ltr" class="font-mono">.claude/config.json</span> بمصفوفة أوامر. <strong class="text-emerald-700">الصح:</strong> <span dir="ltr" class="font-mono">.claude/commands/</span> داخل المستودع — والخيار الأخير آلية غير موجودة أصلاً.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> a team-wide command → placing it in <span class="font-mono">~/.claude/commands/</span>, inside <span class="font-mono">CLAUDE.md</span>, or a <span class="font-mono">.claude/config.json</span> commands array. <strong class="text-emerald-700">Reality:</strong> <span class="font-mono">.claude/commands/</span> in the repository — and that last option is a mechanism that does not exist.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> استخدام <span dir="ltr" class="font-mono">context: fork</span> «للأمان» ومنع الأوامر الخطرة. <strong class="text-emerald-700">الصح:</strong> <span dir="ltr" class="font-mono">fork</span> يعزل السياق فقط — الأمان والتقييد وظيفة <span dir="ltr" class="font-mono">allowed-tools</span>.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> using <span class="font-mono">context: fork</span> "for safety" to block dangerous commands. <strong class="text-emerald-700">Reality:</strong> <span class="font-mono">fork</span> only isolates context — safety and restriction are <span class="font-mono">allowed-tools</span>' job.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> تعديل مهارة المشروع مباشرة «لتجربة شخصية». <strong class="text-emerald-700">الصح:</strong> نسخة شخصية في <span dir="ltr" class="font-mono">~/.claude/skills/</span> باسم مختلف — التعديل المباشر يصل للجميع مع أول commit.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> editing the project skill directly "as a personal experiment." <strong class="text-emerald-700">Reality:</strong> a personal variant in <span class="font-mono">~/.claude/skills/</span> with a different name — a direct edit reaches everyone on the next commit.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="briefcase" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: الاستشاري في الغرفة الجانبية</span><span class="lang-en">Real-life example: the consultant in the side room</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>الأمر المخصّص مثل <strong>نموذج طلب جاهز في أدراج الشركة</strong>: بدل ما يكتب كل موظف الخطاب من الصفر، يسحب النموذج ويعبّي الفراغ (<span dir="ltr" class="font-mono">$ARGUMENTS</span>). لو كان النموذج في الأرشيف المشترك استفاد منه الجميع، ولو في درجك الخاص فهو لك وحدك.</p>
+              <p>أما المهارة فهي <strong>استشاري تستدعيه لمهمة محددة</strong>: تجلسه في <strong>غرفة جانبية</strong> (<span dir="ltr" class="font-mono">context: fork</span>) حتى لا يغرق طاولة الاجتماع الرئيسية بأكوام أوراقه — يدخل عليك بالخلاصة فقط. وقبل أن يبدأ، تسلّمه <strong>تصريح دخول محدود</strong> (<span dir="ltr" class="font-mono">allowed-tools</span>): يقرأ الملفات لكنه لا يوقّع الشيكات. ولو حضر بدون ملف القضية، موظف الاستقبال يسأله عنه (<span dir="ltr" class="font-mono">argument-hint</span>).</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>A custom command is a <strong>ready-made form in the company drawers</strong>: instead of every employee writing the letter from scratch, they pull the template and fill the blank (<span class="font-mono">$ARGUMENTS</span>). Kept in the shared archive, everyone benefits; kept in your own drawer, it is yours alone.</p>
+              <p>A skill is a <strong>consultant called in for a specific job</strong>: you seat them in a <strong>side room</strong> (<span class="font-mono">context: fork</span>) so they do not bury the main meeting table under their piles of paper — they walk in with only the summary. Before they start, you hand them a <strong>limited access badge</strong> (<span class="font-mono">allowed-tools</span>): they may read files but never sign checks. And if they arrive without the case file, the receptionist asks for it (<span class="font-mono">argument-hint</span>).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">السؤال الرسمي النموذجي: «أمر <span dir="ltr" class="font-mono">/review</span> يجب أن يصل لكل مطوّر عند الاستنساخ — أين تنشئه؟» والجواب <span dir="ltr" class="font-mono">.claude/commands/</span>.</span><span class="lang-en">The canonical official question: "a <span class="font-mono">/review</span> command must reach every developer on clone — where do you create it?" Answer: <span class="font-mono">.claude/commands/</span>.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">مهارة «مخرجاتها تغرق المحادثة» أو «استكشافية» → <span dir="ltr" class="font-mono">context: fork</span>؛ «يجب ألا تنفّذ عمليات خطرة» → <span dir="ltr" class="font-mono">allowed-tools</span>.</span><span class="lang-en">A skill whose "output floods the conversation" or is "exploratory" → <span class="font-mono">context: fork</span>; one that "must not perform destructive operations" → <span class="font-mono">allowed-tools</span>.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«معيار دائم أم سير عمل عند الطلب؟» — اختبار تمييز المهارة من <span dir="ltr" class="font-mono">CLAUDE.md</span>.</span><span class="lang-en">"Always-on standard or on-demand workflow?" — testing the skill vs <span class="font-mono">CLAUDE.md</span> distinction.</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">.claude/config.json</span> بمصفوفة <span dir="ltr" class="font-mono">commands</span> — غير موجود.</span><span class="lang-en">A <span class="font-mono">.claude/config.json</span> with a <span class="font-mono">commands</span> array — does not exist.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">تعريف الأوامر داخل <span dir="ltr" class="font-mono">CLAUDE.md</span> — مكانه التعليمات لا الأوامر.</span><span class="lang-en">Defining commands inside <span class="font-mono">CLAUDE.md</span> — it holds instructions, not commands.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> كإجابة عن سؤال صلاحيات، أو <span dir="ltr" class="font-mono">allowed-tools</span> كإجابة عن سؤال تلوّث سياق.</span><span class="lang-en"><span class="font-mono">context: fork</span> answering a privileges question, or <span class="font-mono">allowed-tools</span> answering a context-pollution question.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">تحب مهارة الفريق <span dir="ltr" class="font-mono">generate-report</span> لكنك تريد نسخة معدّلة بتنسيقك الخاص، دون أن يتأثر أي زميل. ما التصرف الصحيح؟</span>
+            <span class="lang-en">You like the team's <span class="font-mono">generate-report</span> skill but want a modified version with your own formatting, without affecting any teammate. What is the correct move?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">عدّل <span dir="ltr" class="font-mono">.claude/skills/generate-report/SKILL.md</span> مباشرة في المستودع</span>
+            <span class="lang-en">Edit <span class="font-mono">.claude/skills/generate-report/SKILL.md</span> directly in the repo</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أنشئ نسخة في <span dir="ltr" class="font-mono">~/.claude/skills/</span> باسم مختلف مثل <span dir="ltr" class="font-mono">my-report</span></span>
+            <span class="lang-en">Create a variant in <span class="font-mono">~/.claude/skills/</span> under a different name like <span class="font-mono">my-report</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">أضف تفضيلاتك لملف <span dir="ltr" class="font-mono">CLAUDE.md</span> بجذر المشروع لتطغى على المهارة</span>
+            <span class="lang-en">Add your preferences to the project root <span class="font-mono">CLAUDE.md</span> to override the skill</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">أضف <span dir="ltr" class="font-mono">context: fork</span> لنسخة المشروع حتى تعمل معزولة لك وحدك</span>
+            <span class="lang-en">Add <span class="font-mono">context: fork</span> to the project copy so it runs isolated just for you</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا النمط الرسمي للتخصيص الشخصي: نسخة في <span dir="ltr" class="font-mono">~/.claude/skills/</span> <strong>باسم مختلف</strong>. تعديل ملف المشروع (A) يصل للجميع مع أول commit، وحشو <span dir="ltr" class="font-mono">CLAUDE.md</span> بتفضيلات شخصية (C) يفرضها على الفريق، و<span dir="ltr" class="font-mono">fork</span> (D) يعزل السياق ولا يجعل المهارة «شخصية».</div>
+            <div class="lang-en text-emerald-900">Correct. This is the official personal-customization pattern: a variant in <span class="font-mono">~/.claude/skills/</span> <strong>under a different name</strong>. Editing the project file (A) ships to everyone on the next commit, stuffing personal preferences into <span class="font-mono">CLAUDE.md</span> (C) imposes them on the team, and <span class="font-mono">fork</span> (D) isolates context — it does not make a skill "personal."</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. أي شيء داخل المستودع يصل للجميع — التخصيص الشخصي مكانه <span dir="ltr" class="font-mono">~/.claude/skills/</span> وباسم مختلف تحديداً حتى لا يتعارض مع مهارة الفريق الأصلية.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. Anything inside the repository reaches everyone — personal customization belongs in <span class="font-mono">~/.claude/skills/</span>, specifically under a different name so it never conflicts with the original team skill.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">مهارة <span dir="ltr" class="font-mono">brainstorm-alternatives</span> تولّد صفحات من الأفكار والمقارنات الاستكشافية، ولاحظت أن بقايا هذا العصف تشوّش قرارات Claude في بقية الجلسة. أي حقل frontmatter يحل المشكلة؟</span>
+            <span class="lang-en">A <span class="font-mono">brainstorm-alternatives</span> skill generates pages of exploratory ideas and comparisons, and you notice the leftover brainstorm noise skewing Claude's decisions for the rest of the session. Which frontmatter field solves this?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">allowed-tools</span> — قلّل الأدوات فيقلّ الإخراج</span>
+            <span class="lang-en"><span class="font-mono">allowed-tools</span> — fewer tools means less output</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">argument-hint</span> — اطلب من المطوّر تحديد نطاق أضيق</span>
+            <span class="lang-en"><span class="font-mono">argument-hint</span> — ask the developer for a narrower scope</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> — يعمل العصف في سياق فرعي معزول ويرجع الخلاصة فقط</span>
+            <span class="lang-en"><span class="font-mono">context: fork</span> — the brainstorm runs in an isolated sub-context and only the conclusion returns</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">انقل المهارة إلى <span dir="ltr" class="font-mono">~/.claude/skills/</span> لتعمل خارج جلسة المشروع</span>
+            <span class="lang-en">Move the skill to <span class="font-mono">~/.claude/skills/</span> so it runs outside the project session</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. المشكلة هي تلوّث السياق بمخرجات استكشافية — وهذا هو الغرض المنصوص لـ <span dir="ltr" class="font-mono">context: fork</span>: العصف كله يعيش في الفرع، والمحادثة الرئيسية تستلم الخلاصة فقط. تقييد الأدوات لا يقلل النثر الاستكشافي، والتلميح لا يغيّر مكان المخرجات، ونقل المهارة يغيّر <em>من يملكها</em> لا <em>أين تتنفذ</em>.</div>
+            <div class="lang-en text-emerald-900">Correct. The problem is context pollution by exploratory output — the stated purpose of <span class="font-mono">context: fork</span>: the whole brainstorm lives in the fork, and the main conversation receives only the conclusion. Restricting tools does not reduce exploratory prose, a hint does not relocate output, and moving the skill changes <em>who owns it</em>, not <em>where it executes</em>.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. إشارات السؤال «مخرجات استكشافية/طويلة» و«تشوّش بقية الجلسة» تعني عزل سياق = <span dir="ltr" class="font-mono">context: fork</span>. الدليل الرسمي يذكر تحليل الكود المطوّل والعصف الذهني كمثالين نموذجيين له.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. The cues "exploratory/verbose output" and "skewing the rest of the session" mean context isolation = <span class="font-mono">context: fork</span>. The official guide names verbose codebase analysis and brainstorming as its two canonical examples.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">المطوّرون يستدعون مهارة <span dir="ltr" class="font-mono">migrate-endpoint</span> كثيراً بدون تمرير اسم الـ endpoint المطلوب، فتنفّذ على افتراضات خاطئة. ما أبسط ضبط يعالج هذا؟</span>
+            <span class="lang-en">Developers keep invoking the <span class="font-mono">migrate-endpoint</span> skill without passing the required endpoint name, so it runs on wrong assumptions. What is the simplest configuration fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أضف <span dir="ltr" class="font-mono">context: fork</span> ليُسأل المستخدم داخل الفرع</span>
+            <span class="lang-en">Add <span class="font-mono">context: fork</span> so the user is asked inside the fork</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أضف <span dir="ltr" class="font-mono">argument-hint: [endpoint-name]</span> في frontmatter المهارة</span>
+            <span class="lang-en">Add <span class="font-mono">argument-hint: [endpoint-name]</span> to the skill's frontmatter</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">اكتب في <span dir="ltr" class="font-mono">CLAUDE.md</span> تعليمات «اسأل دائماً عن الـ endpoint»</span>
+            <span class="lang-en">Write "always ask for the endpoint" instructions in <span class="font-mono">CLAUDE.md</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">قيّد المهارة بـ <span dir="ltr" class="font-mono">allowed-tools</span> حتى لا تعدّل شيئاً بدون معطى</span>
+            <span class="lang-en">Restrict the skill with <span class="font-mono">allowed-tools</span> so it cannot modify anything without an argument</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. <span dir="ltr" class="font-mono">argument-hint</span> مصمَّم لهذه الحالة حرفياً: يذكّر المطوّر بالمعطى المطلوب عند الاستدعاء بدون وسائط. الحلان A وD يستخدمان حقولاً لأغراض أخرى (عزل سياق / تقييد صلاحيات)، وC تعليمات احتمالية في ملف عام بدل ضبط حتمي في المهارة نفسها.</div>
+            <div class="lang-en text-emerald-900">Correct. <span class="font-mono">argument-hint</span> is designed for literally this case: prompting the developer for the required parameter when invoking without arguments. A and D use fields built for other purposes (context isolation / privilege restriction), and C is probabilistic instruction in a global file instead of deterministic configuration on the skill itself.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. «استدعاء بدون المعطى المطلوب» هي الإشارة المعيارية لحقل <span dir="ltr" class="font-mono">argument-hint</span> — كل حقل frontmatter له وظيفة واحدة محددة، والاختبار يحب من يعرف أيها لأي مشكلة.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. "Invoked without the required parameter" is the canonical cue for <span class="font-mono">argument-hint</span> — each frontmatter field has one specific job, and the exam rewards knowing which solves which problem.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">.claude/commands/</span> = أوامر الفريق عبر Git؛ <span dir="ltr" class="font-mono">~/.claude/commands/</span> = أوامرك الشخصية.</span><span class="lang-en"><span class="font-mono">.claude/commands/</span> = team commands via Git; <span class="font-mono">~/.claude/commands/</span> = your personal ones.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> يعزل السياق، <span dir="ltr" class="font-mono">allowed-tools</span> يقيّد الصلاحيات، <span dir="ltr" class="font-mono">argument-hint</span> يطلب المعطى الناقص — ثلاث وظائف لا تتبادل.</span><span class="lang-en"><span class="font-mono">context: fork</span> isolates context, <span class="font-mono">allowed-tools</span> restricts privileges, <span class="font-mono">argument-hint</span> prompts for a missing parameter — three non-interchangeable jobs.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">نسختك الشخصية من مهارة فريق: <span dir="ltr" class="font-mono">~/.claude/skills/</span> وباسم مختلف.</span><span class="lang-en">Your personal variant of a team skill: <span class="font-mono">~/.claude/skills/</span>, under a different name.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">مهارة = عند الطلب لسير عمل محدد؛ <span dir="ltr" class="font-mono">CLAUDE.md</span> = دائماً للمعايير العامة.</span><span class="lang-en">Skill = on demand for a specific workflow; <span class="font-mono">CLAUDE.md</span> = always-on for universal standards.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">لا وجود لمصفوفة أوامر في <span dir="ltr" class="font-mono">config.json</span> — خيار فخ متكرر.</span><span class="lang-en">There is no <span class="font-mono">config.json</span> commands array — a recurring trap option.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="3-1-claude-md.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.1 تدرّج CLAUDE.md</span>
+            <span class="lang-en">3.1 CLAUDE.md hierarchy</span>
+          </div>
+        </div>
+      </a>
+      <a href="3-3-path-rules.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.3 القواعد الخاصة بالمسارات</span>
+            <span class="lang-en">3.3 Path-specific rules</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

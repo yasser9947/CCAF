@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدومين 3: إعداد وسير عمل Claude Code — CCAF مرجع</title>
+  <meta name="description" content="نظرة عامة على الدومين الثالث من شهادة CCAF: شجرة مواضيع إعداد Claude Code — تدرّج CLAUDE.md، الأوامر والمهارات، قواعد المسارات، وضع التخطيط، التحسين التكراري، ودمج CI/CD — مع اختبار قصير.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-12 md:py-16 space-y-6">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></span>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <span class="bg-violet-500/30 border border-violet-400/40 text-violet-50 text-xs font-mono px-2.5 py-1 rounded-lg">D3</span>
+        <span class="text-violet-200 text-sm font-medium">
+          <span class="lang-ar">إعداد وسير عمل Claude Code</span>
+          <span class="lang-en">Claude Code Configuration &amp; Workflows</span>
+        </span>
+      </div>
+
+      <h1 class="text-3xl md:text-5xl font-bold text-balance leading-tight">
+        <span class="lang-ar">الدومين 3: إعداد Claude Code وتصميم سير العمل</span>
+        <span class="lang-en">Domain 3: Configuring Claude Code &amp; Designing Workflows</span>
+      </h1>
+
+      <div class="lang-ar text-lg text-violet-100 leading-relaxed max-w-3xl">
+        كيف تطوّع <span dir="ltr" class="font-mono">Claude Code</span> لفريقك: وين يعيش كل إعداد، متى تخطّط قبل ما تلمس الكود، كيف تكرّر بذكاء، وكيف تشغّله داخل <span dir="ltr" class="font-mono">CI/CD</span> بدون ما يعلّق. ست مواضيع، كل موضوع له صفحة درس كاملة تحت.
+      </div>
+      <div class="lang-en text-lg text-violet-100 leading-relaxed max-w-3xl">
+        How to tailor <span class="font-mono">Claude Code</span> to your team: where each piece of configuration lives, when to plan before touching code, how to iterate intelligently, and how to run it inside <span class="font-mono">CI/CD</span> without hanging. Six topics, each with its own full lesson page below.
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 pt-2">
+        <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full ps-3 pe-4 py-1.5 text-sm">
+          <i data-lucide="pie-chart" class="w-4 h-4 text-violet-300"></i>
+          <span class="lang-ar">20% من محتوى الاختبار</span>
+          <span class="lang-en">20% of scored content</span>
+        </span>
+        <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full ps-3 pe-4 py-1.5 text-sm">
+          <i data-lucide="list-checks" class="w-4 h-4 text-violet-300"></i>
+          <span class="lang-ar">تقريباً 12 سؤال من 60</span>
+          <span class="lang-en">Roughly 12 of 60 questions</span>
+        </span>
+        <span class="inline-flex items-center gap-2 bg-white/10 border border-white/15 rounded-full ps-3 pe-4 py-1.5 text-sm">
+          <i data-lucide="git-branch" class="w-4 h-4 text-violet-300"></i>
+          <span class="lang-ar">6 مواضيع</span>
+          <span class="lang-en">6 topics</span>
+        </span>
+      </div>
+
+      <div class="flex items-start gap-2 text-sm text-violet-200 pt-3 border-t border-white/10">
+        <i data-lucide="target" class="w-4 h-4 mt-0.5 shrink-0 text-violet-300"></i>
+        <div class="space-y-1.5">
+          <p>
+            <span class="lang-ar">السيناريوهات التي تختبر هذا الدومين:</span>
+            <span class="lang-en">Exam scenarios that test this domain:</span>
+          </p>
+          <div class="flex flex-wrap gap-2" dir="ltr">
+            <span class="text-xs bg-violet-500/20 text-violet-100 border border-violet-400/30 rounded-lg px-2.5 py-1 font-mono">S2 Code Generation with Claude Code</span>
+            <span class="text-xs bg-violet-500/20 text-violet-100 border border-violet-400/30 rounded-lg px-2.5 py-1 font-mono">S4 Developer Productivity</span>
+            <span class="text-xs bg-violet-500/20 text-violet-100 border border-violet-400/30 rounded-lg px-2.5 py-1 font-mono">S5 Claude Code for CI</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-12 space-y-14">
+
+    <!-- ===== Domain summary ===== -->
+    <section id="summary" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-5">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="book-open" class="w-5 h-5"></i></span>
+          <h2 class="text-xl md:text-2xl font-bold text-surface-900">
+            <span class="lang-ar">ملخص الدومين</span>
+            <span class="lang-en">Domain summary</span>
+          </h2>
+        </div>
+
+        <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+          <p>هذا الدومين يقيس شيئاً واحداً في جوهره: <strong>هل تعرف وين يعيش كل إعداد، ومتى يُحمَّل، ومن يستفيد منه؟</strong> معايير الفريق في مستوى المشروع (تدخل Git)، تفضيلاتك الشخصية في مستوى المستخدم (<span dir="ltr" class="font-mono">~/.claude/</span>)، الاتفاقيات المنتشرة عبر المجلدات في قواعد <span dir="ltr" class="font-mono">glob</span>، وسير العمل عند الطلب في أوامر ومهارات. فوقها قرارات التشغيل: وضع التخطيط للمهام المعمارية، التنفيذ المباشر للتغييرات الواضحة، و<span dir="ltr" class="font-mono">-p</span> مع إخراج منظّم داخل الـ CI.</p>
+          <p>العقلية التي يكافئها الاختبار: <strong>الحتمية قبل الاحتمالية، والنطاق الصحيح قبل الحل الأذكى</strong>. السؤال يعطيك موقفاً واقعياً (زميل جديد ما تستلم أدواته المعايير، وظيفة CI معلّقة، ترحيل يمس 45 ملفاً) وأربعة خيارات كلها «تبدو منطقية» — الإجابة الصحيحة دائماً هي الآلية المصمَّمة لهذا الغرض بالضبط، لا الحل الالتفافي ولا الآلية غير الموجودة أصلاً.</p>
+        </div>
+        <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+          <p>At its core this domain measures one thing: <strong>do you know where each piece of configuration lives, when it loads, and who benefits from it?</strong> Team standards belong at project level (in Git), personal preferences at user level (<span class="font-mono">~/.claude/</span>), conventions spread across directories in <span class="font-mono">glob</span> rules, and on-demand workflows in commands and skills. On top of that sit the operational decisions: plan mode for architectural tasks, direct execution for well-scoped changes, and <span class="font-mono">-p</span> with structured output inside CI.</p>
+          <p>The mindset it rewards: <strong>determinism over probability, and correct scope over clever workaround</strong>. Each question hands you a realistic situation (a new teammate whose tool ignores the standards, a hanging CI job, a migration touching 45 files) and four options that all "sound reasonable" — the right answer is always the mechanism designed for exactly that purpose, never the workaround and never a mechanism that does not exist.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TOPIC TREE ===== -->
+    <section id="topic-tree" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="network" class="w-5 h-5"></i></span>
+        <h2 class="text-xl md:text-2xl font-bold text-surface-900">
+          <span class="lang-ar">شجرة المواضيع</span>
+          <span class="lang-en">Topic tree</span>
+        </h2>
+      </div>
+
+      <div class="lang-ar text-surface-600 text-sm">ستة مواضيع تتفرّع من جذر واحد — كل بطاقة تفتح صفحة درس كاملة فيها شرح ومخططات وأمثلة وفحص سريع.</div>
+      <div class="lang-en text-surface-600 text-sm">Six topics branching from one root — each card opens a full lesson page with explanations, diagrams, examples, and a quick check.</div>
+
+      <!-- Root node -->
+      <div class="bg-gradient-to-bl from-violet-700 to-violet-900 text-white rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+        <span class="w-12 h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0"><i data-lucide="folder-cog" class="w-6 h-6"></i></span>
+        <div>
+          <div class="font-mono text-xs text-violet-200">Domain 3 — 20%</div>
+          <div class="font-bold text-lg leading-snug"><span class="lang-ar">إعداد وسير عمل Claude Code</span><span class="lang-en">Claude Code Configuration &amp; Workflows</span></div>
+        </div>
+      </div>
+
+      <!-- Trunk + branches -->
+      <div class="ms-6 border-s-2 border-violet-300 space-y-5 pb-1">
+
+        <!-- 3.1 -->
+        <div class="relative ps-7 pt-1">
+          <span class="absolute start-0 top-9 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-1-claude-md.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.1</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">تدرّج CLAUDE.md والتنظيم المعياري</span>
+                  <span class="lang-en">CLAUDE.md hierarchy &amp; modular organization</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">وين يعيش كل إعداد (مستخدم / مشروع / مجلد)، وكيف تقسّم الملف الكبير بدل ما يتضخّم.</span>
+                  <span class="lang-en">Where each instruction lives (user / project / directory), and how to modularize before the file balloons.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">~/.claude/CLAUDE.md</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">@import</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">.claude/rules/</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">/memory</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3.2 -->
+        <div class="relative ps-7">
+          <span class="absolute start-0 top-8 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-2-commands-skills.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.2</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">الأوامر المخصّصة والمهارات</span>
+                  <span class="lang-en">Custom slash commands &amp; skills</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">أوامر يشاركها الفريق عبر Git، ومهارات بسياق معزول وأدوات مقيّدة.</span>
+                  <span class="lang-en">Commands the team shares via Git, and skills with isolated context and restricted tools.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">.claude/commands/</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">SKILL.md</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">context: fork</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">allowed-tools</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3.3 -->
+        <div class="relative ps-7">
+          <span class="absolute start-0 top-8 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-3-path-rules.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.3</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">القواعد الخاصة بالمسارات</span>
+                  <span class="lang-en">Path-specific rules</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">اتفاقيات تُحمَّل تلقائياً حسب نمط الملف لا موقعه — وتوفّر عليك الـ tokens.</span>
+                  <span class="lang-en">Conventions that load automatically by file pattern, not location — and save tokens.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">paths:</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">glob</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">**/*.test.tsx</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3.4 -->
+        <div class="relative ps-7">
+          <span class="absolute start-0 top-8 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-4-plan-mode.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.4</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">وضع التخطيط مقابل التنفيذ المباشر</span>
+                  <span class="lang-en">Plan mode vs direct execution</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">متى ترسم المخطط قبل ما تلمس الكود، ومتى تنفّذ على طول — ودور Explore subagent.</span>
+                  <span class="lang-en">When to draw the blueprint before touching code, when to just execute — and the Explore subagent's role.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">plan mode</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">direct execution</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">Explore subagent</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3.5 -->
+        <div class="relative ps-7">
+          <span class="absolute start-0 top-8 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-5-iterative-refinement.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.5</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">التحسين التكراري</span>
+                  <span class="lang-en">Iterative refinement</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">أمثلة ملموسة بدل النثر، اختبارات أولاً، نمط المقابلة، ومتى تجمع الإصلاحات برسالة واحدة.</span>
+                  <span class="lang-en">Concrete examples over prose, tests first, the interview pattern, and when to batch fixes in one message.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">input/output examples</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">test-driven</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">interview pattern</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3.6 -->
+        <div class="relative ps-7 pb-1">
+          <span class="absolute start-0 top-8 w-7 h-0.5 bg-violet-300" aria-hidden="true"></span>
+          <a href="3-6-cicd.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-violet-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="shrink-0 w-11 h-11 rounded-xl bg-violet-100 text-violet-700 font-bold font-mono flex items-center justify-center">3.6</span>
+              <div class="space-y-2 min-w-0">
+                <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors flex items-center gap-2">
+                  <span class="lang-ar">دمج Claude Code في CI/CD</span>
+                  <span class="lang-en">Claude Code in CI/CD</span>
+                  <i data-lucide="chevron-left" class="w-4 h-4 text-surface-300 group-hover:text-violet-500 ltr:rotate-180 shrink-0"></i>
+                </div>
+                <div class="text-sm text-surface-600">
+                  <span class="lang-ar">تشغيل غير تفاعلي بـ -p، إخراج منظّم يُنشر آلياً، وعزل المولِّد عن المراجِع.</span>
+                  <span class="lang-en">Non-interactive runs with -p, structured output posted automatically, and generator/reviewer isolation.</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">-p / --print</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">--output-format json</span>
+                  <span class="text-[11px] font-mono bg-surface-100 text-surface-600 rounded-md px-2 py-0.5">--json-schema</span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===== How it shows up on the exam ===== -->
+    <section id="exam-themes" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-5">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl md:text-2xl font-bold text-surface-900">
+            <span class="lang-ar">كيف يظهر في الاختبار</span>
+            <span class="lang-en">How it shows up on the exam</span>
+          </h2>
+        </div>
+
+        <div class="lang-ar text-surface-600 text-sm">أنماط الإجابات الفخ المتكررة في هذا الدومين — لو ميّزتها، نصف السؤال انحل:</div>
+        <div class="lang-en text-surface-600 text-sm">The recurring distractor patterns in this domain — recognize them and half the question is solved:</div>
+
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3 bg-surface-50 rounded-xl p-4 border border-surface-100">
+            <i data-lucide="layers" class="w-5 h-5 text-violet-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-surface-700">
+              <div class="lang-ar"><strong>النطاق الغلط:</strong> إعداد للفريق محطوط في مستوى المستخدم (<span dir="ltr" class="font-mono">~/.claude/</span>) — أصل مشكلة «يشتغل عندي وما يشتغل عند الزميل الجديد». الحل دائماً: انقله لمستوى المشروع.</div>
+              <div class="lang-en"><strong>Wrong scope:</strong> team configuration placed at user level (<span class="font-mono">~/.claude/</span>) — the root of "works on my machine, not for the new teammate." The fix is always: move it to project level.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 bg-surface-50 rounded-xl p-4 border border-surface-100">
+            <i data-lucide="ghost" class="w-5 h-5 text-violet-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-surface-700">
+              <div class="lang-ar"><strong>آليات غير موجودة:</strong> خيارات مثل <span dir="ltr" class="font-mono">.claude/config.json</span> بمصفوفة أوامر، أو <span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span>، أو علم <span dir="ltr" class="font-mono">--batch</span> — تبدو معقولة لكنها مخترعة. احفظ الآليات الحقيقية واستبعد الباقي.</div>
+              <div class="lang-en"><strong>Nonexistent mechanisms:</strong> options like a <span class="font-mono">.claude/config.json</span> commands array, <span class="font-mono">CLAUDE_HEADLESS=true</span>, or a <span class="font-mono">--batch</span> flag — plausible-sounding but invented. Know the real mechanisms and eliminate the rest.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 bg-surface-50 rounded-xl p-4 border border-surface-100">
+            <i data-lucide="dice-5" class="w-5 h-5 text-violet-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-surface-700">
+              <div class="lang-ar"><strong>احتمالي بدل حتمي:</strong> «خلّ Claude يستنتج القسم المناسب من العناوين» أو «سوّ مهارة لكل نوع كود» حين يطلب السؤال تطبيقاً <em>تلقائياً</em> — قواعد <span dir="ltr" class="font-mono">glob</span> الصريحة هي الحتمية.</div>
+              <div class="lang-en"><strong>Probabilistic over deterministic:</strong> "let Claude infer the right section from headers" or "make a skill per code type" when the question demands <em>automatic</em> application — explicit <span class="font-mono">glob</span> rules are the deterministic answer.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 bg-surface-50 rounded-xl p-4 border border-surface-100">
+            <i data-lucide="clock-alert" class="w-5 h-5 text-violet-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-surface-700">
+              <div class="lang-ar"><strong>تأجيل التخطيط:</strong> «ابدأ مباشرة وبدّل لوضع التخطيط لو ظهر تعقيد» — بينما التعقيد <em>مذكور أصلاً</em> في المتطلبات (عشرات الملفات، حدود خدمات). التعقيد المعلوم يعني: خطّط من البداية.</div>
+              <div class="lang-en"><strong>Deferred planning:</strong> "start direct and switch to plan mode if complexity emerges" — when the complexity is <em>already stated</em> in the requirements (dozens of files, service boundaries). Known complexity means: plan from the start.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-3 bg-surface-50 rounded-xl p-4 border border-surface-100">
+            <i data-lucide="copy-x" class="w-5 h-5 text-violet-600 shrink-0 mt-0.5"></i>
+            <div class="text-sm text-surface-700">
+              <div class="lang-ar"><strong>فخاخ الـ CI:</strong> نفس الجلسة تراجع كودها («لأنها تعرف الكود»)، حِيَل مثل <span dir="ltr" class="font-mono">&lt; /dev/null</span> بدل <span dir="ltr" class="font-mono">-p</span>، وتحليل نص حر بدل <span dir="ltr" class="font-mono">--output-format json</span> مع <span dir="ltr" class="font-mono">--json-schema</span>.</div>
+              <div class="lang-en"><strong>CI traps:</strong> the same session reviewing its own code ("because it knows the code"), workarounds like <span class="font-mono">&lt; /dev/null</span> instead of <span class="font-mono">-p</span>, and parsing free text instead of <span class="font-mono">--output-format json</span> with <span class="font-mono">--json-schema</span>.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Domain quiz ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil-ruler" class="w-5 h-5"></i></span>
+        <h2 class="text-xl md:text-2xl font-bold text-surface-900">
+          <span class="lang-ar">اختبار الدومين</span>
+          <span class="lang-en">Domain quiz</span>
+        </h2>
+      </div>
+      <div class="lang-ar text-surface-600 text-sm">سبعة أسئلة بنمط الاختبار الحقيقي: سيناريو + أربعة خيارات، واحد صحيح. جاوب عليها كلها لترى نتيجتك.</div>
+      <div class="lang-en text-surface-600 text-sm">Seven questions in the real exam style: a scenario plus four options, one correct. Answer them all to see your result.</div>
+
+      <!-- Score tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="lang-ar">النقاط:</span><span class="lang-en">Score:</span>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">7</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="list-checks" class="w-4 h-4 text-violet-500"></i>
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[140px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 : 3.2 command location -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.2</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">فريقك يريد أمر <span dir="ltr" class="font-mono">/security-check</span> يشغّل قائمة الفحص الأمني الموحّدة، ويكون متاحاً تلقائياً لأي مطوّر يستنسخ المستودع أو يسحب آخر التغييرات. وين تنشئ ملف الأمر؟</span>
+              <span class="lang-en">Your team wants a <span class="font-mono">/security-check</span> command that runs the standard security checklist, automatically available to every developer who clones the repo or pulls the latest changes. Where do you create the command file?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">~/.claude/commands/</span> على جهاز كل مطوّر</span>
+            <span class="lang-en">In <span class="font-mono">~/.claude/commands/</span> on each developer's machine</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">في مجلد <span dir="ltr" class="font-mono">.claude/commands/</span> داخل مستودع المشروع</span>
+            <span class="lang-en">In the <span class="font-mono">.claude/commands/</span> directory inside the project repository</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">داخل ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> في جذر المشروع</span>
+            <span class="lang-en">Inside the <span class="font-mono">CLAUDE.md</span> file at the project root</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">في ملف <span dir="ltr" class="font-mono">.claude/config.json</span> داخل مصفوفة <span dir="ltr" class="font-mono">commands</span></span>
+            <span class="lang-en">In a <span class="font-mono">.claude/config.json</span> file with a <span class="font-mono">commands</span> array</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. أوامر المشروع في <span dir="ltr" class="font-mono">.claude/commands/</span> تدخل التحكم بالإصدارات، فتصل تلقائياً لكل من يستنسخ أو يسحب. <span dir="ltr" class="font-mono">~/.claude/commands/</span> شخصي ولا يُشارَك، و<span dir="ltr" class="font-mono">CLAUDE.md</span> للتعليمات والسياق لا لتعريف الأوامر، ومصفوفة commands في <span dir="ltr" class="font-mono">config.json</span> آلية غير موجودة أصلاً.</div>
+            <div class="lang-en text-emerald-900">Correct. Project commands in <span class="font-mono">.claude/commands/</span> are version-controlled, so they reach everyone automatically on clone/pull. <span class="font-mono">~/.claude/commands/</span> is personal and unshared, <span class="font-mono">CLAUDE.md</span> is for instructions and context rather than command definitions, and a commands array in <span class="font-mono">config.json</span> is a mechanism that does not exist.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. كلمة «يستنسخ المستودع» مفتاح السؤال: المطلوب مشاركة عبر Git، وهذا بالضبط دور <span dir="ltr" class="font-mono">.claude/commands/</span> داخل المشروع. المجلد الشخصي <span dir="ltr" class="font-mono">~/.claude/commands/</span> لا يُشارَك، و<span dir="ltr" class="font-mono">CLAUDE.md</span> لا يعرّف أوامر، و<span dir="ltr" class="font-mono">config.json</span> بمصفوفة أوامر آلية مخترعة.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. "Clones the repo" is the key phrase: you need sharing via Git, which is exactly what <span class="font-mono">.claude/commands/</span> inside the project provides. The personal <span class="font-mono">~/.claude/commands/</span> is not shared, <span class="font-mono">CLAUDE.md</span> does not define commands, and a <span class="font-mono">config.json</span> commands array is invented.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 : 3.4 plan mode -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.4</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">كُلّفت بإعادة هيكلة تطبيق المدفوعات الموحّد (monolith) إلى ثلاث خدمات مصغّرة. التغيير يمس عشرات الملفات ويتطلب قرارات حول حدود الخدمات وتبعيات الوحدات. كيف تبدأ؟</span>
+              <span class="lang-en">You are assigned to restructure the monolithic payments application into three microservices. The change touches dozens of files and requires decisions about service boundaries and module dependencies. How do you start?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">تنفيذ مباشر بالتدريج، ودع التنفيذ يكشف حدود الخدمات الطبيعية</span>
+            <span class="lang-en">Direct execution incrementally, letting implementation reveal the natural service boundaries</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">تنفيذ مباشر بتعليمات شاملة مسبقة تحدّد بنية كل خدمة بالتفصيل</span>
+            <span class="lang-en">Direct execution with comprehensive upfront instructions detailing each service's structure</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">ادخل وضع التخطيط: استكشف الكود، افهم التبعيات، وصمّم مقاربة التنفيذ قبل أي تعديل</span>
+            <span class="lang-en">Enter plan mode: explore the codebase, understand dependencies, and design an implementation approach before any changes</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">ابدأ بالتنفيذ المباشر، وانتقل لوضع التخطيط فقط لو واجهت تعقيداً غير متوقع</span>
+            <span class="lang-en">Begin in direct execution and switch to plan mode only if you hit unexpected complexity</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. تغيير واسع + قرارات معمارية + مقاربات متعددة = وضع التخطيط بالضبط. الاستكشاف والتصميم قبل الالتزام يمنعان إعادة عمل مكلفة. الخيار A يخاطر باكتشاف التبعيات متأخراً، وB يفترض أنك تعرف البنية الصحيحة بدون استكشاف، وD يتجاهل أن التعقيد مذكور في المتطلبات أصلاً — ليس مفاجأة محتملة.</div>
+            <div class="lang-en text-emerald-900">Correct. Large-scale change + architectural decisions + multiple approaches = exactly what plan mode is for. Exploring and designing before committing prevents costly rework. Option A risks discovering dependencies late, B assumes you already know the right structure without exploring, and D ignores that the complexity is already stated in the requirements — it is not a possible surprise.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. المؤشرات الثلاثة كلها حاضرة: عشرات الملفات، قرارات حدود خدمات، ومقاربات متعددة صالحة — هذا تعريف مهمة وضع التخطيط. «ابدأ وبدّل لاحقاً» فخ كلاسيكي: التعقيد معلوم مسبقاً، فالتخطيط يبدأ من أول خطوة لا بعد ما تتورّط.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. All three signals are present: dozens of files, service-boundary decisions, and multiple valid approaches — the definition of a plan-mode task. "Start and switch later" is the classic trap: the complexity is known upfront, so planning starts at step one, not after you are already committed.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 : 3.1 hierarchy diagnosis -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.1</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">زميل جديد استنسخ المستودع، لكن Claude Code عنده يتجاهل معايير الترميز التي تعمل عندك بشكل ممتاز. تكتشف أن المعايير كلها مكتوبة في <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> على جهازك. ما الحل الجذري؟</span>
+              <span class="lang-en">A new teammate cloned the repo, but their Claude Code ignores the coding standards that work perfectly for you. You discover the standards all live in <span class="font-mono">~/.claude/CLAUDE.md</span> on your machine. What is the root-cause fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">اطلب منه تشغيل <span dir="ltr" class="font-mono">/memory</span> ليزامن ملفات الذاكرة من جهازك</span>
+            <span class="lang-en">Have them run <span class="font-mono">/memory</span> to sync the memory files from your machine</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أرسل له الملف يدوياً لينسخه إلى <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> عنده</span>
+            <span class="lang-en">Send them the file manually to copy into their own <span class="font-mono">~/.claude/CLAUDE.md</span></span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">انقل المعايير إلى <span dir="ltr" class="font-mono">CLAUDE.md</span> على مستوى المشروع داخل المستودع</span>
+            <span class="lang-en">Move the standards into a project-level <span class="font-mono">CLAUDE.md</span> inside the repository</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">اطلب منه تشغيل <span dir="ltr" class="font-mono">/compact</span> لإعادة تحميل الإعدادات في جلسته</span>
+            <span class="lang-en">Have them run <span class="font-mono">/compact</span> to reload the configuration in their session</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. المشكلة نطاق، لا عطل: مستوى المستخدم لا يتتبعه Git فلا يصل للزملاء أبداً. النقل لمستوى المشروع يجعل المعايير تُدار بالإصدارات وتصل لكل مستنسخ. <span dir="ltr" class="font-mono">/memory</span> أداة عرض تشخيصية لا مزامنة، والنسخ اليدوي (B) يحل مؤقتاً لكنه يتكرر مع كل زميل جديد وينحرف مع الوقت، و<span dir="ltr" class="font-mono">/compact</span> يضغط سياق الجلسة ولا علاقة له بالإعدادات.</div>
+            <div class="lang-en text-emerald-900">Correct. This is a scoping problem, not a malfunction: user level is never tracked by Git, so it can never reach teammates. Moving to project level makes the standards version-controlled and delivered to every clone. <span class="font-mono">/memory</span> is a diagnostic viewer, not a sync; manual copying (B) works once but repeats for every new teammate and drifts over time; <span class="font-mono">/compact</span> compresses session context and has nothing to do with configuration.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. القاعدة الذهبية: ما يخص الفريق يعيش في مستوى المشروع (داخل Git)، وما يخصك أنت في مستوى المستخدم. <span dir="ltr" class="font-mono">/memory</span> يعرض الملفات المحمَّلة فقط (تشخيص)، والنسخ اليدوي حل هش لا يُدار بالإصدارات، و<span dir="ltr" class="font-mono">/compact</span> لضغط السياق لا للإعدادات.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. Golden rule: what belongs to the team lives at project level (in Git); what is yours alone lives at user level. <span class="font-mono">/memory</span> only shows which files are loaded (a diagnostic), manual copying is fragile and unversioned, and <span class="font-mono">/compact</span> compresses context, not configuration.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q4 : 3.3 path rules -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">4</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.3</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">ملفات ترحيل قواعد البيانات (<span dir="ltr" class="font-mono">*.sql</span>) منتشرة داخل كل خدمة في المستودع (<span dir="ltr" class="font-mono">services/*/db/migrations/</span>)، وتريد أن تُطبَّق اتفاقياتها تلقائياً عند تحرير أي ملف منها فقط — دون تحميلها في بقية الجلسات. ما الأنسب؟</span>
+              <span class="lang-en">Database migration files (<span class="font-mono">*.sql</span>) are spread inside every service in the repo (<span class="font-mono">services/*/db/migrations/</span>), and you want their conventions applied automatically only when editing one of them — without loading them in every other session. What fits best?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">ملف قاعدة في <span dir="ltr" class="font-mono">.claude/rules/</span> بترويسة YAML فيها <span dir="ltr" class="font-mono">paths: ["**/migrations/**/*.sql"]</span></span>
+            <span class="lang-en">A rule file in <span class="font-mono">.claude/rules/</span> with YAML frontmatter <span class="font-mono">paths: ["**/migrations/**/*.sql"]</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل كل مجلد <span dir="ltr" class="font-mono">migrations</span> على حدة</span>
+            <span class="lang-en">A <span class="font-mono">CLAUDE.md</span> inside each individual <span class="font-mono">migrations</span> directory</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">مهارة <span dir="ltr" class="font-mono">migration-conventions</span> يستدعيها المطوّر قبل التحرير</span>
+            <span class="lang-en">A <span class="font-mono">migration-conventions</span> skill the developer invokes before editing</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">قسم بعنوان Migrations في <span dir="ltr" class="font-mono">CLAUDE.md</span> الجذر، ويستنتج Claude متى يطبّقه</span>
+            <span class="lang-en">A Migrations section in the root <span class="font-mono">CLAUDE.md</span>, letting Claude infer when to apply it</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. الاتفاقية موزّعة عبر مجلدات كثيرة والمطلوب تطبيق «تلقائي» — هذا بالضبط دور قواعد <span dir="ltr" class="font-mono">glob</span>: تُحمَّل فقط عند مطابقة الملف المحرَّر، فتوفّر السياق والـ tokens. النسخ المتكررة (B) عبء صيانة، والمهارة (C) استدعاء يدوي يناقض «تلقائياً»، والاستنتاج من العناوين (D) احتمالي غير مضمون.</div>
+            <div class="lang-en text-emerald-900">Correct. The convention spans many directories and must apply "automatically" — exactly what <span class="font-mono">glob</span> rules do: they load only when the edited file matches, saving context and tokens. Duplicated copies (B) are a maintenance burden, a skill (C) needs manual invocation which contradicts "automatically", and header inference (D) is probabilistic and unreliable.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>A</strong>. إشارتا السؤال: «منتشرة» + «تلقائياً» = قاعدة مسارات بنمط <span dir="ltr" class="font-mono">glob</span>. <span dir="ltr" class="font-mono">CLAUDE.md</span> المجلدي مقيّد بموقعه ويتطلب نسخة في كل مجلد، والمهارات تُستدعى يدوياً، واستنتاج الأقسام غير حتمي.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>A</strong>. The question's two signals — "spread" + "automatically" — point to a <span class="font-mono">glob</span> path rule. A directory <span class="font-mono">CLAUDE.md</span> is location-bound and needs a copy per folder, skills are manually invoked, and section inference is non-deterministic.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q5 : 3.2 fork + allowed-tools -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">5</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.2</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">مهارة <span dir="ltr" class="font-mono">codebase-inventory</span> تمسح مئات الملفات وتغرق المحادثة الرئيسية بمخرجاتها، وتريد أيضاً ضمان أنها لا تنفّذ أوامر <span dir="ltr" class="font-mono">Bash</span> أبداً. أي تركيبة frontmatter تحقق الهدفين؟</span>
+              <span class="lang-en">A <span class="font-mono">codebase-inventory</span> skill scans hundreds of files and floods the main conversation with output, and you also want to guarantee it never runs <span class="font-mono">Bash</span> commands. Which frontmatter combination achieves both?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> فقط — العزل يمنع الأوامر الخطرة تلقائياً</span>
+            <span class="lang-en"><span class="font-mono">context: fork</span> alone — isolation automatically blocks dangerous commands</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">allowed-tools</span> فقط — تقييد الأدوات يمنع تضخم السياق تلقائياً</span>
+            <span class="lang-en"><span class="font-mono">allowed-tools</span> alone — restricting tools automatically prevents context bloat</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">argument-hint</span> يحدّد الملفات المسموح مسحها فقط</span>
+            <span class="lang-en"><span class="font-mono">argument-hint</span> restricting which files may be scanned</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar"><span dir="ltr" class="font-mono">context: fork</span> لعزل المخرجات + <span dir="ltr" class="font-mono">allowed-tools</span> بدون <span dir="ltr" class="font-mono">Bash</span></span>
+            <span class="lang-en"><span class="font-mono">context: fork</span> to isolate the output + <span class="font-mono">allowed-tools</span> without <span class="font-mono">Bash</span></span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. حقلان مستقلان لمشكلتين مختلفتين: <span dir="ltr" class="font-mono">context: fork</span> يعزل <em>السياق</em> (المخرجات الطويلة تبقى في الفرع ويرجع الملخص فقط)، و<span dir="ltr" class="font-mono">allowed-tools</span> يقيّد <em>الصلاحيات</em> (استبعاد Bash). أحدهما لا يغني عن الآخر أبداً.</div>
+            <div class="lang-en text-emerald-900">Correct. Two independent fields for two different problems: <span class="font-mono">context: fork</span> isolates <em>context</em> (verbose output stays in the fork, only the summary returns), while <span class="font-mono">allowed-tools</span> restricts <em>privileges</em> (excluding Bash). Neither ever substitutes for the other.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>D</strong>. الفخ الشائع خلط الحقلين: <span dir="ltr" class="font-mono">fork</span> يحل تلوّث السياق ولا يمنع أي أداة، و<span dir="ltr" class="font-mono">allowed-tools</span> يمنع الأدوات ولا يعزل المخرجات، و<span dir="ltr" class="font-mono">argument-hint</span> مجرد تذكير بالمعطى المطلوب — لا علاقة له بالأمان أو السياق.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>D</strong>. The common trap is conflating the two fields: <span class="font-mono">fork</span> solves context pollution and blocks no tools, <span class="font-mono">allowed-tools</span> blocks tools and isolates no output, and <span class="font-mono">argument-hint</span> merely prompts for a missing parameter — unrelated to safety or context.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q6 : 3.6 -p flag -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">6</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.6</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">سكربت في خط CI يشغّل <span dir="ltr" class="font-mono">claude "Review this PR for security issues"</span> لكن الوظيفة تتعلق إلى ما لا نهاية، والسجلات تُظهر أن Claude Code ينتظر إدخالاً تفاعلياً. ما التصحيح الموثّق؟</span>
+              <span class="lang-en">A CI pipeline script runs <span class="font-mono">claude "Review this PR for security issues"</span> but the job hangs indefinitely, and logs show Claude Code waiting for interactive input. What is the documented fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">صدّر متغير البيئة <span dir="ltr" class="font-mono">CLAUDE_HEADLESS=true</span> قبل الأمر</span>
+            <span class="lang-en">Export the environment variable <span class="font-mono">CLAUDE_HEADLESS=true</span> before the command</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أضف العلم <span dir="ltr" class="font-mono">-p</span>: <span dir="ltr" class="font-mono">claude -p "Review this PR for security issues"</span></span>
+            <span class="lang-en">Add the <span class="font-mono">-p</span> flag: <span class="font-mono">claude -p "Review this PR for security issues"</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">وجّه الإدخال من العدم: <span dir="ltr" class="font-mono">claude "..." &lt; /dev/null</span></span>
+            <span class="lang-en">Redirect stdin: <span class="font-mono">claude "..." &lt; /dev/null</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">أضف العلم <span dir="ltr" class="font-mono">--batch</span> لتشغيل دفعي بدون إدخال</span>
+            <span class="lang-en">Add the <span class="font-mono">--batch</span> flag for batch execution without input</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. <span dir="ltr" class="font-mono">-p</span> (أو <span dir="ltr" class="font-mono">--print</span>) هو الوضع غير التفاعلي الموثّق: يعالج الطلب، يطبع النتيجة إلى stdout، ويخرج. <span dir="ltr" class="font-mono">CLAUDE_HEADLESS</span> و<span dir="ltr" class="font-mono">--batch</span> غير موجودين أصلاً، و<span dir="ltr" class="font-mono">&lt; /dev/null</span> حيلة نظام تشغيل لا تعالج صيغة أمر Claude Code.</div>
+            <div class="lang-en text-emerald-900">Correct. <span class="font-mono">-p</span> (or <span class="font-mono">--print</span>) is the documented non-interactive mode: it processes the prompt, prints to stdout, and exits. <span class="font-mono">CLAUDE_HEADLESS</span> and <span class="font-mono">--batch</span> simply do not exist, and <span class="font-mono">&lt; /dev/null</span> is an OS workaround that does not address Claude Code's command syntax.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. عبارة «ينتظر إدخالاً تفاعلياً» في أسئلة CI تعني دائماً العلم <span dir="ltr" class="font-mono">-p / --print</span>. متغير <span dir="ltr" class="font-mono">CLAUDE_HEADLESS</span> وعلم <span dir="ltr" class="font-mono">--batch</span> مخترعان، وإعادة توجيه stdin حيلة لا تصلح صيغة الأمر.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. "Waiting for interactive input" in a CI question always means the <span class="font-mono">-p / --print</span> flag. <span class="font-mono">CLAUDE_HEADLESS</span> and <span class="font-mono">--batch</span> are invented, and redirecting stdin is a workaround that does not fix the command syntax.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q7 : 3.6 re-run duplicates -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">7</span>
+          <div class="space-y-1">
+            <span class="inline-block text-[11px] font-mono bg-surface-100 text-surface-500 rounded px-1.5 py-0.5">3.6</span>
+            <p class="font-medium text-surface-900 leading-relaxed">
+              <span class="lang-ar">مراجعة CI تعمل عند كل commit جديد على الـ PR، لكنها تعيد نشر نفس الملاحظات القديمة في كل تشغيل فيغرق الـ PR بتعليقات مكررة. ما أفضل معالجة؟</span>
+              <span class="lang-en">Your CI review runs on every new commit to the PR, but it re-posts the same old findings on every run, flooding the PR with duplicate comments. What is the best fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">شغّل المراجعة مرة واحدة فقط عند فتح الـ PR وتجاهل الـ commits اللاحقة</span>
+            <span class="lang-en">Run the review only once when the PR opens and ignore later commits</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">ضمّن نتائج المراجعة السابقة في السياق واطلب الإبلاغ فقط عن الجديد أو ما لم يُعالَج بعد</span>
+            <span class="lang-en">Include the prior review findings in context and instruct it to report only new or still-unaddressed issues</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">خفّض درجة العشوائية (temperature) حتى يصبح الإخراج حتمياً فلا يتكرر</span>
+            <span class="lang-en">Lower the temperature so output becomes deterministic and stops repeating</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">رشّح التعليقات المكررة بمطابقة نصية في سكربت بعد المراجعة</span>
+            <span class="lang-en">Filter duplicate comments with string matching in a post-processing script</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا النمط الموصى به: عند إعادة التشغيل بعد commits جديدة، مرّر النتائج السابقة واطلب «الجديد أو غير المعالَج فقط». الخيار A يفوّت مشاكل الكود الجديد كلياً، وC يخلط العشوائية بالسبب الحقيقي (غياب سياق المراجعة السابقة)، وD هش — نفس الملاحظة بصياغة مختلفة تفلت من المطابقة النصية، وهو يعالج العرَض لا السبب.</div>
+            <div class="lang-en text-emerald-900">Correct. This is the recommended pattern: on re-runs after new commits, pass the prior findings and ask for "only new or still-unaddressed issues." Option A misses problems in the new code entirely, C confuses randomness with the real cause (missing prior-review context), and D is brittle — the same finding reworded slips past string matching, and it treats the symptom rather than the cause.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. المراجعة تكرّر الملاحظات لأنها لا تعرف ما قيل سابقاً — فأعطها المعرفة: ضمّن النتائج السابقة في السياق واطلب الجديد وغير المعالَج فقط. تعطيل المراجعة أو خفض العشوائية أو الترشيح النصي كلها لا تعالج غياب السياق.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. The review repeats findings because it does not know what was already said — so give it that knowledge: include prior findings in context and request only new or unaddressed issues. Disabling re-runs, lowering temperature, or string filtering all fail to address the missing context.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/7</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Prev / Next pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="../domain-2/index.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">الدومين 2: تصميم الأدوات وMCP</span>
+            <span class="lang-en">Domain 2: Tool Design &amp; MCP</span>
+          </div>
+        </div>
+      </a>
+      <a href="../domain-4/index.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">الدومين 4: هندسة البرومبت والإخراج المنظّم</span>
+            <span class="lang-en">Domain 4: Prompt Engineering &amp; Structured Output</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

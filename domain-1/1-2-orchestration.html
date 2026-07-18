@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.2 تنسيق الأنظمة متعددة الوكلاء — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.2 — coordinator-subagent orchestration: hub-and-spoke architecture, isolated subagent context, dynamic subagent selection, scope partitioning, narrow decomposition risks, and iterative refinement loops. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">التنسيق متعدد الوكلاء</span><span class="lang-en">Multi-agent orchestration</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.2</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">تنسيق الأنظمة متعددة الوكلاء</span>
+          <span class="lang-en">Orchestrating multi-agent systems</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">منسّق واحد يدير متخصصين — البنية اللي يقوم عليها سيناريو البحث كامل. جودة التقرير النهائي تتحدّد هنا: عند قرار التفكيك، قبل ما يشتغل أي وكيل فرعي.</span>
+        <span class="lang-en">One coordinator managing specialists — the architecture the entire research scenario stands on. The final report's quality is decided here, at decomposition time, before any subagent even runs.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>ترسم بنية hub-and-spoke وتعلّل لماذا يمرّ كل اتصال بين الوكلاء عبر المنسّق.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تعرف أن الوكيل الفرعي يعمل بسياق معزول — لا يرث تاريخ محادثة المنسّق تلقائيًا.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تعدّد أدوار المنسّق: تفكيك المهمة، التفويض، تجميع النتائج، واختيار الوكلاء ديناميكيًا حسب تعقيد الطلب.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشخّص خطر التفكيك الضيّق الذي يترك جوانب من الموضوع بلا تغطية.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تقسّم نطاق البحث بين الوكلاء (مواضيع فرعية أو أنواع مصادر مميّزة) لتقليل الازدواجية.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تبني حلقة تنقيح تكرارية: تقييم مخرجات التوليف، إعادة تفويض موجّهة، وإعادة توليف حتى تكفي التغطية.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Draw the hub-and-spoke architecture and justify why all inter-subagent communication routes through the coordinator.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Know that subagents run with isolated context — they don't automatically inherit the coordinator's conversation history.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Enumerate the coordinator's roles: task decomposition, delegation, result aggregation, and dynamically selecting subagents by query complexity.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Diagnose the overly-narrow decomposition risk that leaves parts of a broad topic uncovered.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Partition research scope across agents (distinct subtopics or source types) to minimize duplication.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Build an iterative refinement loop: evaluate synthesis output, re-delegate with targeted queries, and re-synthesize until coverage is sufficient.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: hub and spoke ===== -->
+    <section id="hub-spoke" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">بنية Hub-and-Spoke: كل الطرق تمرّ بالمنسّق</span>
+        <span class="lang-en">Hub-and-spoke: every road runs through the coordinator</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>في نظام بحث متعدد الوكلاء (سيناريو 3)، البنية المعتمدة هي <span class="font-semibold">hub-and-spoke</span>: وكيل <span class="font-semibold">منسّق</span> في المركز يدير كل الاتصال بين الوكلاء الفرعيين، ومعالجة الأخطاء، وتوجيه المعلومات. الوكلاء الفرعيون <span class="font-semibold">لا يتكلمون مع بعض مباشرة أبدًا</span> — وكيل البحث ما يسلّم نتائجه لوكيل التوليف؛ يسلّمها للمنسّق، والمنسّق يقرّر وش يوصل لمن.</p>
+        <p>ليش هالمركزية؟ ثلاثة مكاسب يذكرها الدليل نصًا: <span class="font-semibold">الرصد (observability)</span> — نقطة واحدة تشوف منها كل تدفّق النظام وتصيد منها الأعطال؛ <span class="font-semibold">معالجة أخطاء متّسقة</span> — فشل أي وكيل يصل للمنسّق فيقرّر: إعادة محاولة، بديل، أو المواصلة بنتائج جزئية؛ و<span class="font-semibold">تدفّق معلومات مضبوط</span> — تتحكم بما يراه كل وكيل بدل فوضى نقل غير مراقب بين الأطراف.</p>
+        <p>ونقطة تُبنى عليها الصفحة القادمة كلها: الوكيل الفرعي يعمل <span class="font-semibold">بسياق معزول</span> — ما يرث تاريخ محادثة المنسّق تلقائيًا. فكل معلومة يحتاجها لازم توصله صراحةً في برومبته.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>In a multi-agent research system (Scenario 3), the established architecture is <span class="font-semibold">hub-and-spoke</span>: a central <span class="font-semibold">coordinator</span> agent manages all inter-subagent communication, error handling, and information routing. Subagents <span class="font-semibold">never talk to each other directly</span> — the search agent doesn't hand its findings to the synthesis agent; it hands them to the coordinator, which decides what reaches whom.</p>
+        <p>Why centralize? Three gains the guide names explicitly: <span class="font-semibold">observability</span> — one point from which you can watch the whole system's flow and catch failures; <span class="font-semibold">consistent error handling</span> — any agent's failure reaches the coordinator, which decides: retry, alternative, or proceed with partial results; and <span class="font-semibold">controlled information flow</span> — you govern what each agent sees instead of unmonitored peer-to-peer chatter.</p>
+        <p>And one point the next page is built on entirely: a subagent runs with <span class="font-semibold">isolated context</span> — it does not automatically inherit the coordinator's conversation history. Everything it needs must reach it explicitly in its prompt.</p>
+      </div>
+
+      <!-- Diagram 1: hub and spoke -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-lg mx-auto">
+          <div class="grid grid-cols-3 gap-3 items-center text-center">
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-xl p-3 text-xs font-mono font-bold text-brand-800">web_search</div>
+            <div class="flex justify-center"><i data-lucide="arrow-up-down" class="w-5 h-5 text-surface-400"></i></div>
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-xl p-3 text-xs font-mono font-bold text-brand-800">doc_analysis</div>
+            <div class="flex justify-center"><i data-lucide="arrow-up-down" class="w-5 h-5 text-surface-400 rotate-90"></i></div>
+            <div class="bg-brand-600 text-white rounded-xl px-4 py-3 text-sm font-mono font-bold shadow-md">coordinator</div>
+            <div class="flex justify-center"><i data-lucide="arrow-up-down" class="w-5 h-5 text-surface-400 rotate-90"></i></div>
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-xl p-3 text-xs font-mono font-bold text-brand-800">synthesis</div>
+            <div class="flex justify-center"><i data-lucide="arrow-up-down" class="w-5 h-5 text-surface-400"></i></div>
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-xl p-3 text-xs font-mono font-bold text-brand-800">report_gen</div>
+          </div>
+          <div class="mt-4 flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+            <span class="text-[11px] font-mono text-red-700">spoke-to-spoke direct communication: NOT allowed</span>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">المنسّق في المركز، وكل سهم يمرّ به — الوكلاء الفرعيون لا يتواصلون مباشرة إطلاقًا.</span>
+          <span class="lang-en">The coordinator sits at the hub and every arrow passes through it — spokes never communicate directly.</span>
+        </p>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> لو سمحت للوكلاء بالتواصل المباشر «توفيرًا للوقت»، خسرت الثلاثة دفعة وحدة: الرصد، ومعالجة الأخطاء الموحّدة، والتحكم بتدفّق المعلومة. السرعة لها طريقها الصحيح: التوازي (صفحة 1.3) والأدوات المحدودة النطاق (الدومين 2).</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> allow direct spoke-to-spoke chatter "to save time" and you lose all three at once: observability, unified error handling, and controlled information flow. Speed has its proper channels: parallelism (page 1.3) and scoped tools (Domain 2).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: coordinator roles ===== -->
+    <section id="coordinator-roles" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">وظيفة المنسّق: يفكّك، يفوّض، يجمّع — ويختار</span>
+        <span class="lang-en">The coordinator's job: decompose, delegate, aggregate — and select</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>المنسّق مو مجرد «موزّع بريد». أدواره الأربعة: (1) <span class="font-semibold">تفكيك المهمة</span> إلى مهام فرعية تغطّي الموضوع كاملًا؛ (2) <span class="font-semibold">التفويض</span> لكل وكيل بنطاقه وسياقه؛ (3) <span class="font-semibold">تجميع النتائج</span> ودمجها؛ و(4) — وهذا اللي يفرّق المعماري الشاطر — <span class="font-semibold">اختيار الوكلاء ديناميكيًا حسب تعقيد الطلب</span>. سؤال بسيط مثل «متى تأسست شركة معيّنة؟» ما يحتاج أنبوب بحث + تحليل مستندات + توليف + تقرير كامل؛ يكفيه وكيل البحث وحده. تمرير كل طلب عبر الأنبوب الكامل يحرق وقتًا وتوكنز بلا فائدة.</p>
+        <p>وعند التفويض لعدة وكلاء: <span class="font-semibold">قسّم النطاق</span> بحيث يقلّ التكرار — أعطِ كل وكيل موضوعًا فرعيًا مميّزًا (الاقتصاد لواحد، التقنية لثاني) أو نوع مصادر مميّزًا (أوراق أكاديمية لواحد، أخبار الصناعة لثاني). بدون تقسيم صريح بيرجعون لك بنفس المقالات الخمس المشهورة.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The coordinator is not a mail sorter. Its four roles: (1) <span class="font-semibold">decompose the task</span> into subtasks that cover the whole topic; (2) <span class="font-semibold">delegate</span> each agent its scope and context; (3) <span class="font-semibold">aggregate results</span> and merge them; and (4) — the one that separates good architects — <span class="font-semibold">dynamically select which subagents to invoke based on query complexity</span>. A simple question like "when was some company founded?" doesn't need the full search + document analysis + synthesis + report pipeline; the search agent alone suffices. Routing everything through the full pipeline burns time and tokens for nothing.</p>
+        <p>And when delegating to several agents: <span class="font-semibold">partition the scope</span> to minimize duplication — give each agent a distinct subtopic (economics to one, technology to another) or a distinct source type (academic papers vs industry news). Without explicit partitioning, they all come back with the same five famous articles.</p>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> جودة النظام متعدد الوكلاء تتحدّد عند <span class="font-semibold">قرار التفكيك</span>. الوكلاء الفرعيون ينفّذون النطاق المُسنَد بأمانة — فإذا كان النطاق ناقصًا، سينفّذون النقص بأمانة أيضًا.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> a multi-agent system's quality is decided at <span class="font-semibold">decomposition time</span>. Subagents execute their assigned scope faithfully — so if the scope is incomplete, they will faithfully execute the incompleteness too.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: narrow decomposition ===== -->
+    <section id="narrow-decomposition" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">الفخ الأكبر: التفكيك الضيّق</span>
+        <span class="lang-en">The biggest trap: narrow decomposition</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>السيناريو الكلاسيكي في الاختبار: نظام بحث كل وكلائه «نجحوا» — البحث لقى مقالات ممتازة، التحليل لخّص بدقة، التوليف كتب تقريرًا متماسكًا — ومع ذلك التقرير النهائي يغطّي زاوية وحدة من موضوع عريض. تفتح سجلات المنسّق فتلقى التفكيك نفسه ضيّقًا: موضوع «أثر الذكاء الاصطناعي على الصناعات الإبداعية» انقسم إلى ثلاث مهام كلها فنون بصرية، وما ذُكرت الموسيقى ولا الكتابة ولا الأفلام أصلًا.</p>
+        <p>الدرس المزدوج: <span class="font-semibold">تشخيصيًا</span> — لما يكون الناتج ناقصًا وكل وكيل «ناجح»، وجّه الشك أولًا لقرار التفكيك، مو للوكلاء. <span class="font-semibold">وقائيًا</span> — اكتب برومبت المنسّق بحيث يُلزمه بتغطية <span class="font-semibold">كل مجالات</span> الموضوع قبل التوزيع، وفعّل حلقة تنقيح (القسم التالي) تكتشف الفجوات وتسدّها.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The classic exam scenario: a research system where every agent "succeeded" — search found excellent articles, analysis summarized accurately, synthesis wrote a coherent report — yet the final report covers a single angle of a broad topic. Open the coordinator's logs and the decomposition itself is narrow: "the impact of AI on creative industries" was split into three tasks that are all visual arts, with music, writing, and film never mentioned at all.</p>
+        <p>The double lesson: <span class="font-semibold">diagnostically</span> — when output is incomplete and every agent "succeeded," point suspicion first at the decomposition decision, not the agents. <span class="font-semibold">Preventively</span> — write the coordinator prompt to require covering <span class="font-semibold">all domains</span> of the topic before distributing, and run a refinement loop (next section) that detects and closes gaps.</p>
+      </div>
+
+      <!-- Diagram 2: BEFORE/AFTER decomposition -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="grid sm:grid-cols-2 gap-4">
+          <div class="bg-red-50 border-2 border-red-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+              <span class="text-sm font-mono font-bold text-red-800">BAD — narrow decomposition</span>
+            </div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-surface-700">topic: AI x creative industries</div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-red-400"></i><span class="text-[11px] font-mono text-red-900 bg-white border border-red-200 rounded px-2 py-1 flex-1">AI in digital art</span></div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-red-400"></i><span class="text-[11px] font-mono text-red-900 bg-white border border-red-200 rounded px-2 py-1 flex-1">AI in graphic design</span></div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-red-400"></i><span class="text-[11px] font-mono text-red-900 bg-white border border-red-200 rounded px-2 py-1 flex-1">AI in photography</span></div>
+            <div class="text-[11px] font-mono text-red-700 pt-1">missing: music, writing, film...</div>
+          </div>
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+              <span class="text-sm font-mono font-bold text-emerald-800">GOOD — full coverage</span>
+            </div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-surface-700">topic: AI x creative industries</div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-[11px] font-mono text-emerald-900 bg-white border border-emerald-200 rounded px-2 py-1 flex-1">visual arts + design</span></div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-[11px] font-mono text-emerald-900 bg-white border border-emerald-200 rounded px-2 py-1 flex-1">music + audio production</span></div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-[11px] font-mono text-emerald-900 bg-white border border-emerald-200 rounded px-2 py-1 flex-1">writing + publishing</span></div>
+            <div class="flex items-center gap-1.5 ps-2"><i data-lucide="corner-down-right" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-[11px] font-mono text-emerald-900 bg-white border border-emerald-200 rounded px-2 py-1 flex-1">film + performing arts</span></div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">نفس الموضوع، تفكيكان: الأيسر ينتج تقريرًا «ناجح الوكلاء، فاشل التغطية»؛ الأيمن يغطّي المجال كاملًا.</span>
+          <span class="lang-en">Same topic, two decompositions: one yields a report where agents succeed but coverage fails; the other spans the whole field.</span>
+        </p>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-amber-900 leading-relaxed"><span class="font-bold">تنبيه:</span> لو التقرير النهائي ناقص، أول شك يروح على <span class="font-semibold">قرار التفكيك عند المنسّق</span>، مو على الوكلاء الفرعيين. الوكلاء غالبًا نفّذوا نطاقهم المُسنَد بإتقان — المشكلة في <span class="font-semibold">ما الذي أُسند إليهم</span>.</div>
+          <div class="lang-en text-amber-900 leading-relaxed"><span class="font-bold">Warning:</span> when the final report is incomplete, suspect the <span class="font-semibold">coordinator's decomposition</span> first, not the subagents. They almost certainly executed their assigned scope faithfully — the problem is <span class="font-semibold">what they were assigned</span>.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: refinement loop ===== -->
+    <section id="refinement" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">04</span>
+        <span class="lang-ar">حلقة التنقيح التكرارية: سدّ الفجوات قبل التسليم</span>
+        <span class="lang-en">The iterative refinement loop: close gaps before delivering</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>حتى مع تفكيك جيد، الجولة الأولى نادرًا ما تكفي لموضوع عريض. النمط الذي يطلبه الدليل: المنسّق <span class="font-semibold">يقيّم مخرجات التوليف بحثًا عن فجوات</span>، وإذا وجدها <span class="font-semibold">يعيد التفويض</span> لوكلاء البحث والتحليل <span class="font-semibold">بأسئلة موجّهة</span> نحو الفجوة تحديدًا (مو بإعادة البحث من الصفر)، ثم <span class="font-semibold">يعيد استدعاء التوليف</span> بالأدلة الجديدة — ويكرّر حتى تكفي التغطية. هذي الحلقة هي العلاج المعماري الدائم للتفكيك الناقص: حتى لو فاتت المنسّقَ زاويةٌ في الجولة الأولى، التقييم يلتقطها.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Even with good decomposition, one round is rarely enough for a broad topic. The pattern the guide requires: the coordinator <span class="font-semibold">evaluates the synthesis output for gaps</span>, and when it finds them it <span class="font-semibold">re-delegates</span> to the search and analysis subagents <span class="font-semibold">with targeted queries</span> aimed at the specific gap (not re-searching from scratch), then <span class="font-semibold">re-invokes synthesis</span> with the new evidence — repeating until coverage is sufficient. This loop is the durable architectural cure for incomplete decomposition: even if the coordinator missed an angle in round one, evaluation catches it.</p>
+      </div>
+
+      <!-- Code -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">منسّق: اختيار ديناميكي + حلقة تنقيح لسدّ الفجوات</span>
+          <span class="lang-en">Coordinator: dynamic selection + a refinement loop that closes gaps</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">def coordinate(query):
+    # 1) Analyze the query and pick ONLY the subagents it needs
+    plan   = analyze(query)
+    agents = select_subagents(plan)          # dynamic selection by complexity
+    if plan.is_simple_lookup:
+        return run_subagents(["web_search"], plan.direct_query)
+
+    # 2) Partition scope so agents don't duplicate each other's work
+    #    (distinct subtopics or distinct source types per agent)
+    findings = run_subagents(agents, partition_scope(plan))
+    report   = synthesize(findings)
+
+    # 3) Iterative refinement: evaluate -&gt; re-delegate -&gt; re-synthesize
+    while has_coverage_gaps(report):
+        gaps  = identify_gaps(report)        # e.g. "no findings on music/film"
+        more  = run_subagents(["web_search", "doc_analysis"],
+                              targeted_queries(gaps))
+        findings += more
+        report   = synthesize(findings)      # re-run synthesis with new evidence
+
+    return report                            # everything flowed through the hub</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Exam trap ===== -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+        <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+      </div>
+      <ul class="space-y-2.5 text-sm text-red-900/90">
+        <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">تقرير ناقص مع نجاح كل الوكلاء ← الخيارات اللي تلوم البحث أو التحليل أو التوليف كلها مشتّتات؛ الجواب: <span class="font-semibold">تفكيك المنسّق ضيّق</span>.</span><span class="lang-en">Incomplete report while every agent succeeded — options blaming search, analysis, or synthesis are all distractors; the answer: <span class="font-semibold">the coordinator's decomposition is too narrow</span>.</span></span></li>
+        <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«شغّل الأنبوب الكامل على كل طلب لضمان الجودة» — عكس الاختيار الديناميكي الذي يطلبه الدليل.</span><span class="lang-en">"Run the full pipeline on every query to guarantee quality" — the opposite of the dynamic selection the guide requires.</span></span></li>
+        <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«خلّ وكيل البحث يرسل نتائجه لوكيل التوليف مباشرة لتقليل الخطوات» — يكسر الرصد ومعالجة الأخطاء الموحّدة.</span><span class="lang-en">"Let the search agent send findings straight to synthesis to cut steps" — breaks observability and unified error handling.</span></span></li>
+        <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">فجوات تغطية بعد التوليف ← الجواب حلقة تنقيح بإعادة تفويض <span class="font-semibold">موجّهة</span>، مو «أعد البحث كله من الصفر».</span><span class="lang-en">Coverage gaps after synthesis — the answer is a refinement loop with <span class="font-semibold">targeted</span> re-delegation, not "redo all the research from scratch."</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="newspaper" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: رئيس تحرير المجلة</span>
+              <span class="lang-en">Real-life example: the magazine editor-in-chief</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>مجلة تجهّز ملفًا خاصًا عن «الحياة في المدن الذكية». <span class="font-semibold">رئيس التحرير هو المنسّق</span>: يفكّك الملف إلى زوايا (النقل، الطاقة، الخصوصية، الاقتصاد) ويوزّعها على محررين متخصصين (الوكلاء الفرعيين)، لكل واحد زاوية مختلفة عشان ما يتكرر الشغل. المحررون <span class="font-semibold">ما ينسّقون مع بعض مباشرة</span> — كل مسودة تمرّ على مكتب رئيس التحرير: هو اللي يشوف الصورة كاملة، يعالج تعارض المعلومات، ويقرّر وش ينشر.</p>
+              <p>لو طلع العدد كله عن النقل فقط، مين الملوم؟ مو المحررين — كل واحد غطّى زاويته المكلّف بها باحتراف. الملوم <span class="font-semibold">ورقة التوزيع الضيّقة</span> اللي كتبها رئيس التحرير. ورئيس التحرير الشاطر يسوي «حلقة تنقيح»: يقرأ المسودة المجمّعة، يكتشف أن زاوية الخصوصية ضعيفة، فيرجّع محررها بأسئلة محددة — مو بإعادة كتابة الملف كله. وإذا كان الموضوع خبرًا عاجلًا بسيطًا؟ يرسله لمحرر واحد بدل تجنيد الفريق كامل — هذا هو الاختيار الديناميكي.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A magazine is preparing a special issue on "life in smart cities." <span class="font-semibold">The editor-in-chief is the coordinator</span>: he decomposes the issue into angles (transport, energy, privacy, economy) and assigns them to specialist editors (the subagents), each with a distinct angle so no work is duplicated. The editors <span class="font-semibold">don't coordinate with each other directly</span> — every draft crosses the editor-in-chief's desk: he sees the full picture, resolves conflicting facts, and decides what gets published.</p>
+              <p>If the issue comes out covering only transport, who's at fault? Not the editors — each covered their assigned angle professionally. The fault lies in the <span class="font-semibold">narrow assignment sheet</span> the chief wrote. And a good chief runs a "refinement loop": reading the assembled draft, noticing the privacy angle is thin, and sending its editor back with specific follow-up questions — not rewriting the entire issue. A simple breaking-news item? He sends one editor instead of mobilizing the whole team — that's dynamic selection.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.2 تدور حول «مين المسؤول؟»: يعطونك أعراضًا (تقرير ناقص، ازدواجية نتائج، بطء) وسجلات المنسّق، ويطلبون السبب الجذري أو الإصلاح المعماري.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>اقرأ سجلات المنسّق في السؤال أولًا: لو المهام المسندة نفسها ضيّقة، فالجواب جاهز مهما حاولت المشتّتات لوم وكلاء المصبّ.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>الحلول الصحيحة تتكلم بلغة: اختيار ديناميكي، تقسيم نطاق، حلقة تنقيح موجّهة، توجيه كل الاتصال عبر المنسّق.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: أي خيار يجعل الوكلاء يتواصلون مباشرة، وأي خيار يعالج فجوات التغطية بإعادة كل البحث بدل استعلامات موجّهة.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.2 questions revolve around "who is responsible?": you get symptoms (incomplete report, duplicated findings, slowness) plus coordinator logs, and must name the root cause or the architectural fix.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Read the coordinator's logs in the stem first: if the assigned subtasks are themselves narrow, the answer is settled no matter how hard the distractors blame downstream agents.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Correct options speak the language of: dynamic selection, scope partitioning, targeted refinement loops, all communication through the coordinator.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: any option letting subagents talk directly, and any option fixing coverage gaps by redoing all research instead of targeted queries.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">في بنية hub-and-spoke، ليش يمرّ كل اتصال بين الوكلاء الفرعيين عبر المنسّق بدل التواصل المباشر؟</span>
+            <span class="lang-en">In a hub-and-spoke architecture, why does all inter-subagent communication route through the coordinator instead of direct peer links?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">لأن الوكلاء الفرعيين تقنيًا غير قادرين على تبادل الرسائل إطلاقًا</span>
+            <span class="lang-en">Because subagents are technically incapable of exchanging messages at all</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">للحصول على الرصد، ومعالجة أخطاء متّسقة، وتدفّق معلومات مضبوط من نقطة واحدة</span>
+            <span class="lang-en">To gain observability, consistent error handling, and controlled information flow from a single point</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">لأن التواصل المباشر أسرع لكنه يستهلك توكنز أكثر</span>
+            <span class="lang-en">Because direct communication is faster but consumes more tokens</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">لتقليل عدد الوكلاء المطلوبين في النظام</span>
+            <span class="lang-en">To reduce the number of agents the system needs</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> هذي الفوائد الثلاث المنصوصة: رصد كامل من نقطة واحدة، معالجة أخطاء موحّدة عند المنسّق، وتحكّم بما يصل لكل وكيل.</span>
+              <span class="lang-en"><strong>Correct.</strong> Those are the three stated benefits: full observability from one point, unified error handling at the coordinator, and control over what reaches each agent.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: الرصد + معالجة الأخطاء المتّسقة + التحكم بتدفّق المعلومة. المسألة قرار معماري مقصود، مو قيدًا تقنيًا ولا مسألة توكنز أو عدد وكلاء.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct reason: observability + consistent error handling + controlled information flow. It's a deliberate architectural decision — not a technical limitation, token math, or agent-count issue.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">منسّقك يمرّر كل استفسار — حتى «ما معنى هذا المصطلح؟» — عبر أنبوب البحث والتحليل والتوليف والتقرير كاملًا، فيتأخر الرد البسيط دقائق. وش الإصلاح؟</span>
+            <span class="lang-en">Your coordinator routes every query — even "what does this term mean?" — through the full search, analysis, synthesis, and report pipeline, so simple answers take minutes. What is the fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">خلّ المنسّق يحلّل متطلبات الطلب ويختار ديناميكيًا الوكلاء الذين يحتاجهم فقط</span>
+            <span class="lang-en">Have the coordinator analyze the query requirements and dynamically select only the subagents it needs</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">قلّل عدد الوكلاء في الأنبوب إلى اثنين حتى تقصر الرحلة للجميع</span>
+            <span class="lang-en">Cut the pipeline down to two agents so the trip is shorter for everyone</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">اسمح للوكلاء بتبادل النتائج مباشرة لتسريع مرور الطلب</span>
+            <span class="lang-en">Allow the agents to exchange results directly to speed up the pass-through</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">شغّل الأنبوب كاملًا لكن بموديل أصغر وأسرع لكل الوكلاء</span>
+            <span class="lang-en">Keep the full pipeline but run every agent on a smaller, faster model</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> دور المنسّق يشمل تقرير <span class="font-semibold">أي</span> وكلاء يُستدعون حسب تعقيد الطلب — سؤال بسيط يكفيه وكيل واحد، وموضوع عريض يستحق الأنبوب الكامل.</span>
+              <span class="lang-en"><strong>Correct.</strong> The coordinator's role includes deciding <span class="font-semibold">which</span> subagents to invoke based on query complexity — a simple question needs one agent; a broad topic earns the full pipeline.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: الاختيار الديناميكي للوكلاء. تقليص الأنبوب يضرّ الموضوعات العريضة، والتواصل المباشر يكسر البنية، والموديل الأصغر يعالج العرَض (البطء) لا السبب (توجيه أعمى للجميع).</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct fix is dynamic subagent selection. Shrinking the pipeline hurts broad topics, direct communication breaks the architecture, and a smaller model treats the symptom (slowness) not the cause (blind routing for everyone).</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">بعد جولة التوليف الأولى لموضوع عريض، اكتشف المنسّق أن محورين بلا أي مصادر. وش السلوك الصحيح؟</span>
+            <span class="lang-en">After the first synthesis round on a broad topic, the coordinator finds two subtopics with no sources at all. What is the correct behavior?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">سلّم التقرير مع ملاحظة أن بعض المحاور خارج نطاق البحث</span>
+            <span class="lang-en">Deliver the report with a note that some subtopics were out of scope</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أعد تشغيل البحث كاملًا من الصفر على الموضوع كله بنطاق أعرض</span>
+            <span class="lang-en">Re-run the entire research from scratch on the whole topic with a wider scope</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أعد التفويض لوكلاء البحث والتحليل باستعلامات موجّهة نحو المحورين الناقصين، ثم أعد التوليف بالأدلة الجديدة</span>
+            <span class="lang-en">Re-delegate to the search and analysis agents with queries targeted at the two missing subtopics, then re-invoke synthesis with the new evidence</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">اطلب من وكيل التوليف تأليف تغطية للمحورين من معرفته العامة</span>
+            <span class="lang-en">Ask the synthesis agent to write coverage for the two subtopics from its general knowledge</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> هذي حلقة التنقيح التكرارية بنصّها: تقييم ← إعادة تفويض موجّهة نحو الفجوات ← إعادة توليف — حتى تكفي التغطية.</span>
+              <span class="lang-en"><strong>Correct.</strong> That is the iterative refinement loop verbatim: evaluate, re-delegate targeted at the gaps, re-synthesize — until coverage is sufficient.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: إعادة تفويض موجّهة ثم إعادة توليف. التسليم الناقص يتنازل عن الجودة، والإعادة الكاملة تبذير يعيد شغلًا صحيحًا، والتأليف من «المعرفة العامة» يفتح باب الهلوسة بلا مصادر.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct move: targeted re-delegation then re-synthesis. Shipping incomplete surrenders quality, a full redo wastes correct work, and writing from "general knowledge" invites unsourced hallucination.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Hub-and-spoke: كل الاتصال عبر المنسّق — رصد، أخطاء موحّدة، تدفّق مضبوط.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>سياق الوكيل الفرعي معزول — لا وراثة تلقائية لتاريخ المنسّق.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>المنسّق يختار الوكلاء ديناميكيًا حسب التعقيد ويقسّم النطاق لتقليل الازدواجية.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>ناتج ناقص + وكلاء «ناجحون» = تفكيك ضيّق عند المنسّق.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>العلاج الدائم: حلقة تنقيح — تقييم، إعادة تفويض موجّهة، إعادة توليف.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Hub-and-spoke: all communication through the coordinator — observability, unified errors, controlled flow.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Subagent context is isolated — no automatic inheritance of the coordinator's history.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The coordinator selects subagents dynamically by complexity and partitions scope to minimize duplication.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Incomplete output + "successful" agents = narrow decomposition at the coordinator.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The durable cure: a refinement loop — evaluate, re-delegate targeted, re-synthesize.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-1-agentic-loop.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.1 حلقة الوكيل</span><span class="lang-en">1.1 The agentic loop</span></span>
+          </span>
+        </a>
+        <a href="1-3-subagents-context.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.3 الوكلاء الفرعيون وتمرير السياق</span><span class="lang-en">1.3 Subagents &amp; context passing</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

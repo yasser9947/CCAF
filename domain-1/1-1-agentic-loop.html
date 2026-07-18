@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.1 حلقة الوكيل — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.1 — the agentic loop: stop_reason control flow (tool_use vs end_turn), appending tool results to conversation history, model-driven decisions vs decision trees, and termination anti-patterns. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">حلقة الوكيل</span><span class="lang-en">The agentic loop</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.1</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">حلقة الوكيل للتنفيذ المستقل</span>
+          <span class="lang-en">The agentic loop for autonomous execution</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">كل وكيل — من بوت الدعم إلى مساعد البرمجة — هو في جوهره هذي الحلقة. إذا فهمت متى تستمر ومتى تتوقف، فهمت نصف الـ Agent SDK.</span>
+        <span class="lang-en">Every agent — from a support bot to a coding assistant — is at its core this loop. Understand when it continues and when it stops, and you understand half the Agent SDK.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشرح دورة حياة الحلقة الوكيلة: إرسال الطلب لـ Claude، فحص <span dir="ltr" class="font-mono text-brand-700">stop_reason</span>، تنفيذ الأدوات المطلوبة، وإرجاع النتائج للدورة التالية.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تبني control flow يستمر عند <span dir="ltr" class="font-mono text-brand-700">"tool_use"</span> ويتوقف عند <span dir="ltr" class="font-mono text-brand-700">"end_turn"</span> — لا شيء غيرهما.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تضيف نتائج الأدوات (<span dir="ltr" class="font-mono text-brand-700">tool_result</span> مربوطة بـ <span dir="ltr" class="font-mono text-brand-700">tool_use_id</span>) لتاريخ المحادثة حتى يبني الموديل على المعلومة الجديدة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفرّق بين القرار الذي يقوده الموديل (model-driven) وشجرة القرارات المُعدّة مسبقًا.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تتجنّب أنماط الإيقاف الخاطئة الثلاثة: تحليل النص، سقف التكرارات كآلية أساسية، واعتبار وجود النص دليل اكتمال.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Explain the agentic loop lifecycle: send a request to Claude, inspect <span dir="ltr" class="font-mono text-brand-700">stop_reason</span>, execute the requested tools, and return results for the next iteration.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Build control flow that continues on <span dir="ltr" class="font-mono text-brand-700">"tool_use"</span> and terminates on <span dir="ltr" class="font-mono text-brand-700">"end_turn"</span> — nothing else.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Append tool results (<span dir="ltr" class="font-mono text-brand-700">tool_result</span> keyed by <span dir="ltr" class="font-mono text-brand-700">tool_use_id</span>) to conversation history so the model can reason over the new information.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Distinguish model-driven decision-making from pre-configured decision trees.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Avoid the three termination anti-patterns: text parsing, iteration caps as the primary stop, and treating text presence as completion.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: lifecycle ===== -->
+    <section id="lifecycle" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">دورة الحياة: أربع خطوات تتكرّر</span>
+        <span class="lang-en">The lifecycle: four repeating steps</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الحلقة الوكيلة (agentic loop) هي القلب النابض لأي وكيل. دورتها بسيطة: <span class="font-semibold">ترسل الطلب لـ Claude</span>، ثم <span class="font-semibold">تفحص</span> <span dir="ltr" class="font-mono text-brand-700">stop_reason</span> في الرد. لو كانت قيمته <span dir="ltr" class="font-mono text-brand-700">"tool_use"</span> فهذا يعني أن Claude يطلب تنفيذ أداة أو أكثر: تنفّذها أنت في الكود، وترجّع النتائج، وتعيد الإرسال. ولو كانت <span dir="ltr" class="font-mono text-brand-700">"end_turn"</span> فالموديل أنهى المهمة وقدّم رده النهائي — الحلقة تنكسر هنا.</p>
+        <p>لاحظ التقسيم الدقيق للأدوار: <span class="font-semibold">الموديل يقرّر</span> (أي أداة، بأي مدخلات، ومتى ينتهي)، و<span class="font-semibold">الكود ينفّذ</span> (يشغّل الأداة ويرجّع النتيجة). أنت ما تكتب منطق «إذا سأل عن الطلب استدعِ lookup_order» — Claude نفسه يستنتج ذلك من السياق ووصف الأدوات.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The agentic loop is the beating heart of any agent. The cycle is simple: <span class="font-semibold">send a request to Claude</span>, then <span class="font-semibold">inspect</span> the response's <span dir="ltr" class="font-mono text-brand-700">stop_reason</span>. If it is <span dir="ltr" class="font-mono text-brand-700">"tool_use"</span>, Claude is requesting one or more tool executions: your code runs them, returns the results, and sends again. If it is <span dir="ltr" class="font-mono text-brand-700">"end_turn"</span>, the model has finished the task and produced its final answer — the loop breaks here.</p>
+        <p>Note the precise division of labor: <span class="font-semibold">the model decides</span> (which tool, with what inputs, and when it's done) while <span class="font-semibold">your code executes</span> (runs the tool, returns the result). You never write logic like "if they ask about an order, call lookup_order" — Claude infers that from context and tool descriptions.</p>
+      </div>
+
+      <!-- Diagram 1: the loop cycle -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="space-y-3">
+          <div class="flex flex-wrap items-center justify-center gap-2 text-center">
+            <div class="shrink-0 bg-surface-100 border border-surface-300 rounded-lg px-3 py-2 text-xs font-mono font-medium text-surface-700">user request</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="shrink-0 bg-brand-600 text-white rounded-lg px-3 py-2 text-xs font-mono font-medium">messages.create()</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="shrink-0 bg-brand-100 border-2 border-brand-300 rounded-lg px-3 py-2 text-xs font-mono font-bold text-brand-800">check stop_reason</div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+            <div class="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-2">
+              <div class="text-xs font-mono font-bold text-amber-800 text-center">"tool_use"</div>
+              <div class="flex flex-col items-center gap-1.5">
+                <div class="bg-white border border-amber-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-amber-900 w-full text-center">execute requested tools</div>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-amber-500"></i>
+                <div class="bg-white border border-amber-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-amber-900 w-full text-center">append tool_result to messages</div>
+                <div class="flex items-center gap-1.5 text-amber-700">
+                  <i data-lucide="repeat" class="w-4 h-4"></i>
+                  <span class="text-[11px] font-mono font-bold">loop: send again</span>
+                </div>
+              </div>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3 space-y-2">
+              <div class="text-xs font-mono font-bold text-emerald-800 text-center">"end_turn"</div>
+              <div class="flex flex-col items-center gap-1.5">
+                <div class="bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-emerald-900 w-full text-center">task complete</div>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-emerald-500"></i>
+                <div class="bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-emerald-900 w-full text-center">return final text to user</div>
+                <div class="flex items-center gap-1.5 text-emerald-700">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  <span class="text-[11px] font-mono font-bold">exit loop</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">الدورة الكاملة: طلب ← فحص stop_reason ← تنفيذ وإلحاق النتائج ← تكرار، والخروج الوحيد عند end_turn.</span>
+          <span class="lang-en">The full cycle: request, inspect stop_reason, execute and append results, repeat — the only exit is end_turn.</span>
+        </p>
+      </div>
+
+      <!-- Code: agentic loop -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">حلقة وكيل تُقاد بـ stop_reason (Messages API)</span>
+          <span class="lang-en">An agentic loop driven by stop_reason (Messages API)</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">import anthropic
+
+client = anthropic.Anthropic()
+messages = [{"role": "user", "content": "Refund order #12345 for this customer"}]
+
+while True:
+    response = client.messages.create(
+        model="claude-opus-4-8",
+        max_tokens=1024,
+        tools=TOOLS,                      # your MCP / custom tool schemas
+        messages=messages,
+    )
+
+    # Control flow is driven ONLY by stop_reason -- never by parsing text.
+    if response.stop_reason == "tool_use":
+        # 1) Record Claude's turn (it may contain several tool_use blocks)
+        messages.append({"role": "assistant", "content": response.content})
+
+        # 2) Execute every requested tool and collect the results
+        tool_results = []
+        for block in response.content:
+            if block.type == "tool_use":
+                output = run_tool(block.name, block.input)      # your dispatcher
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,                    # correlate to the call
+                    "content": output,
+                })
+
+        # 3) Append results so the model can reason on the NEXT iteration
+        messages.append({"role": "user", "content": tool_results})
+        continue
+
+    # stop_reason == "end_turn" -&gt; the task is done
+    break
+
+final_text = "".join(b.text for b in response.content if b.type == "text")
+print(final_text)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: appending results ===== -->
+    <section id="append-results" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">إلحاق النتائج بالسياق: وقود الدورة التالية</span>
+        <span class="lang-en">Appending results to context: fuel for the next iteration</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>ليش نلحق النتائج بتاريخ المحادثة؟ لأن الموديل <span class="font-semibold">عديم الذاكرة بين النداءات</span> — كل نداء API مستقل، وما «يشوف» إلا ما ترسله في <span dir="ltr" class="font-mono text-brand-700">messages</span>. فإذا نفّذت <span dir="ltr" class="font-mono text-brand-700">lookup_order</span> وما رجّعت النتيجة في الرسالة التالية، فكأن العملية ما صارت أبدًا من وجهة نظر Claude.</p>
+        <p>الترتيب الدقيق: (1) تلحق رد المساعد كاملًا (بما فيه كتل <span dir="ltr" class="font-mono text-brand-700">tool_use</span>)، ثم (2) تلحق رسالة <span dir="ltr" class="font-mono text-brand-700">user</span> تحتوي كتل <span dir="ltr" class="font-mono text-brand-700">tool_result</span>، كل كتلة مربوطة بندائها عبر <span dir="ltr" class="font-mono text-brand-700">tool_use_id</span>. بهذا يقدر الموديل في الدورة التالية أن يقرأ النتيجة، يربطها بالسؤال اللي طرحه، ويقرّر خطوته الجاية بناءً عليها — هذي هي «المحادثة الذاتية» اللي تجعل الوكيل وكيلًا.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Why append results to conversation history? Because the model is <span class="font-semibold">stateless between calls</span> — every API call stands alone, and Claude "sees" only what you send in <span dir="ltr" class="font-mono text-brand-700">messages</span>. If you execute <span dir="ltr" class="font-mono text-brand-700">lookup_order</span> but don't return the result in the next message, from Claude's perspective the operation never happened.</p>
+        <p>The exact order: (1) append the assistant's full turn (including its <span dir="ltr" class="font-mono text-brand-700">tool_use</span> blocks), then (2) append a <span dir="ltr" class="font-mono text-brand-700">user</span> message containing <span dir="ltr" class="font-mono text-brand-700">tool_result</span> blocks, each correlated to its call via <span dir="ltr" class="font-mono text-brand-700">tool_use_id</span>. On the next iteration the model reads the result, ties it back to the question it asked, and decides its next move accordingly — this is the self-conversation that makes an agent an agent.</p>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> الرد الواحد ممكن يحتوي <span class="font-semibold">عدة</span> كتل <span dir="ltr" class="font-mono">tool_use</span> دفعة واحدة — رجّع <span dir="ltr" class="font-mono">tool_result</span> لكل واحدة منها في نفس رسالة الـ user، وإلا يفشل النداء التالي.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> a single response can carry <span class="font-semibold">several</span> <span dir="ltr" class="font-mono">tool_use</span> blocks at once — return a <span dir="ltr" class="font-mono">tool_result</span> for each of them in the same user message, or the next call fails.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: who decides ===== -->
+    <section id="model-driven" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">من يقرّر الأداة التالية؟ الموديل، مو مخطط مسبق</span>
+        <span class="lang-en">Who picks the next tool? The model, not a script</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>هنا الفرق الجوهري بين الوكيل الحقيقي وسكربت الأتمتة: في <span class="font-semibold">اتخاذ القرار الذي يقوده الموديل</span> (model-driven decision-making)، Claude يقرأ السياق الحالي — طلب المستخدم، نتائج الأدوات السابقة، أوصاف الأدوات — ويستنتج بنفسه أي أداة يستدعي بعدين. أما <span class="font-semibold">شجرة القرارات المُعدّة مسبقًا</span> فتفرض تسلسل أدوات ثابتًا مكتوبًا في الكود: الخطوة 1 ثم 2 ثم 3 مهما حصل.</p>
+        <p>ليش يهم؟ لأن مهام مثل المرتجعات ونزاعات الفوترة (سيناريو 1) <span class="font-semibold">عالية الغموض</span>: ما تعرف مسبقًا وش بيقول العميل ولا وش بتكشف البيانات. الشجرة الثابتة تنكسر مع أول حالة غير متوقعة؛ الموديل يعيد التخطيط ويتكيّف.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Here is the essential difference between a real agent and an automation script: with <span class="font-semibold">model-driven decision-making</span>, Claude reads the current context — the user's request, prior tool results, tool descriptions — and infers by itself which tool to call next. A <span class="font-semibold">pre-configured decision tree</span>, by contrast, hard-codes a fixed tool sequence: step 1, then 2, then 3 no matter what.</p>
+        <p>Why does it matter? Because tasks like returns and billing disputes (Scenario 1) are <span class="font-semibold">high-ambiguity</span>: you can't know upfront what the customer will say or what the data will reveal. The fixed tree breaks on the first unexpected case; the model re-plans and adapts.</p>
+      </div>
+
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">قرار يقوده الموديل</th>
+              <th class="p-3 text-start font-semibold text-surface-600">شجرة قرارات مُعدّة مسبقًا</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">من يختار الأداة التالية؟</td><td class="p-3">Claude، بناءً على السياق الحالي</td><td class="p-3 text-surface-600">تسلسل ثابت مكتوب مسبقًا</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">التكيّف مع المفاجآت</td><td class="p-3">مرن — يعيد التخطيط حسب النتائج</td><td class="p-3 text-surface-600">هشّ — ينكسر مع أي حالة غير متوقعة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">التوقف</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">stop_reason == "end_turn"</span></td><td class="p-3 text-surface-600">نهاية التسلسل المبرمج</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مناسب لِـ</td><td class="p-3">مهام عالية الغموض (مرتجعات، نزاعات)</td><td class="p-3 text-surface-600">تدفّقات بسيطة محدّدة تمامًا</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">Model-driven decisions</th>
+              <th class="p-3 text-start font-semibold text-surface-600">Pre-configured decision tree</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Who picks the next tool?</td><td class="p-3">Claude, from current context</td><td class="p-3 text-surface-600">A fixed, pre-written sequence</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Adapting to surprises</td><td class="p-3">Flexible — re-plans on results</td><td class="p-3 text-surface-600">Brittle — breaks on the unexpected</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Termination</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">stop_reason == "end_turn"</span></td><td class="p-3 text-surface-600">End of the scripted sequence</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Fits</td><td class="p-3">High-ambiguity tasks (returns, disputes)</td><td class="p-3 text-surface-600">Simple, fully-specified flows</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> <span dir="ltr" class="font-mono">stop_reason</span> هو «إشارة المرور» الرسمية للحلقة. النص اللي يكتبه الموديل <span class="font-semibold">محتوى</span> للمستخدم، مو <span class="font-semibold">إشارة تحكّم</span> للبرنامج — وخلط الاثنين هو أصل معظم أخطاء الحلقات.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> <span dir="ltr" class="font-mono">stop_reason</span> is the loop's official traffic light. The model's text is <span class="font-semibold">content</span> for the user, not a <span class="font-semibold">control signal</span> for your program — conflating the two is the root of most loop bugs.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: termination anti-patterns ===== -->
+    <section id="termination" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">04</span>
+        <span class="lang-ar">شروط الإيقاف: الصح والغلط</span>
+        <span class="lang-en">Termination: the right way and the wrong ways</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>دليل الاختبار يسمّي ثلاثة أنماط خاطئة بالاسم، وكلها تظهر كمشتّتات «معقولة» في الأسئلة: <span class="font-semibold">تحليل إشارات اللغة الطبيعية</span> لإنهاء الحلقة (البحث عن «انتهيت» في النص)، <span class="font-semibold">سقف تكرارات عشوائي كآلية التوقف الأساسية</span>، و<span class="font-semibold">اعتبار وجود نص في الرد دليل اكتمال</span>. الثلاثة تشترك في نفس الخطيئة: تستبدل الإشارة الرسمية باستدلال هشّ.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The exam guide names three anti-patterns explicitly, and all three appear as "reasonable-looking" distractors: <span class="font-semibold">parsing natural-language signals</span> to end the loop (scanning the text for "done"), <span class="font-semibold">an arbitrary iteration cap as the primary stopping mechanism</span>, and <span class="font-semibold">treating the presence of assistant text as a completion indicator</span>. All three commit the same sin: replacing the official signal with brittle inference.</p>
+      </div>
+
+      <!-- Diagram 2: GOOD vs BAD termination -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="grid sm:grid-cols-2 gap-4">
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 space-y-2.5">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+              <span class="text-sm font-mono font-bold text-emerald-800">GOOD — signal-driven</span>
+            </div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">if stop_reason == "tool_use": run + append + loop</div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">if stop_reason == "end_turn": break</div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">cap exists only as a SAFETY backstop</div>
+          </div>
+          <div class="bg-red-50 border-2 border-red-300 rounded-xl p-4 space-y-2.5">
+            <div class="flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+              <span class="text-sm font-mono font-bold text-red-800">BAD — guess-driven</span>
+            </div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">if "I'm done" in text: break</div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">for i in range(5): ...  # cap as PRIMARY stop</div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">if response.has_text: assume complete</div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">اليسار الأخضر يقود بالإشارة الرسمية؛ اليمين الأحمر يخمّن — وكل تخمين ينكسر في الإنتاج.</span>
+          <span class="lang-en">The green panel drives on the official signal; the red panel guesses — and every guess breaks in production.</span>
+        </p>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-emerald-900 leading-relaxed"><span class="font-bold">نصيحة:</span> سقف التكرارات مو ممنوع — وجوده كصمام أمان ضد الحلقات الجامحة ممارسة سليمة. الممنوع أن يكون <span class="font-semibold">الآلية الأساسية</span> للتوقف. الفرق بين «حزام أمان» و«فرامل السيارة».</div>
+          <div class="lang-en text-emerald-900 leading-relaxed"><span class="font-bold">Tip:</span> an iteration cap isn't forbidden — keeping one as a safety valve against runaway loops is sound practice. What's forbidden is making it the <span class="font-semibold">primary</span> stopping mechanism. It's the difference between a seatbelt and the car's brakes.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«أوقف الحلقة لما يكتب الموديل عبارة إنهاء متفق عليها» — يبدو ذكيًا، لكنه تحليل لغة طبيعية: نمط خاطئ صريح.</span><span class="lang-en">"Stop the loop when the model writes an agreed completion phrase" — sounds clever, but it's natural-language parsing: an explicit anti-pattern.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«حدّد <span dir="ltr" class="font-mono">max_iterations</span> كآلية التوقف الأساسية» — السقف حاجز أمان احتياطي فقط.</span><span class="lang-en">"Make <span dir="ltr" class="font-mono">max_iterations</span> the primary stop" — a cap is only a safety backstop.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«إذا رجع نص في الرد فالمهمة خلصت» — النص ممكن يرافق <span dir="ltr" class="font-mono">tool_use</span> («دقيقة أتحقق من الطلب...») فلا يدل على الاكتمال.</span><span class="lang-en">"If the response contains text, the task is done" — text can accompany <span dir="ltr" class="font-mono">tool_use</span> ("One moment, checking the order...") so it proves nothing about completion.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="chef-hat" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: الشيف والنادل</span>
+              <span class="lang-en">Real-life example: the chef and the waiter</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>تخيّل مطبخ مطعم: <span class="font-semibold">الشيف هو الموديل</span> و<span class="font-semibold">النادل هو الكود اللي ينفّذ الحلقة</span>. الشيف يطبخ، وكل ما احتاج شيئًا من المخزن يرفع تذكرة مكتوبة: «أبغى كيلو طماطم» — هذي بالضبط <span dir="ltr" class="font-mono">stop_reason: "tool_use"</span>. النادل ما يناقش ولا يفسّر ولا «يحس» — يقرأ التذكرة، يجيب الطلب، ويحطّه قدام الشيف مع رقم التذكرة (<span dir="ltr" class="font-mono">tool_use_id</span>) عشان يعرف الشيف هذا رد على أي طلب. ثم يرجع الشيف يكمل بناءً على المكوّن الجديد.</p>
+              <p>ولما يعلن الشيف «الصحن جاهز، قدّموه» فهذي <span dir="ltr" class="font-mono">"end_turn"</span> — إشارة رسمية واضحة. لاحظ وش <span class="font-semibold">ما يفعله</span> النادل الشاطر: ما يسحب الصحن لمجرد أنه سمع الشيف يدندن (تحليل نص)، ولا يقرّر «خمس تذاكر تكفي، بقدّم اللي موجود» (سقف تكرارات)، ولا يعتبر أي كلام من الشيف علامة انتهاء (النص ليس دليل اكتمال). النادل يتحرّك على الإشارة الرسمية فقط — وهذا سرّ مطعم ما يطلع منه صحن ناقص.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>Picture a restaurant kitchen: <span class="font-semibold">the chef is the model</span> and <span class="font-semibold">the waiter is the code running the loop</span>. The chef cooks, and whenever he needs something from the storeroom he raises a written ticket: "one kilo of tomatoes" — that is exactly <span dir="ltr" class="font-mono">stop_reason: "tool_use"</span>. The waiter doesn't argue, interpret, or guess — he reads the ticket, fetches the item, and places it before the chef with the ticket number attached (<span dir="ltr" class="font-mono">tool_use_id</span>) so the chef knows which request it answers. The chef then continues, building on the new ingredient.</p>
+              <p>When the chef announces "the dish is ready, serve it," that is <span dir="ltr" class="font-mono">"end_turn"</span> — a clear, official signal. Note what a good waiter <span class="font-semibold">never</span> does: he doesn't grab the plate because he heard the chef humming (text parsing), doesn't decide "five tickets is plenty, I'll serve what's there" (iteration cap), and doesn't treat any chatter from the chef as a done signal (text is not completion). The waiter moves on the official signal only — which is why no half-finished dish ever leaves that kitchen.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.1 تجيك بصيغتين: «أي تنفيذ للحلقة صحيح؟» (تختار كودًا يقوده stop_reason)، أو «الحلقة تتوقف مبكرًا/تعلق — ليش؟» (تشخّص نمط إيقاف خاطئ).</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>الإجابة الصحيحة دائمًا تذكر <span dir="ltr" class="font-mono">stop_reason</span> صراحةً: استمرار عند <span dir="ltr" class="font-mono">"tool_use"</span>، توقف عند <span dir="ltr" class="font-mono">"end_turn"</span>، مع إلحاق النتائج بين الدورات.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد فورًا: أي خيار يفحص نص الرد، أي خيار يجعل العدّاد آلية التوقف الأساسية، وأي خيار يستنتج الاكتمال من وجود نص.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>انتبه لخيارات تنسى إلحاق <span dir="ltr" class="font-mono">tool_result</span> للتاريخ — بدونها الموديل «ما شاف» النتيجة أصلًا.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.1 questions come in two shapes: "which loop implementation is correct?" (pick the stop_reason-driven code) or "the loop stops early / hangs — why?" (diagnose a termination anti-pattern).</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>The correct answer always names <span dir="ltr" class="font-mono">stop_reason</span> explicitly: continue on <span dir="ltr" class="font-mono">"tool_use"</span>, stop on <span dir="ltr" class="font-mono">"end_turn"</span>, appending results between iterations.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate on sight: any option scanning response text, any option making a counter the primary stop, and any option inferring completion from text presence.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Watch for options that forget to append <span dir="ltr" class="font-mono">tool_result</span> to history — without it, the model never "saw" the result at all.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">رجع الرد بـ <span dir="ltr" class="font-mono text-[0.9em]">stop_reason == "tool_use"</span> ومعه كتلتا <span dir="ltr" class="font-mono text-[0.9em]">tool_use</span>. وش الخطوة الصحيحة التالية؟</span>
+            <span class="lang-en">The response returned <span dir="ltr" class="font-mono text-[0.9em]">stop_reason == "tool_use"</span> with two <span dir="ltr" class="font-mono text-[0.9em]">tool_use</span> blocks. What is the correct next step?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">نفّذ الأداة الأولى فقط وتجاهل الثانية حتى الدورة القادمة</span>
+            <span class="lang-en">Execute only the first tool and postpone the second to the next iteration</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ألحق رد المساعد، نفّذ الأداتين، وأرجع <span dir="ltr" class="font-mono text-[0.9em]">tool_result</span> لكل واحدة (بمعرّفها) في رسالة user واحدة ثم أعد الإرسال</span>
+            <span class="lang-en">Append the assistant turn, execute both tools, and return a <span dir="ltr" class="font-mono text-[0.9em]">tool_result</span> for each (by its id) in one user message, then send again</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ابدأ محادثة جديدة نظيفة وحطّ نتائج الأدوات في برومبت النظام</span>
+            <span class="lang-en">Start a fresh conversation and put the tool outputs in the system prompt</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">اعرض النص المرافق على المستخدم واعتبر المهمة منتهية</span>
+            <span class="lang-en">Show the accompanying text to the user and consider the task finished</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> كل كتلة <span dir="ltr" class="font-mono">tool_use</span> تحتاج <span dir="ltr" class="font-mono">tool_result</span> مقابلة بمعرّفها، وتُلحق النتائج كلها كرسالة user واحدة قبل الدورة التالية.</span>
+              <span class="lang-en"><strong>Correct.</strong> Every <span dir="ltr" class="font-mono">tool_use</span> block needs a matching <span dir="ltr" class="font-mono">tool_result</span> keyed by its id, all appended as one user message before the next iteration.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: تنفيذ كل الأدوات المطلوبة وإرجاع <span dir="ltr" class="font-mono">tool_result</span> لكل كتلة في نفس رسالة الـ user. تجاهل أداة أو بدء محادثة جديدة يقطع سلسلة الاستدلال، والنص المرافق ليس علامة اكتمال.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct step: execute all requested tools and return a <span dir="ltr" class="font-mono">tool_result</span> per block in the same user message. Skipping a tool or restarting the conversation breaks the reasoning chain, and accompanying text is not a completion signal.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">وكيل دعم ينفّذ <span dir="ltr" class="font-mono text-[0.9em]">lookup_order</span> بنجاح، لكن في الدورة التالية يتصرّف وكأنه ما شاف النتيجة أبدًا ويعيد طلب نفس الأداة. وش أرجح سبب؟</span>
+            <span class="lang-en">A support agent successfully executes <span dir="ltr" class="font-mono text-[0.9em]">lookup_order</span>, but on the next iteration it acts as if it never saw the result and requests the same tool again. Most likely cause?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">الموديل يحتاج برومبت أوضح يذكّره بنتائج الأدوات السابقة</span>
+            <span class="lang-en">The model needs a clearer prompt reminding it of prior tool results</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أداة <span dir="ltr" class="font-mono text-[0.9em]">lookup_order</span> بطيئة والموديل «ملّ» من الانتظار</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono text-[0.9em]">lookup_order</span> is slow and the model "got tired" of waiting</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">الكود ينفّذ الأداة لكنه لا يُلحق كتلة <span dir="ltr" class="font-mono text-[0.9em]">tool_result</span> بتاريخ المحادثة قبل النداء التالي</span>
+            <span class="lang-en">The code executes the tool but never appends the <span dir="ltr" class="font-mono text-[0.9em]">tool_result</span> block to conversation history before the next call</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">لازم رفع <span dir="ltr" class="font-mono text-[0.9em]">max_tokens</span> حتى يتذكّر الموديل النتائج</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono text-[0.9em]">max_tokens</span> must be raised so the model can remember results</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> الموديل عديم الذاكرة بين النداءات — لا يعرف إلا ما في <span dir="ltr" class="font-mono">messages</span>. نتيجة ما أُلحقت = نتيجة ما صارت من وجهة نظره، فيعيد الطلب.</span>
+              <span class="lang-en"><strong>Correct.</strong> The model is stateless between calls — it knows only what's in <span dir="ltr" class="font-mono">messages</span>. A result never appended is a result that never happened from its perspective, so it asks again.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: النتيجة ما أُلحقت بالتاريخ. هذا خلل في الحلقة نفسها مو في البرومبت ولا في سرعة الأداة ولا في <span dir="ltr" class="font-mono">max_tokens</span> — الموديل ببساطة ما استلم المعلومة.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct cause: the result was never appended to history. It's a loop bug — not the prompt, not tool speed, not <span dir="ltr" class="font-mono">max_tokens</span>. The model simply never received the information.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">وش الدور الصحيح لسقف التكرارات (<span dir="ltr" class="font-mono text-[0.9em]">max_iterations</span>) في حلقة وكيل إنتاجية؟</span>
+            <span class="lang-en">What is the correct role of an iteration cap (<span dir="ltr" class="font-mono text-[0.9em]">max_iterations</span>) in a production agentic loop?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">هو آلية الإيقاف الأساسية: تختار رقمًا يناسب متوسط طول المهام</span>
+            <span class="lang-en">It is the primary stopping mechanism: pick a number matching average task length</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ممنوع نهائيًا — وجوده بحد ذاته نمط خاطئ</span>
+            <span class="lang-en">Strictly forbidden — its mere presence is an anti-pattern</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">صمام أمان احتياطي ضد الحلقات الجامحة — بينما التوقف الفعلي يقوده <span dir="ltr" class="font-mono text-[0.9em]">stop_reason</span></span>
+            <span class="lang-en">A safety backstop against runaway loops — while actual termination is driven by <span dir="ltr" class="font-mono text-[0.9em]">stop_reason</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">بديل عن فحص <span dir="ltr" class="font-mono text-[0.9em]">stop_reason</span> في المهام القصيرة</span>
+            <span class="lang-en">A replacement for checking <span dir="ltr" class="font-mono text-[0.9em]">stop_reason</span> on short tasks</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> السقف حزام أمان: يمنع الكارثة لو انحرفت الحلقة، لكنه لا يقود التوقف الطبيعي — تلك مهمة <span dir="ltr" class="font-mono">stop_reason</span> وحدها.</span>
+              <span class="lang-en"><strong>Correct.</strong> The cap is a seatbelt: it prevents disaster if the loop goes rogue, but it never drives normal termination — that is <span dir="ltr" class="font-mono">stop_reason</span>'s job alone.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: صمام أمان احتياطي فقط. جعله الآلية الأساسية نمط خاطئ صريح، ومنعه كليًا مبالغة — الممنوع هو الاعتماد عليه للتوقف الطبيعي بدل <span dir="ltr" class="font-mono">stop_reason</span>.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct role: a safety backstop only. Making it primary is an explicit anti-pattern, and banning it entirely is overkill — what's forbidden is relying on it for normal termination instead of <span dir="ltr" class="font-mono">stop_reason</span>.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>الحلقة: أرسل ← افحص <span dir="ltr" class="font-mono">stop_reason</span> ← نفّذ ← ألحق ← كرّر. الخروج الوحيد: <span dir="ltr" class="font-mono">"end_turn"</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>كل <span dir="ltr" class="font-mono">tool_use</span> يقابلها <span dir="ltr" class="font-mono">tool_result</span> بمعرّفها، تُلحق كرسالة user قبل الدورة التالية.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>القرار يقوده الموديل من السياق — مو شجرة قرارات مبرمجة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>ممنوعات الإيقاف الثلاثة: تحليل النص، السقف كآلية أساسية، النص كدليل اكتمال.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The loop: send, inspect <span dir="ltr" class="font-mono">stop_reason</span>, execute, append, repeat. The only exit: <span dir="ltr" class="font-mono">"end_turn"</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Every <span dir="ltr" class="font-mono">tool_use</span> gets a matching <span dir="ltr" class="font-mono">tool_result</span> by id, appended as a user message before the next iteration.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Decisions are model-driven from context — not a scripted decision tree.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The three termination sins: text parsing, cap-as-primary, text presence as completion.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">نظرة عامة على الدومين 1</span><span class="lang-en">Domain 1 overview</span></span>
+          </span>
+        </a>
+        <a href="1-2-orchestration.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.2 تنسيق الأنظمة متعددة الوكلاء</span><span class="lang-en">1.2 Multi-agent orchestration</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

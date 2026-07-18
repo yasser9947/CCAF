@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.3 الوكلاء الفرعيون وتمرير السياق — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.3 — subagent invocation and context passing: the Task tool and allowedTools, AgentDefinition, explicit structured context passing with metadata, parallel Task calls in a single response, and goal-based coordinator prompts. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">الوكلاء الفرعيون والسياق</span><span class="lang-en">Subagents &amp; context</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.3</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">استدعاء الوكلاء الفرعيين وتمرير السياق والإطلاق</span>
+          <span class="lang-en">Subagent invocation, context passing &amp; spawning</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">أقوى منسّق في الدنيا بلا تمرير سياق صحيح = وكلاء يشتغلون في الظلام. هنا التفاصيل التقنية: أداة Task، وقاعدة «لا وراثة تلقائية»، والتوازي الصحيح.</span>
+        <span class="lang-en">The mightiest coordinator with broken context passing = agents working in the dark. Here are the mechanics: the Task tool, the "no automatic inheritance" rule, and doing parallelism right.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تطلق الوكلاء الفرعيين بأداة <span dir="ltr" class="font-mono text-brand-700">Task</span>، وتعرف أن <span dir="ltr" class="font-mono text-brand-700">allowedTools</span> عند المنسّق لازم تتضمّن <span dir="ltr" class="font-mono text-brand-700">"Task"</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تعرّف كل نوع وكيل بـ <span dir="ltr" class="font-mono text-brand-700">AgentDefinition</span>: وصف، برومبت نظام، وقيود أدوات.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تمرّر السياق صراحةً: نتائج الوكلاء السابقين كاملة داخل برومبت الوكيل الفرعي — لا وراثة ولا ذاكرة مشتركة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفصل المحتوى عن الميتاداتا (روابط المصادر، أسماء المستندات، أرقام الصفحات) بصيغ منظّمة تحفظ الإسناد.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشغّل وكلاء بالتوازي بإصدار عدة نداءات <span dir="ltr" class="font-mono text-brand-700">Task</span> في رد واحد — لا عبر أدوار متتابعة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تكتب برومبتات منسّق تحدّد الأهداف ومعايير الجودة بدل الإجراءات خطوة-بخطوة، وتعرف دور fork للجلسات (تفصيلها في 1.7).</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Spawn subagents with the <span dir="ltr" class="font-mono text-brand-700">Task</span> tool, and know the coordinator's <span dir="ltr" class="font-mono text-brand-700">allowedTools</span> must include <span dir="ltr" class="font-mono text-brand-700">"Task"</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Define each agent type with an <span dir="ltr" class="font-mono text-brand-700">AgentDefinition</span>: description, system prompt, and tool restrictions.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Pass context explicitly: complete findings from prior agents go inside the subagent's prompt — no inheritance, no shared memory.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Separate content from metadata (source URLs, document names, page numbers) with structured formats that preserve attribution.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Run agents in parallel by emitting multiple <span dir="ltr" class="font-mono text-brand-700">Task</span> calls in a single response — not across sequential turns.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Write coordinator prompts that state goals and quality criteria instead of step-by-step procedures, and know fork-based sessions (detailed in 1.7).</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: Task tool + AgentDefinition ===== -->
+    <section id="task-tool" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">أداة Task و AgentDefinition: عدّة الإطلاق</span>
+        <span class="lang-en">The Task tool &amp; AgentDefinition: the spawning kit</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>آلية إطلاق الوكلاء الفرعيين هي أداة <span dir="ltr" class="font-mono text-brand-700">Task</span> المدمجة: المنسّق «يستدعي أداة» اسمها Task، ومدخلاتها تحدّد نوع الوكيل الفرعي والبرومبت الذي سيستلمه. وهنا شرط صلب ينساه كثيرون: لازم قائمة <span dir="ltr" class="font-mono text-brand-700">allowedTools</span> عند المنسّق تتضمّن <span dir="ltr" class="font-mono text-brand-700">"Task"</span> — بدونها المنسّق ببساطة <span class="font-semibold">لا يستطيع التفويض إطلاقًا</span>، مهما كان برومبته بليغًا.</p>
+        <p>كل نوع وكيل فرعي تعرّفه بـ <span dir="ltr" class="font-mono text-brand-700">AgentDefinition</span> من ثلاثة أجزاء: <span class="font-semibold">الوصف</span> (متى يُستدعى هذا الوكيل — يقرؤه المنسّق)، <span class="font-semibold">برومبت النظام</span> (شخصية الوكيل وأسلوب مخرجاته)، و<span class="font-semibold">قيود الأدوات</span> (وكيل البحث ياخذ أدوات البحث فقط؛ وكيل التوليف بلا أدوات بحث أصلًا — فصل الاختصاصات هذا يتوسّع فيه الدومين 2).</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The mechanism for spawning subagents is the built-in <span dir="ltr" class="font-mono text-brand-700">Task</span> tool: the coordinator "calls a tool" named Task whose input specifies the subagent type and the prompt it will receive. And here is a hard requirement people forget: the coordinator's <span dir="ltr" class="font-mono text-brand-700">allowedTools</span> must include <span dir="ltr" class="font-mono text-brand-700">"Task"</span> — without it, the coordinator simply <span class="font-semibold">cannot delegate at all</span>, however eloquent its prompt.</p>
+        <p>Each subagent type is declared with an <span dir="ltr" class="font-mono text-brand-700">AgentDefinition</span> in three parts: the <span class="font-semibold">description</span> (when to invoke this agent — read by the coordinator), the <span class="font-semibold">system prompt</span> (the agent's persona and output style), and <span class="font-semibold">tool restrictions</span> (the search agent gets search tools only; the synthesis agent gets no search tools at all — a separation of concerns Domain 2 expands on).</p>
+      </div>
+
+      <!-- Code: SDK -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">تعريف الوكلاء وإطلاقهم بالتوازي (Agent SDK)</span>
+          <span class="lang-en">Defining agents and spawning them in parallel (Agent SDK)</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">from claude_agent_sdk import query, ClaudeAgentOptions, AgentDefinition
+
+# Each subagent runs in ISOLATED context: it only sees what you put in its prompt.
+research_agents = {
+    "web_search": AgentDefinition(
+        description="Searches the web for sources on an ASSIGNED subtopic.",
+        prompt=("You are a web research specialist. Return findings as structured "
+                "items: {claim, evidence, source_url, published_date}."),
+        tools=["WebSearch", "WebFetch"],       # scoped tools only
+    ),
+    "doc_analysis": AgentDefinition(
+        description="Analyzes documents and extracts cited claims.",
+        prompt="Extract claims with source name, page number, and a short excerpt.",
+        tools=["Read", "Grep"],
+    ),
+    "synthesis": AgentDefinition(
+        description="Merges findings into a single cited report.",
+        prompt=("Combine ONLY the findings provided in your prompt. "
+                "Preserve every claim-to-source mapping."),
+        tools=[],                              # no search tools: separation of concerns
+    ),
+}
+
+options = ClaudeAgentOptions(
+    agents=research_agents,
+    allowed_tools=["Task"],                    # REQUIRED to spawn subagents
+    system_prompt=(
+        "You are a research coordinator. Decompose the topic to cover ALL of its "
+        "domains. Spawn independent subagents IN PARALLEL by emitting multiple Task "
+        "calls in a SINGLE response. Pass each subagent the exact findings it needs "
+        "-- subagents do NOT inherit your context. Specify goals and quality "
+        "criteria, not step-by-step procedures."
+    ),
+)
+
+async for message in query(
+    prompt="Research the impact of AI on creative industries",
+    options=options,
+):
+    print(message)</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> أعراض «المنسّق يوصف الخطة لكن ما يفوّض أحدًا أبدًا» لها تشخيص واحد شائع: <span dir="ltr" class="font-mono">"Task"</span> ناقصة من <span dir="ltr" class="font-mono">allowedTools</span>. افحص الإعدادات قبل ما تلوم البرومبت.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> the symptom "the coordinator describes the plan but never actually delegates" has one common diagnosis: <span dir="ltr" class="font-mono">"Task"</span> is missing from <span dir="ltr" class="font-mono">allowedTools</span>. Check the config before blaming the prompt.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: explicit context passing ===== -->
+    <section id="context-passing" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">تمرير السياق صراحةً: لا وراثة، لا ذاكرة مشتركة</span>
+        <span class="lang-en">Explicit context passing: no inheritance, no shared memory</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>القاعدة اللي ينكسر عليها أكثر المهندسين: الوكيل الفرعي <span class="font-semibold text-red-700">لا يرث سياق الأب ولا يشارك ذاكرة بين الاستدعاءات</span>. كل استدعاء Task يفتح عالمًا نظيفًا معزولًا: ما فيه تاريخ المنسّق، ولا نتائج الوكلاء الآخرين، ولا حتى نتائج استدعاء سابق <span class="font-semibold">لنفس</span> الوكيل. عبارة «بناءً على النتائج السابقة» في برومبت وكيل فرعي = جملة بلا معنى في عالمه.</p>
+        <p>الحل من شقّين. الأول: <span class="font-semibold">التضمين الكامل</span> — إذا احتاج وكيل التوليف نتائج البحث وتحليل المستندات، تحطّها حرفيًا داخل برومبته. الثاني: <span class="font-semibold">صيغة منظّمة تفصل المحتوى عن الميتاداتا</span> — كل نتيجة تُمرَّر كعنصر فيه الادّعاء (claim) والدليل (evidence) منفصلين عن بيانات المصدر (رابط، اسم مستند، رقم صفحة، تاريخ نشر). ليش؟ لأن حشر كل شيء في نص حر يذوّب الإسناد: بعد تلخيصين ما عاد أحد يعرف أي ادّعاء جاء من أي مصدر — والحفاظ على الإسناد مطلب مركزي في سيناريو البحث (ويرجع بقوة في الدومين 5).</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The rule most engineers break first: a subagent <span class="font-semibold text-red-700">does not inherit its parent's context and shares no memory between invocations</span>. Every Task call opens a clean, isolated world: no coordinator history, no other agents' findings, not even the output of a previous invocation of <span class="font-semibold">the same</span> agent. The phrase "based on the earlier findings" in a subagent prompt is a meaningless sentence in its world.</p>
+        <p>The fix has two parts. First: <span class="font-semibold">full inclusion</span> — if the synthesis agent needs the web search and document analysis outputs, you place them verbatim inside its prompt. Second: <span class="font-semibold">a structured format separating content from metadata</span> — each finding is passed as an item with the claim and evidence kept apart from source data (URL, document name, page number, publication date). Why? Because dumping everything into free text dissolves attribution: two summaries later, nobody knows which claim came from which source — and preserving attribution is central to the research scenario (and returns hard in Domain 5).</p>
+      </div>
+
+      <!-- Diagram 1: context passing flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-4">
+          <div class="flex flex-wrap items-center justify-center gap-2 text-center">
+            <div class="bg-brand-600 text-white rounded-xl px-4 py-2.5 text-xs font-mono font-bold shadow-sm">coordinator</div>
+            <div class="flex flex-col items-center px-1">
+              <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-1.5 py-0.5 mb-1">prompt = task + ALL findings + metadata</span>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-emerald-500"></i>
+            </div>
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-brand-800">synthesis subagent</div>
+          </div>
+          <div class="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <i data-lucide="x-circle" class="w-4 h-4 text-red-500 shrink-0"></i>
+            <span class="text-[11px] font-mono text-red-700">"automatic context inheritance" -- does not exist. Anything not in the prompt is invisible.</span>
+          </div>
+          <div class="bg-surface-50 border border-surface-200 rounded-xl p-3">
+            <div class="text-[10px] font-mono text-surface-500 mb-1.5">structured finding (content vs metadata):</div>
+            <div class="grid sm:grid-cols-2 gap-2">
+              <div class="bg-white border border-brand-200 rounded-lg p-2">
+                <div class="text-[10px] font-mono font-bold text-brand-700 mb-1">content</div>
+                <div class="text-[10px] font-mono text-surface-600">claim: "AI tools cut design time 40%"</div>
+                <div class="text-[10px] font-mono text-surface-600">evidence: "...survey of 1,200 studios..."</div>
+              </div>
+              <div class="bg-white border border-amber-200 rounded-lg p-2">
+                <div class="text-[10px] font-mono font-bold text-amber-700 mb-1">metadata</div>
+                <div class="text-[10px] font-mono text-surface-600">source_url, document, page: 14</div>
+                <div class="text-[10px] font-mono text-surface-600">published_date: 2025-11-02</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">السياق يوصل بطريق واحد فقط: حقنه صراحةً في البرومبت — بصيغة تفصل الادّعاء عن بيانات مصدره.</span>
+          <span class="lang-en">Context travels one way only: injected explicitly into the prompt — in a format separating each claim from its source data.</span>
+        </p>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> برومبت الوكيل الفرعي هو <span class="font-semibold">كامل عالمه</span>. صمّمه كأنك ترسل ملف عمل لمستشار خارجي ما حضر أي اجتماع: المهمة، وكل المعطيات، ومعايير القبول — كلها داخل الملف.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> a subagent's prompt is <span class="font-semibold">its entire universe</span>. Design it like a work file sent to an external consultant who attended no meetings: the task, every input, and the acceptance criteria — all inside the file.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: parallel spawning ===== -->
+    <section id="parallel" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">التوازي الصحيح: عدة نداءات Task في رد واحد</span>
+        <span class="lang-en">Parallelism done right: multiple Task calls in one response</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>للمهام المستقلة (البحث في محور الاقتصاد + البحث في محور التقنية)، الفرق بين التوازي والتتابع هو الفرق بين انتظار أبطأ وكيل وانتظار مجموعهم. الطريقة الصحيحة للتوازي: المنسّق يُصدر <span class="font-semibold">عدة نداءات Task في رد واحد</span> — كتل tool_use متجاورة في نفس الرسالة — فتنطلق كلها معًا. الطريقة الخاطئة الشائعة: نداء Task واحد في كل دور، ينتظر نتيجته، ثم يطلق التالي — نفس الشغل بزمن تراكمي.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>For independent tasks (researching the economics angle + the technology angle), parallel vs sequential is the difference between waiting for the slowest agent and waiting for the sum of all of them. The right way to parallelize: the coordinator emits <span class="font-semibold">multiple Task calls in a single response</span> — adjacent tool_use blocks in the same message — so they all launch together. The common wrong way: one Task call per turn, wait for its result, then launch the next — the same work at cumulative latency.</p>
+      </div>
+
+      <!-- Diagram 2: parallel vs sequential -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="grid sm:grid-cols-2 gap-4">
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+              <span class="text-sm font-mono font-bold text-emerald-800">GOOD — one response</span>
+            </div>
+            <div class="bg-white border border-emerald-200 rounded-lg p-2.5 space-y-1.5">
+              <div class="text-[10px] font-mono text-surface-500">coordinator response #1:</div>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="text-[10px] font-mono bg-emerald-100 border border-emerald-300 rounded px-1.5 py-1 text-emerald-900">Task(web_search)</span>
+                <span class="text-[10px] font-mono bg-emerald-100 border border-emerald-300 rounded px-1.5 py-1 text-emerald-900">Task(doc_analysis)</span>
+                <span class="text-[10px] font-mono bg-emerald-100 border border-emerald-300 rounded px-1.5 py-1 text-emerald-900">Task(data_check)</span>
+              </div>
+              <div class="flex items-center gap-1.5 text-emerald-700 pt-1">
+                <i data-lucide="timer" class="w-3.5 h-3.5"></i>
+                <span class="text-[10px] font-mono font-bold">all run concurrently -- wall time = slowest agent</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-red-50 border-2 border-red-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+              <span class="text-sm font-mono font-bold text-red-800">BAD — sequential turns</span>
+            </div>
+            <div class="bg-white border border-red-200 rounded-lg p-2.5 space-y-1.5">
+              <div class="text-[10px] font-mono text-red-900">turn 1: Task(web_search) ... wait</div>
+              <div class="text-[10px] font-mono text-red-900">turn 2: Task(doc_analysis) ... wait</div>
+              <div class="text-[10px] font-mono text-red-900">turn 3: Task(data_check) ... wait</div>
+              <div class="flex items-center gap-1.5 text-red-700 pt-1">
+                <i data-lucide="timer" class="w-3.5 h-3.5"></i>
+                <span class="text-[10px] font-mono font-bold">wall time = sum of all three</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">وكلاء مستقلون؟ أطلقهم كلهم في رد واحد. التتابع للدورات المعتمدة على نتائج بعضها فقط.</span>
+          <span class="lang-en">Independent agents? Launch them all in one response. Sequential turns are only for steps that depend on each other's results.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: goals not procedures ===== -->
+    <section id="goals" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">04</span>
+        <span class="lang-ar">أهداف لا إجراءات</span>
+        <span class="lang-en">Goals, not procedures</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>آخر مهارة في هذا الموضوع تخصّ صياغة برومبت المنسّق نفسه: حدّد <span class="font-semibold">أهداف البحث ومعايير الجودة</span> («غطِّ كل مجالات الموضوع؛ كل ادّعاء له مصدر وتاريخ؛ فضّل مصادر أحدث من 2023») بدل تعليمات إجرائية خطوة-بخطوة («أولًا ابحث بكلمة كذا، ثم افتح أول ثلاث نتائج...»). الأهداف تترك للوكلاء الفرعيين <span class="font-semibold">حرية التكيّف</span> مع ما يكتشفونه؛ الإجراءات المفصّلة تقتل هذي المرونة وتعيدك عمليًا لشجرة قرارات جامدة — نفس الفخ اللي حذّرنا منه في 1.1. وللاستكشاف المتوازي لنهجين مختلفين من أساس مشترك، الدليل يشير لإدارة الجلسات بالتفريع (fork) — تفاصيلها الكاملة في صفحة 1.7.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The last skill in this topic concerns the coordinator prompt itself: specify <span class="font-semibold">research goals and quality criteria</span> ("cover all domains of the topic; every claim carries a source and date; prefer sources newer than 2023") instead of step-by-step procedural instructions ("first search for this keyword, then open the top three results..."). Goals leave subagents <span class="font-semibold">free to adapt</span> to what they discover; detailed procedures kill that flexibility and effectively drag you back to a rigid decision tree — the same trap 1.1 warned about. And for exploring two divergent approaches from a shared baseline, the guide points to fork-based session management — fully detailed on page 1.7.</p>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-emerald-900 leading-relaxed"><span class="font-bold">نصيحة:</span> اختبر برومبت المنسّق بسؤال: «لو تغيّر الواقع في منتصف الشغل، هل تسمح الصياغة للوكيل بتعديل خطته؟» إذا كان الجواب لا، فأنت تكتب إجراءات مو أهدافًا.</div>
+          <div class="lang-en text-emerald-900 leading-relaxed"><span class="font-bold">Tip:</span> test your coordinator prompt with one question: "if reality shifts mid-task, does the wording let the agent adjust its plan?" If the answer is no, you are writing procedures, not goals.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">افتراض أن وكيل التوليف «يشوف» نتائج البحث تلقائيًا — لا؛ السياق لازم يُحقن في برومبته صراحةً وكاملًا.</span><span class="lang-en">Assuming the synthesis agent automatically "sees" the search findings — no; context must be injected into its prompt, explicitly and completely.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">إطلاق وكلاء مستقلين عبر أدوار متتابعة (Task واحدة لكل دور) — التوازي الصحيح: عدة نداءات في رد واحد.</span><span class="lang-en">Spawning independent agents across sequential turns (one Task per turn) — correct parallelism is multiple calls in one response.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">نسيان <span dir="ltr" class="font-mono">"Task"</span> من <span dir="ltr" class="font-mono">allowedTools</span> ثم لوم البرومبت لما يعجز المنسّق عن التفويض.</span><span class="lang-en">Omitting <span dir="ltr" class="font-mono">"Task"</span> from <span dir="ltr" class="font-mono">allowedTools</span>, then blaming the prompt when the coordinator can't delegate.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">تمرير النتائج كنص حر مدموج بلا فصل محتوى/ميتاداتا — يضيّع الإسناد أثناء التوليف.</span><span class="lang-en">Passing findings as merged free text with no content/metadata separation — attribution dissolves during synthesis.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="utensils" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: تذاكر المطبخ في مطعم مزدحم</span>
+              <span class="lang-en">Real-life example: kitchen tickets in a busy restaurant</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>الشيف التنفيذي (المنسّق) يستلم طلب طاولة كاملة ويوزّعه على أقسام المطبخ: الشواية، السلطات، الحلويات (الوكلاء الفرعيون). قسم الحلويات <span class="font-semibold">ما سمع كلام الزبون أبدًا</span> — كل اللي يعرفه مكتوب في التذكرة اللي وصلته: «تشيز كيك، بدون فراولة — حساسية». هذا هو تمرير السياق الصريح: لو ما كُتبت الحساسية في التذكرة، القسم ما يعرف عنها شيئًا، مهما تكلم الزبون مع الشيف قبل شوي. والتذكرة نفسها منظّمة: الصنف والتعديلات (المحتوى) في خانة، ورقم الطاولة والوقت (الميتاداتا) في خانة — عشان يعرف كل طبق يرجع لأي طاولة.</p>
+              <p>والتوازي؟ الشيف الشاطر <span class="font-semibold">يعلّق تذاكر الطاولة كلها دفعة وحدة</span> فتشتغل الأقسام الثلاثة بنفس الوقت ويطلع العشاء كاملًا سوا — هذا «عدة نداءات Task في رد واحد». الشيف الضعيف يسلّم تذكرة، ينتظر الصحن، ثم يسلّم اللي بعدها: نفس الأصناف، لكن السلطة ذابلة والزبون طفش (أدوار متتابعة). ولاحظ صيغة التذاكر: الشيف يكتب «ستيك وسط مع صوص الفلفل» — الهدف ومعيار الجودة — وما يمسك يد الطبّاخ خطوة خطوة: القسم أعرف بشغله.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>The executive chef (coordinator) takes a full table's order and distributes it across kitchen stations: grill, salads, desserts (the subagents). The dessert station <span class="font-semibold">never heard the customer speak</span> — everything it knows is written on the ticket it received: "cheesecake, no strawberries — allergy." That is explicit context passing: if the allergy isn't written on the ticket, the station knows nothing about it, no matter how long the customer chatted with the chef. And the ticket itself is structured: item and modifications (content) in one field, table number and time (metadata) in another — so every dish finds its way back to the right table.</p>
+              <p>Parallelism? A good chef <span class="font-semibold">fires all the table's tickets at once</span> so all three stations cook simultaneously and dinner arrives together — that is "multiple Task calls in one response." A weak chef hands over one ticket, waits for the plate, then hands over the next: same dishes, but the salad has wilted and the customer is fuming (sequential turns). Note the ticket's wording too: the chef writes "steak medium, pepper sauce" — the goal and quality bar — without hand-holding the cook step by step: the station knows its craft.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.3 عملية جدًا: إعدادات SDK فيها خطأ واحد قاتل، أو وكيل توليف طلعت مخرجاته «فاضية» من النتائج، أو سؤال أداء عن تسريع وكلاء مستقلين.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>ثبّت الثلاثية: <span dir="ltr" class="font-mono">Task</span> في <span dir="ltr" class="font-mono">allowedTools</span> + سياق كامل محقون في البرومبت + نداءات متعددة في رد واحد للتوازي.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>لما يسأل عن حفظ الإسناد أثناء تمرير النتائج، الجواب: صيغة منظّمة تفصل المحتوى (claim/evidence) عن الميتاداتا (مصدر/صفحة/تاريخ).</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد أي خيار يذكر «وراثة تلقائية للسياق» أو «ذاكرة مشتركة بين الوكلاء» — هذي ميزات غير موجودة.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>واستبعد برومبتات المنسّق المليئة بإجراءات خطوة-بخطوة — الدليل يطلب أهدافًا ومعايير جودة.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.3 questions are hands-on: an SDK config with one fatal mistake, a synthesis agent whose output came back "empty" of findings, or a performance question about speeding up independent agents.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Lock in the trio: <span dir="ltr" class="font-mono">Task</span> inside <span dir="ltr" class="font-mono">allowedTools</span> + full context injected in the prompt + multiple calls in one response for parallelism.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>When asked how to preserve attribution while passing findings: a structured format separating content (claim/evidence) from metadata (source/page/date).</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate any option mentioning "automatic context inheritance" or "shared agent memory" — those features do not exist.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Also eliminate coordinator prompts stuffed with step-by-step procedures — the guide demands goals and quality criteria.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">عرّفت ثلاثة وكلاء في <span dir="ltr" class="font-mono text-[0.9em]">agents</span> وكتبت برومبت منسّق ممتازًا، لكن المنسّق يكتفي بوصف الخطة ولا يفوّض أبدًا. وش أول شيء تفحصه؟</span>
+            <span class="lang-en">You defined three agents in <span dir="ltr" class="font-mono text-[0.9em]">agents</span> and wrote an excellent coordinator prompt, but the coordinator only describes the plan and never delegates. What do you check first?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">صياغة برومبت المنسّق — يحتاج أمثلة تفويض أكثر</span>
+            <span class="lang-en">The coordinator prompt wording — it needs more delegation examples</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">هل تتضمّن <span dir="ltr" class="font-mono text-[0.9em]">allowedTools</span> عند المنسّق قيمة <span dir="ltr" class="font-mono text-[0.9em]">"Task"</span>؟</span>
+            <span class="lang-en">Whether the coordinator's <span dir="ltr" class="font-mono text-[0.9em]">allowedTools</span> includes <span dir="ltr" class="font-mono text-[0.9em]">"Task"</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أوصاف الوكلاء الفرعيين — لعلها قصيرة فما تجذب المنسّق</span>
+            <span class="lang-en">The subagent descriptions — maybe they're too short to attract the coordinator</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">قيمة <span dir="ltr" class="font-mono text-[0.9em]">max_tokens</span> — قد تكون منخفضة فتمنع نداءات الأدوات</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono text-[0.9em]">max_tokens</span> — it may be too low to allow tool calls</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> إطلاق الوكلاء يتم حصريًا عبر أداة <span dir="ltr" class="font-mono">Task</span>، وشرطها أن تكون ضمن <span dir="ltr" class="font-mono">allowedTools</span>. بدونها لا تفويض — مهما تحسّن البرومبت أو الأوصاف.</span>
+              <span class="lang-en"><strong>Correct.</strong> Spawning happens exclusively through the <span dir="ltr" class="font-mono">Task</span> tool, which must be in <span dir="ltr" class="font-mono">allowedTools</span>. Without it there is no delegation — however good the prompt or descriptions.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الفحص الأول: وجود <span dir="ltr" class="font-mono">"Task"</span> في <span dir="ltr" class="font-mono">allowedTools</span>. «يصف الخطة ولا ينفّذ» عرَض كلاسيكي لقدرة تفويض مقفلة على مستوى الإعدادات، مو مشكلة برومبت ولا أوصاف ولا توكنز.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The first check: <span dir="ltr" class="font-mono">"Task"</span> present in <span dir="ltr" class="font-mono">allowedTools</span>. "Describes the plan but never acts" is the classic symptom of delegation being locked out at the config level — not a prompt, description, or token issue.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">عندك ثلاث مهام بحث مستقلة تمامًا وتبي أقل زمن إجمالي. كيف يطلقها المنسّق؟</span>
+            <span class="lang-en">You have three fully independent research tasks and want minimum wall time. How should the coordinator launch them?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">نداء <span dir="ltr" class="font-mono text-[0.9em]">Task</span> واحد في كل دور، وانتظار كل نتيجة قبل النداء التالي</span>
+            <span class="lang-en">One <span dir="ltr" class="font-mono text-[0.9em]">Task</span> call per turn, waiting for each result before the next</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">دمج المهام الثلاث في برومبت واحد لوكيل فرعي واحد كبير</span>
+            <span class="lang-en">Merge all three tasks into one prompt for a single big subagent</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">إصدار ثلاثة نداءات <span dir="ltr" class="font-mono text-[0.9em]">Task</span> في رد واحد فتنفَّذ بالتوازي</span>
+            <span class="lang-en">Emit three <span dir="ltr" class="font-mono text-[0.9em]">Task</span> calls in a single response so they execute in parallel</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">تشغيل ثلاث نسخ من المنسّق نفسه، لكل نسخة مهمة واحدة</span>
+            <span class="lang-en">Run three copies of the coordinator itself, one task each</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> التوازي في الـ Agent SDK = عدة نداءات <span dir="ltr" class="font-mono">Task</span> في <span class="font-semibold">رد واحد</span>؛ الزمن الكلي يساوي أبطأ وكيل بدل مجموعهم.</span>
+              <span class="lang-en"><strong>Correct.</strong> Parallelism in the Agent SDK = multiple <span dir="ltr" class="font-mono">Task</span> calls in <span class="font-semibold">one response</span>; wall time equals the slowest agent instead of the sum.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: ثلاثة نداءات في رد واحد. الأدوار المتتابعة تجمع الأزمنة، والدمج في وكيل واحد يميّع التركيز ويفقد التوازي، وتعدّد المنسّقين يعقّد البنية بلا داعٍ.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct launch: three calls in one response. Sequential turns add up the latencies, merging into one agent dilutes focus and loses parallelism, and multiple coordinators complicate the architecture needlessly.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">تمرّر نتائج البحث لوكيل التوليف وتبي التقرير النهائي يحافظ على إسناد كل ادّعاء لمصدره. وش أفضل صيغة تمرير؟</span>
+            <span class="lang-en">You're passing search findings to the synthesis agent and want the final report to keep every claim attributed to its source. What is the best passing format?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">فقرة نصية واحدة تلخّص كل النتائج بأسلوب سردي سلس</span>
+            <span class="lang-en">A single narrative paragraph smoothly summarizing all the findings</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">عناصر منظّمة تفصل المحتوى (الادّعاء والدليل) عن الميتاداتا (الرابط، اسم المستند، رقم الصفحة، التاريخ)</span>
+            <span class="lang-en">Structured items separating content (claim and evidence) from metadata (URL, document name, page number, date)</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">قائمة الروابط فقط، ووكيل التوليف يفتحها ويستخرج ما يحتاجه بنفسه</span>
+            <span class="lang-en">Only the list of URLs, letting the synthesis agent open them and extract what it needs</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ملخّص قصير جدًا لتوفير التوكنز، والتفاصيل تبقى عند المنسّق</span>
+            <span class="lang-en">A very short summary to save tokens, with details staying at the coordinator</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> الصيغة المنظّمة التي تفصل المحتوى عن الميتاداتا هي ما ينصّ عليه الدليل لحفظ الإسناد — التوليف يدمج الادّعاءات ويبقي خريطة «ادّعاء ← مصدر» سليمة.</span>
+              <span class="lang-en"><strong>Correct.</strong> A structured format separating content from metadata is exactly what the guide prescribes for preserving attribution — synthesis merges claims while the claim-to-source mapping stays intact.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: عناصر منظّمة تفصل المحتوى عن الميتاداتا. السرد الحر يذوّب الإسناد، وقائمة الروابط تعيد شغل البحث كاملًا (ووكيل التوليف أصلًا بلا أدوات بحث)، والملخّص المفرط يفقد التفاصيل والدلائل.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct format: structured items separating content from metadata. Free narrative dissolves attribution, a URL list redoes the search work (and the synthesis agent has no search tools anyway), and an over-compressed summary loses details and evidence.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>الإطلاق عبر أداة <span dir="ltr" class="font-mono">Task</span>، وشرطه <span dir="ltr" class="font-mono">"Task"</span> داخل <span dir="ltr" class="font-mono">allowedTools</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>كل وكيل = <span dir="ltr" class="font-mono">AgentDefinition</span>: وصف + برومبت + قيود أدوات.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>لا وراثة ولا ذاكرة مشتركة: السياق كاملًا داخل برومبت الوكيل، بصيغة تفصل المحتوى عن الميتاداتا.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>التوازي = عدة نداءات <span dir="ltr" class="font-mono">Task</span> في رد واحد.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>برومبت المنسّق: أهداف ومعايير جودة — مو إجراءات خطوة-بخطوة.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Spawning goes through the <span dir="ltr" class="font-mono">Task</span> tool, gated on <span dir="ltr" class="font-mono">"Task"</span> inside <span dir="ltr" class="font-mono">allowedTools</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Each agent = an <span dir="ltr" class="font-mono">AgentDefinition</span>: description + prompt + tool restrictions.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>No inheritance, no shared memory: full context goes inside the agent's prompt, content separated from metadata.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Parallelism = multiple <span dir="ltr" class="font-mono">Task</span> calls in one response.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Coordinator prompts: goals and quality criteria — not step-by-step procedures.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-2-orchestration.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.2 تنسيق الأنظمة متعددة الوكلاء</span><span class="lang-en">1.2 Multi-agent orchestration</span></span>
+          </span>
+        </a>
+        <a href="1-4-workflows-enforcement.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.4 سير العمل: الفرض والتسليم</span><span class="lang-en">1.4 Workflows: enforcement &amp; handoff</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

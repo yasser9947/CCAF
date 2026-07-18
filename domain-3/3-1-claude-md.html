@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.1 تدرّج CLAUDE.md والتنظيم المعياري — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.1: تدرّج ملفات CLAUDE.md (مستخدم / مشروع / مجلد)، التقسيم المعياري بـ @import و .claude/rules/، وتشخيص الإعدادات بأمر /memory.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">تدرّج CLAUDE.md</span><span class="lang-en">CLAUDE.md hierarchy</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.1</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">تدرّج CLAUDE.md والتنظيم المعياري</span>
+            <span class="lang-en">CLAUDE.md hierarchy &amp; modular organization</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">أكثر أسئلة الدومين شيوعاً تبدأ من هنا: إعداد في المستوى الغلط يعني فريقاً كاملاً يشتغل بدون معاييره.</span>
+            <span class="lang-en">The domain's most common questions start here: configuration at the wrong level means a whole team working without its standards.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">التدرّج الثلاثي: مستخدم (<span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span>) ← مشروع (<span dir="ltr" class="font-mono">.claude/CLAUDE.md</span> أو الجذر) ← مجلد فرعي</span><span class="lang-en">The three-level hierarchy: user (<span class="font-mono">~/.claude/CLAUDE.md</span>) → project (<span class="font-mono">.claude/CLAUDE.md</span> or root) → subdirectory</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">ليش مستوى المستخدم لا يصل للزملاء أبداً عبر التحكم بالإصدارات — وتشخيص هذه المشكلة</span><span class="lang-en">Why user level never reaches teammates via version control — and how to diagnose that failure</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">صيغة <span dir="ltr" class="font-mono">@import</span> لسحب ملفات معايير خارجية انتقائياً بحسب حاجة كل حزمة</span><span class="lang-en">The <span class="font-mono">@import</span> syntax for selectively pulling external standards files per package</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">تقسيم الملف المتضخّم إلى ملفات موضوعية في <span dir="ltr" class="font-mono">.claude/rules/</span> (مثل <span dir="ltr" class="font-mono">testing.md</span>)</span><span class="lang-en">Splitting a bloated file into topic files under <span class="font-mono">.claude/rules/</span> (e.g. <span class="font-mono">testing.md</span>)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100 md:col-span-2">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">استخدام <span dir="ltr" class="font-mono">/memory</span> للتحقق من ملفات الذاكرة المُحمَّلة فعلياً وتفسير السلوك غير المتسق بين الجلسات</span><span class="lang-en">Using <span class="font-mono">/memory</span> to verify which memory files are actually loaded and explain inconsistent behavior across sessions</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: hierarchy ===== -->
+    <section id="hierarchy" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="layers" class="w-5 h-5"></i></span>
+        <span class="lang-ar">ثلاثة مستويات تتراكم ولا تتصادم</span>
+        <span class="lang-en">Three levels that stack, not clash</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>ملفات <span dir="ltr" class="font-mono">CLAUDE.md</span> هي «الذاكرة» التي يقرأها Claude Code تلقائياً في بداية كل جلسة. تتدرّج على ثلاثة مستويات، وكل مستوى <strong>يُضاف</strong> إلى ما قبله — لا يستبدله:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>مستوى المستخدم</strong> — <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span>: تفضيلاتك الشخصية على جهازك أنت. <strong class="text-violet-700">خارج المستودع تماماً، فلا يتتبعه Git ولا يراه زملاؤك أبداً.</strong></li>
+          <li><strong>مستوى المشروع</strong> — <span dir="ltr" class="font-mono">.claude/CLAUDE.md</span> أو <span dir="ltr" class="font-mono">CLAUDE.md</span> في الجذر: معايير الفريق المشتركة. يدخل التحكم بالإصدارات، فيستلمه كل من يستنسخ المستودع أو يسحب آخر التغييرات.</li>
+          <li><strong>مستوى المجلد</strong> — ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل مجلد فرعي (مثل <span dir="ltr" class="font-mono">frontend/</span>): يُحمَّل عند العمل داخل ذلك المجلد فقط، فيحمل اتفاقيات تلك المنطقة تحديداً.</li>
+        </ul>
+        <p>هذا التصميم يعني أن سؤال «وين أكتب هذا الإعداد؟» له إجابة واحدة صحيحة دائماً بحسب <strong>من يجب أن يستفيد منه</strong> — وهذا بالضبط ما يختبره الدومين.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p><span class="font-mono">CLAUDE.md</span> files are the "memory" Claude Code reads automatically at the start of every session. They cascade across three levels, and each level <strong>adds to</strong> — never replaces — the ones above it:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>User level</strong> — <span class="font-mono">~/.claude/CLAUDE.md</span>: your personal preferences on your own machine. <strong class="text-violet-700">Entirely outside the repository, so Git never tracks it and teammates never see it.</strong></li>
+          <li><strong>Project level</strong> — <span class="font-mono">.claude/CLAUDE.md</span> or a root <span class="font-mono">CLAUDE.md</span>: shared team standards. Version-controlled, so everyone who clones or pulls receives it.</li>
+          <li><strong>Directory level</strong> — a <span class="font-mono">CLAUDE.md</span> inside a subdirectory (e.g. <span class="font-mono">frontend/</span>): loaded only when working within that directory, carrying that area's specific conventions.</li>
+        </ul>
+        <p>This design means "where do I write this instruction?" always has exactly one right answer, determined by <strong>who must benefit from it</strong> — which is precisely what this domain tests.</p>
+      </div>
+
+      <!-- DIAGRAM 1: layered stack -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="layers" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: تدرّج التحميل التراكمي</span><span class="lang-en">Diagram: the additive loading stack</span></div>
+        <div dir="ltr" class="space-y-2 max-w-2xl mx-auto">
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-4 flex items-center gap-3">
+            <i data-lucide="user" class="w-5 h-5 text-surface-500 shrink-0"></i>
+            <div class="min-w-0">
+              <div class="font-mono text-sm font-bold text-surface-800">USER &nbsp;~/.claude/CLAUDE.md</div>
+              <div class="font-mono text-xs text-surface-500">personal preferences — NOT in version control</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2 text-surface-400">
+            <i data-lucide="plus" class="w-4 h-4"></i><i data-lucide="arrow-down" class="w-4 h-4"></i>
+          </div>
+          <div class="rounded-xl border-2 border-violet-400 bg-violet-50 p-4 flex items-center gap-3">
+            <i data-lucide="users" class="w-5 h-5 text-violet-600 shrink-0"></i>
+            <div class="min-w-0">
+              <div class="font-mono text-sm font-bold text-violet-800">PROJECT &nbsp;CLAUDE.md / .claude/CLAUDE.md</div>
+              <div class="font-mono text-xs text-violet-600">team standards — shared via git (clone / pull)</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2 text-surface-400">
+            <i data-lucide="plus" class="w-4 h-4"></i><i data-lucide="arrow-down" class="w-4 h-4"></i>
+          </div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-4 flex items-center gap-3">
+            <i data-lucide="folder" class="w-5 h-5 text-surface-500 shrink-0"></i>
+            <div class="min-w-0">
+              <div class="font-mono text-sm font-bold text-surface-800">DIRECTORY &nbsp;frontend/CLAUDE.md</div>
+              <div class="font-mono text-xs text-surface-500">loads only when working inside frontend/</div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2 text-surface-400">
+            <i data-lucide="equal" class="w-4 h-4"></i><i data-lucide="arrow-down" class="w-4 h-4"></i>
+          </div>
+          <div class="rounded-xl bg-surface-900 text-white p-4 flex items-center gap-3">
+            <i data-lucide="brain" class="w-5 h-5 text-violet-300 shrink-0"></i>
+            <div class="font-mono text-sm">effective session memory = all three, ADDED together</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">المستويات تتراكم في سياق الجلسة — الأعمق يضيف تخصيصاً، ولا يمسح ما فوقه.</span>
+          <span class="lang-en">Levels accumulate into session context — deeper levels add specificity, never erasing what is above.</span>
+        </p>
+      </div>
+
+      <!-- Scope table -->
+      <div class="space-y-3">
+        <h3 class="font-bold text-surface-900 text-lg"><span class="lang-ar">أين يعيش كل إعداد؟</span><span class="lang-en">Where does each config live?</span></h3>
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">المستوى</th>
+                <th class="p-3 text-start font-semibold">المسار</th>
+                <th class="p-3 text-center font-semibold">يُشارَك عبر Git؟</th>
+                <th class="p-3 text-start font-semibold">متى يُحمَّل</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">مستخدم</td>
+                <td class="p-3 font-mono text-xs" dir="ltr">~/.claude/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-red-500 font-semibold">لا</span></td>
+                <td class="p-3">كل جلسة على جهازك أنت فقط</td>
+              </tr>
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">مشروع</td>
+                <td class="p-3 font-mono text-xs" dir="ltr">CLAUDE.md / .claude/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-emerald-600 font-semibold">نعم</span></td>
+                <td class="p-3">كل جلسة داخل المشروع، لكل الفريق</td>
+              </tr>
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">مجلد</td>
+                <td class="p-3 font-mono text-xs" dir="ltr">frontend/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-emerald-600 font-semibold">نعم</span></td>
+                <td class="p-3">فقط عند العمل داخل ذلك المجلد</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">Level</th>
+                <th class="p-3 text-start font-semibold">Path</th>
+                <th class="p-3 text-center font-semibold">Shared via Git?</th>
+                <th class="p-3 text-start font-semibold">When it loads</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">User</td>
+                <td class="p-3 font-mono text-xs">~/.claude/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-red-500 font-semibold">No</span></td>
+                <td class="p-3">Every session, on your machine only</td>
+              </tr>
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">Project</td>
+                <td class="p-3 font-mono text-xs">CLAUDE.md / .claude/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-emerald-600 font-semibold">Yes</span></td>
+                <td class="p-3">Every session in the project, for the whole team</td>
+              </tr>
+              <tr class="hover:bg-surface-50">
+                <td class="p-3 font-medium">Directory</td>
+                <td class="p-3 font-mono text-xs">frontend/CLAUDE.md</td>
+                <td class="p-3 text-center"><span class="text-emerald-600 font-semibold">Yes</span></td>
+                <td class="p-3">Only when working inside that directory</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed">القاعدة الذهبية: <strong>ما يجب أن يشاركه الفريق = مستوى المشروع</strong> (داخل Git). <strong>ما يخصّك أنت وحدك = مستوى المستخدم</strong> (<span dir="ltr" class="font-mono">~/.claude/</span>). الخلط بينهما هو مصدر سيناريو «كل شي يشتغل عندي، وما شي يشتغل عند الزميل الجديد».</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed">Golden rule: <strong>what the team must share = project level</strong> (in Git). <strong>What is yours alone = user level</strong> (<span class="font-mono">~/.claude/</span>). Confusing the two is the source of every "works on my machine, not for the new teammate" scenario.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: modular organization ===== -->
+    <section id="modular" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="blocks" class="w-5 h-5"></i></span>
+        <span class="lang-ar">التقسيم المعياري: @import و .claude/rules/</span>
+        <span class="lang-en">Modular organization: @import &amp; .claude/rules/</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>مع نمو المشروع، ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> الواحد يتحوّل بسرعة إلى وحش من 2,000 سطر لا أحد يجرؤ على تعديله. عندك أداتان للتقسيم:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong><span dir="ltr" class="font-mono">@import</span></strong>: يسحب ملفات خارجية داخل <span dir="ltr" class="font-mono">CLAUDE.md</span>. قوته في <strong>الانتقائية</strong> — في الـ monorepo، كل حزمة تستورد ملفات المعايير التي تخصّها فقط، بناءً على معرفة مشرف الحزمة بمجاله، بدل تحميل كل شيء للجميع.</li>
+          <li><strong><span dir="ltr" class="font-mono">.claude/rules/</span></strong>: مجلد ملفات موضوعية مركّزة (<span dir="ltr" class="font-mono">testing.md</span>، <span dir="ltr" class="font-mono">api-conventions.md</span>، <span dir="ltr" class="font-mono">deployment.md</span>) بديلاً عن الملف الواحد المتضخّم. كل ملف مسؤول عن موضوع واحد، فيسهل تعديله ومراجعته في PR مستقل.</li>
+        </ul>
+        <p>الفرق الجوهري بينهما: <span dir="ltr" class="font-mono">@import</span> تركيبٌ <em>داخل</em> ملف يحدد ما يُسحب له، بينما <span dir="ltr" class="font-mono">.claude/rules/</span> بنية <em>مجلد</em> تنظّم القواعد بالموضوع — وفي الدرس <a href="3-3-path-rules.html" class="text-violet-700 underline decoration-violet-300 hover:decoration-violet-600">3.3</a> بتشوف كيف تكتسب ملفات rules قوة إضافية بترويسة <span dir="ltr" class="font-mono">paths</span>.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>As a project grows, a single <span class="font-mono">CLAUDE.md</span> quickly becomes a 2,000-line monster nobody dares touch. You have two splitting tools:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong><span class="font-mono">@import</span></strong>: pulls external files into <span class="font-mono">CLAUDE.md</span>. Its power is <strong>selectivity</strong> — in a monorepo, each package imports only the standards files relevant to it, based on the maintainer's domain knowledge, instead of loading everything for everyone.</li>
+          <li><strong><span class="font-mono">.claude/rules/</span></strong>: a directory of focused topic files (<span class="font-mono">testing.md</span>, <span class="font-mono">api-conventions.md</span>, <span class="font-mono">deployment.md</span>) replacing one bloated file. Each file owns one topic, so it is easy to edit and review in its own PR.</li>
+        </ul>
+        <p>The core difference: <span class="font-mono">@import</span> is syntax <em>inside</em> a file choosing what gets pulled in, while <span class="font-mono">.claude/rules/</span> is a <em>directory</em> structure organizing rules by topic — and in lesson <a href="3-3-path-rules.html" class="text-violet-700 underline decoration-violet-300 hover:decoration-violet-600">3.3</a> you will see rules files gain extra power through <span class="font-mono">paths</span> frontmatter.</p>
+      </div>
+
+      <!-- DIAGRAM 2: @import modular tree -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="git-merge" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: شجرة @import الانتقائية</span><span class="lang-en">Diagram: the selective @import tree</span></div>
+        <div dir="ltr" class="max-w-2xl mx-auto">
+          <div class="rounded-xl border-2 border-violet-400 bg-violet-50 p-4 flex items-center gap-3">
+            <i data-lucide="file-text" class="w-5 h-5 text-violet-600 shrink-0"></i>
+            <div>
+              <div class="font-mono text-sm font-bold text-violet-800">payments/CLAUDE.md</div>
+              <div class="font-mono text-xs text-violet-600">small core + selective @imports</div>
+            </div>
+          </div>
+          <div class="ml-6 border-l-2 border-violet-300 mt-2 space-y-2 pb-1">
+            <div class="relative pl-6 pt-1">
+              <span class="absolute left-0 top-1/2 w-6 h-0.5 bg-violet-300"></span>
+              <div class="rounded-lg border border-surface-200 bg-surface-50 p-3 flex items-center gap-2">
+                <i data-lucide="corner-down-right" class="w-4 h-4 text-violet-500 shrink-0"></i>
+                <span class="font-mono text-xs text-surface-700">@./.claude/rules/api-conventions.md</span>
+              </div>
+            </div>
+            <div class="relative pl-6">
+              <span class="absolute left-0 top-1/2 w-6 h-0.5 bg-violet-300"></span>
+              <div class="rounded-lg border border-surface-200 bg-surface-50 p-3 flex items-center gap-2">
+                <i data-lucide="corner-down-right" class="w-4 h-4 text-violet-500 shrink-0"></i>
+                <span class="font-mono text-xs text-surface-700">@./docs/error-handling-standards.md</span>
+              </div>
+            </div>
+            <div class="relative pl-6">
+              <span class="absolute left-0 top-1/2 w-6 h-0.5 bg-violet-300"></span>
+              <div class="rounded-lg border border-surface-200 bg-surface-50 p-3 flex items-center gap-2">
+                <i data-lucide="corner-down-right" class="w-4 h-4 text-violet-500 shrink-0"></i>
+                <span class="font-mono text-xs text-surface-700">@../shared/logging-standards.md</span>
+              </div>
+            </div>
+            <div class="relative pl-6 pb-1">
+              <span class="absolute left-0 top-1/2 w-6 h-0.5 bg-surface-200"></span>
+              <div class="rounded-lg border border-dashed border-surface-300 bg-white p-3 flex items-center gap-2 opacity-60">
+                <i data-lucide="x" class="w-4 h-4 text-surface-400 shrink-0"></i>
+                <span class="font-mono text-xs text-surface-400 line-through">frontend-styling.md — not imported here</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">كل حزمة تستورد ما يخصّها فقط — ملفات الواجهة لا تُحمَّل في حزمة المدفوعات.</span>
+          <span class="lang-en">Each package imports only what concerns it — frontend files never load in the payments package.</span>
+        </p>
+      </div>
+
+      <!-- Code: hierarchy tree -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">البنية الكاملة على القرص</span><span class="lang-en">The full layout on disk</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-bash !bg-surface-900 scrollbar-thin"><code class="language-bash">~/.claude/CLAUDE.md             # USER level  -> personal, NOT in version control
+
+my-project/                     # ---- everything below is shared via git ----
+├── CLAUDE.md                   # PROJECT level -> team standards, always loaded
+├── .claude/
+│   ├── rules/                  # focused topic files (see lesson 3.3 for paths:)
+│   │   ├── testing.md
+│   │   ├── api-conventions.md
+│   │   └── deployment.md
+│   ├── commands/               # project slash commands (lesson 3.2)
+│   └── skills/                 # project skills (lesson 3.2)
+├── frontend/
+│   └── CLAUDE.md               # DIRECTORY level -> loads inside frontend/
+└── backend/
+    └── CLAUDE.md               # DIRECTORY level -> loads inside backend/</code></pre>
+        </div>
+      </div>
+
+      <!-- Code: modular CLAUDE.md -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: CLAUDE.md معياري بـ @import</span><span class="lang-en">Example: modular CLAUDE.md with @import</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown"># Payments Service — Project Standards
+
+## Team-wide rules (always apply)
+- TypeScript strict mode across every package.
+- Never commit directly to `main`; open a PR.
+- Money is always integer cents, never floats.
+
+## Modular imports (pull in only what this package needs)
+@./.claude/rules/api-conventions.md
+@./docs/error-handling-standards.md
+@../shared/logging-standards.md
+
+# Each maintainer imports the standards relevant to their domain,
+# keeping this file small instead of a 2,000-line monolith.</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">لما يقول السؤال «الأكثر قابلية للصيانة / most maintainable» عن معايير كثيرة متنوعة، فالإجابة نادراً ما تكون «ملف واحد كبير» — التقسيم بـ <span dir="ltr" class="font-mono">@import</span> أو <span dir="ltr" class="font-mono">.claude/rules/</span> هو النمط المكافأ.</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">When a question says "most maintainable" about many varied standards, the answer is rarely "one big file" — splitting via <span class="font-mono">@import</span> or <span class="font-mono">.claude/rules/</span> is the rewarded pattern.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: diagnosis ===== -->
+    <section id="diagnosis" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="stethoscope" class="w-5 h-5"></i></span>
+        <span class="lang-ar">التشخيص: /memory وأعطال التدرّج</span>
+        <span class="lang-en">Diagnosis: /memory &amp; hierarchy failures</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>عطلان يتكرران في الأسئلة (وفي الواقع):</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>«الزميل الجديد ما تطبّق أداته المعايير»</strong>: التشخيص الأول دائماً — هل المعايير في <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> (مستوى المستخدم)؟ إذا نعم فهي ببساطة غير موجودة في المستودع أصلاً. العلاج: انقلها لمستوى المشروع. لا الملف تالف، ولا يحتاج <span dir="ltr" class="font-mono">/clear</span>، ولا مشكلة صلاحيات.</li>
+          <li><strong>«السلوك غير متسق بين الجلسات أو الأجهزة»</strong>: شغّل <span dir="ltr" class="font-mono">/memory</span> لعرض ملفات الذاكرة المُحمَّلة فعلاً في هذه الجلسة. غالباً بتكتشف أن جلسةً تحمّل ملف مجلد فرعي وجلسةً أخرى لا، أو أن ملفاً شخصياً يضيف تعليمات عند مطوّر دون الآخر.</li>
+        </ul>
+        <p>انتبه: <span dir="ltr" class="font-mono">/memory</span> أداة <strong>عرض وتشخيص</strong> — تريك ما هو محمَّل، ولا «تزامن» شيئاً بين الأجهزة ولا تصلح شيئاً بنفسها.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>Two failures recur in questions (and in real life):</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>"The new teammate's tool does not apply the standards"</strong>: the first diagnostic is always — are the standards in <span class="font-mono">~/.claude/CLAUDE.md</span> (user level)? If so, they simply do not exist in the repository at all. The cure: move them to project level. The file is not corrupt, <span class="font-mono">/clear</span> will not help, and it is not a permissions issue.</li>
+          <li><strong>"Behavior is inconsistent across sessions or machines"</strong>: run <span class="font-mono">/memory</span> to display which memory files are actually loaded in this session. You will often find one session loading a subdirectory file another does not, or a personal file adding instructions for one developer only.</li>
+        </ul>
+        <p>Note carefully: <span class="font-mono">/memory</span> is a <strong>viewer and diagnostic</strong> — it shows what is loaded; it never "syncs" anything across machines and fixes nothing by itself.</p>
+      </div>
+
+      <!-- Warning -->
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></div>
+          <div class="lang-ar text-amber-900/90 text-sm leading-relaxed">لا تخلط بين <span dir="ltr" class="font-mono">/memory</span> (يعرض ملفات الذاكرة المُحمَّلة) و<span dir="ltr" class="font-mono">/compact</span> (يضغط سياق المحادثة الطويلة). في أسئلة التشخيص، <span dir="ltr" class="font-mono">/compact</span> إجابة فخ لأنه لا علاقة له بالإعدادات إطلاقاً.</div>
+          <div class="lang-en text-amber-900/90 text-sm leading-relaxed">Do not confuse <span class="font-mono">/memory</span> (shows loaded memory files) with <span class="font-mono">/compact</span> (compresses long conversation context). In diagnosis questions, <span class="font-mono">/compact</span> is a trap answer with no relation to configuration at all.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «الزميل الجديد ما يستلم المعايير → الملف تالف / يحتاج إعادة تثبيت / شغّل <span dir="ltr" class="font-mono">/clear</span>». <strong class="text-emerald-700">الصح:</strong> المعايير في مستوى المستخدم الذي لا يتتبعه Git — انقلها إلى مستوى المشروع.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "new teammate is not getting the standards → the file is corrupt / reinstall / run <span class="font-mono">/clear</span>." <strong class="text-emerald-700">Reality:</strong> the standards sit at user level, which Git never tracks — move them to project level.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> اعتبار <span dir="ltr" class="font-mono">/memory</span> أمر «مزامنة» ينقل الذاكرة بين الأجهزة. <strong class="text-emerald-700">الصح:</strong> هو عارض تشخيصي فقط — يريك أي ملفات محمَّلة الآن.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> treating <span class="font-mono">/memory</span> as a "sync" command that moves memory between machines. <strong class="text-emerald-700">Reality:</strong> it is a diagnostic viewer only — it shows which files are loaded right now.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> حشر كل المعايير في ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> واحد عملاق «ليكون كل شيء في مكان واحد». <strong class="text-emerald-700">الصح:</strong> قسّم بـ <span dir="ltr" class="font-mono">@import</span> أو <span dir="ltr" class="font-mono">.claude/rules/</span> لتبقى المعايير قابلة للصيانة والمراجعة.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> cramming every standard into one giant <span class="font-mono">CLAUDE.md</span> "so everything is in one place." <strong class="text-emerald-700">Reality:</strong> split with <span class="font-mono">@import</span> or <span class="font-mono">.claude/rules/</span> so standards stay maintainable and reviewable.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="building-2" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: المكتب الهندسي</span><span class="lang-en">Real-life example: the engineering office</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>تخيّل مكتباً هندسياً. <span dir="ltr" class="font-mono">CLAUDE.md</span> في مستوى المشروع هو <strong>دليل المعايير المعلّق على جدار قاعة المشروع</strong>: أي مهندس ينضم يشوفه فوراً ويلتزم به — لأنه جزء من القاعة نفسها (المستودع). أما <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> فهو <strong>دفتر ملاحظاتك الشخصي في دُرج مكتبك</strong>: مفيد لك، لكن المهندس الجديد ما يعرف بوجوده أصلاً.</p>
+              <p>ولما يكبر دليل المعايير، ما يصير كتاباً واحداً بألف صفحة — يتوزّع إلى <strong>فصول مستقلة</strong> (سلامة، كهرباء، تشطيبات = <span dir="ltr" class="font-mono">.claude/rules/</span>)، وكل قسم في المكتب <strong>يستعير الفصول التي تخصّه فقط</strong> (<span dir="ltr" class="font-mono">@import</span>). وسؤال «أي فصول موجودة على طاولتك الآن؟» يجاوبه أمين المكتبة: <span dir="ltr" class="font-mono">/memory</span>.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>Picture an engineering office. A project-level <span class="font-mono">CLAUDE.md</span> is the <strong>standards manual pinned to the project-room wall</strong>: any engineer who joins sees it immediately and follows it — because it belongs to the room itself (the repository). But <span class="font-mono">~/.claude/CLAUDE.md</span> is <strong>your personal notebook in your desk drawer</strong>: useful to you, invisible to the new engineer who never knew it existed.</p>
+              <p>And when the manual grows, it does not become one thousand-page book — it splits into <strong>independent chapters</strong> (safety, electrical, finishing = <span class="font-mono">.claude/rules/</span>), and each department <strong>borrows only the chapters that concern it</strong> (<span class="font-mono">@import</span>). As for "which chapters are on your desk right now?" — the librarian answers that: <span class="font-mono">/memory</span>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">سيناريو «زميل جديد استنسخ المستودع والمعايير لا تعمل عنده» — والمطلوب تشخيص مستوى الإعداد.</span><span class="lang-en">A "new teammate cloned the repo but the standards don't apply" scenario — asking you to diagnose the config level.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">سؤال «الأكثر قابلية للصيانة» لتنظيم معايير monorepo متعددة الحزم — الجواب <span dir="ltr" class="font-mono">@import</span> الانتقائي أو <span dir="ltr" class="font-mono">.claude/rules/</span>.</span><span class="lang-en">A "most maintainable" question about organizing multi-package monorepo standards — answered by selective <span class="font-mono">@import</span> or <span class="font-mono">.claude/rules/</span>.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">سلوك غير متسق بين الجلسات — الخطوة الأولى <span dir="ltr" class="font-mono">/memory</span> للتحقق من المُحمَّل.</span><span class="lang-en">Inconsistent behavior across sessions — first step is <span class="font-mono">/memory</span> to verify what is loaded.</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«شغّل <span dir="ltr" class="font-mono">/memory</span> ليزامن» أو «شغّل <span dir="ltr" class="font-mono">/compact</span> ليعيد التحميل» — الأول عارض والثاني ضاغط سياق.</span><span class="lang-en">"Run <span class="font-mono">/memory</span> to sync" or "run <span class="font-mono">/compact</span> to reload" — one is a viewer, the other compresses context.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«انسخ الملف يدوياً لكل زميل» — يشتغل مرة ثم ينحرف؛ ليس حلاً جذرياً يُدار بالإصدارات.</span><span class="lang-en">"Copy the file manually to each teammate" — works once then drifts; not a version-controlled root fix.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«الملف تالف / أعد التثبيت» — لا يوجد عطل؛ إنها مسألة نطاق مشاركة فقط.</span><span class="lang-en">"The file is corrupt / reinstall" — nothing is broken; it is purely a sharing-scope issue.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">مطوّرة تفضّل أن يشرح لها Claude Code كل تعديل بإيجاز شديد قبل تنفيذه — تفضيل شخصي لا تريد فرضه على بقية الفريق في أي مشروع. أين تكتب هذه التعليمات؟</span>
+            <span class="lang-en">A developer prefers Claude Code to explain each change very briefly before executing — a personal preference she does not want imposed on the rest of the team in any project. Where should she write this instruction?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">CLAUDE.md</span> بجذر المشروع</span>
+            <span class="lang-en">In the project root <span class="font-mono">CLAUDE.md</span></span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span> على جهازها</span>
+            <span class="lang-en">In <span class="font-mono">~/.claude/CLAUDE.md</span> on her machine</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">CLAUDE.md</span> داخل كل مجلد فرعي تعمل عليه</span>
+            <span class="lang-en">In a <span class="font-mono">CLAUDE.md</span> inside every subdirectory she works on</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">في ملف داخل <span dir="ltr" class="font-mono">.claude/rules/</span> بالمستودع</span>
+            <span class="lang-en">In a file under <span class="font-mono">.claude/rules/</span> in the repository</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. تفضيل شخصي عابر للمشاريع = مستوى المستخدم <span dir="ltr" class="font-mono">~/.claude/CLAUDE.md</span>: يعمل في كل جلساتها ولا يدخل أي مستودع فلا يفرض على أحد. الخيارات الأخرى كلها داخل المستودع فتصل للفريق كاملاً.</div>
+            <div class="lang-en text-emerald-900">Correct. A cross-project personal preference = user level <span class="font-mono">~/.claude/CLAUDE.md</span>: it applies in all her sessions and never enters any repository, so it is imposed on nobody. Every other option lives in the repo and reaches the whole team.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. القاعدة تعمل بالاتجاهين: معايير الفريق → مستوى المشروع، والتفضيل الشخصي → مستوى المستخدم. أي مكان داخل المستودع (A، C، D) سيُشارَك عبر Git ويفرض تفضيلها على الجميع.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. The rule cuts both ways: team standards → project level, personal preference → user level. Any location inside the repository (A, C, D) is shared via Git and forces her preference on everyone.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">ملف <span dir="ltr" class="font-mono">CLAUDE.md</span> في مشروعكم وصل إلى 2,000 سطر تخلط معايير الاختبار باتفاقيات الـ API بإجراءات النشر، وصار كل تعديل عليه مغامرة. ما الحل الأكثر قابلية للصيانة؟</span>
+            <span class="lang-en">Your project's <span class="font-mono">CLAUDE.md</span> has hit 2,000 lines mixing testing standards, API conventions, and deployment procedures, and every edit has become an adventure. What is the most maintainable fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أعد ترتيب الملف نفسه بعناوين أوضح وفهرس في أوله</span>
+            <span class="lang-en">Reorganize the same file with clearer headers and a table of contents</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">انسخ المحتوى إلى <span dir="ltr" class="font-mono">CLAUDE.md</span> في كل مجلد فرعي</span>
+            <span class="lang-en">Duplicate the content into a <span class="font-mono">CLAUDE.md</span> in every subdirectory</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">قسّمه إلى ملفات موضوعية مركّزة في <span dir="ltr" class="font-mono">.claude/rules/</span> مثل <span dir="ltr" class="font-mono">testing.md</span> و<span dir="ltr" class="font-mono">api-conventions.md</span> و<span dir="ltr" class="font-mono">deployment.md</span></span>
+            <span class="lang-en">Split it into focused topic files under <span class="font-mono">.claude/rules/</span> such as <span class="font-mono">testing.md</span>, <span class="font-mono">api-conventions.md</span>, and <span class="font-mono">deployment.md</span></span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">حوّل كل قسم إلى مهارة تُستدعى عند الحاجة</span>
+            <span class="lang-en">Convert each section into a skill invoked on demand</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. <span dir="ltr" class="font-mono">.claude/rules/</span> هو البديل المصمَّم للملف المتضخّم: كل موضوع في ملف مستقل يسهل تعديله ومراجعته. إعادة الترتيب (A) تجميل لا يعالج التضخم، والنسخ (B) يضاعف مشكلة الصيانة، والمهارات (D) للاستدعاء عند الطلب — لكن هذه معايير دائمة يجب أن تبقى محمَّلة تلقائياً.</div>
+            <div class="lang-en text-emerald-900">Correct. <span class="font-mono">.claude/rules/</span> is the designed alternative to a bloated file: each topic in its own file, easy to edit and review. Reorganizing (A) is cosmetic and leaves the bloat, duplicating (B) multiplies the maintenance problem, and skills (D) are for on-demand invocation — but these are always-on standards that must stay automatically loaded.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. الدليل الرسمي يذكر هذا النمط حرفياً: تقسيم <span dir="ltr" class="font-mono">CLAUDE.md</span> الكبير إلى ملفات موضوعية في <span dir="ltr" class="font-mono">.claude/rules/</span>. المعايير الدائمة لا تتحول لمهارات (تُستدعى يدوياً)، والنسخ المكرر ينحرف مع الوقت.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. The official guide names this pattern explicitly: splitting a large <span class="font-mono">CLAUDE.md</span> into topic files under <span class="font-mono">.claude/rules/</span>. Always-on standards should not become skills (manually invoked), and duplicated copies drift over time.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">يشتكي مطوّر أن Claude Code يطبّق معايير الاختبار في بعض الجلسات ويتجاهلها في أخرى داخل نفس المشروع. ما الخطوة التشخيصية الأولى؟</span>
+            <span class="lang-en">A developer complains Claude Code applies the testing standards in some sessions and ignores them in others within the same project. What is the first diagnostic step?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">شغّل <span dir="ltr" class="font-mono">/compact</span> في بداية كل جلسة لضمان التحميل</span>
+            <span class="lang-en">Run <span class="font-mono">/compact</span> at the start of every session to force loading</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أعد كتابة المعايير بصياغة أكثر حزماً وتكراراً</span>
+            <span class="lang-en">Rewrite the standards with firmer, more repetitive wording</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">احذف مجلد <span dir="ltr" class="font-mono">~/.claude/</span> وأعد تثبيت Claude Code</span>
+            <span class="lang-en">Delete <span class="font-mono">~/.claude/</span> and reinstall Claude Code</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">شغّل <span dir="ltr" class="font-mono">/memory</span> في الجلستين وقارن ملفات الذاكرة المُحمَّلة فعلياً</span>
+            <span class="lang-en">Run <span class="font-mono">/memory</span> in both sessions and compare which memory files are actually loaded</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. <span dir="ltr" class="font-mono">/memory</span> هو أداة التشخيص المخصصة لهذا بالضبط: يعرض الملفات المُحمَّلة في الجلسة الحالية، فيكشف فرقاً مثل جلسة بدأت داخل مجلد فرعي فحمّلت ملفه وأخرى لا. الضغط (<span dir="ltr" class="font-mono">/compact</span>) وإعادة الصياغة وإعادة التثبيت كلها تخمين قبل التشخيص.</div>
+            <div class="lang-en text-emerald-900">Correct. <span class="font-mono">/memory</span> is the diagnostic built for exactly this: it lists the files loaded in the current session, revealing differences such as one session starting inside a subdirectory (loading its file) while another did not. Compacting, rewording, and reinstalling are all guesses made before diagnosing.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>D</strong>. «سلوك غير متسق بين الجلسات» هي الإشارة المعيارية لأمر <span dir="ltr" class="font-mono">/memory</span>: تحقّق أولاً أي ملفات ذاكرة محمَّلة، ثم عالج السبب. لا تقفز لحلول عمياء قبل معرفة ما هو محمَّل فعلاً.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>D</strong>. "Inconsistent behavior across sessions" is the canonical cue for <span class="font-mono">/memory</span>: first verify which memory files are loaded, then fix the cause. Never jump to blind fixes before knowing what is actually loaded.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">ثلاثة مستويات <strong>تتراكم</strong>: مستخدم (<span dir="ltr" class="font-mono">~/.claude/</span>) ← مشروع (الجذر أو <span dir="ltr" class="font-mono">.claude/</span>) ← مجلد فرعي.</span><span class="lang-en">Three levels <strong>stack</strong>: user (<span class="font-mono">~/.claude/</span>) → project (root or <span class="font-mono">.claude/</span>) → subdirectory.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">مستوى المستخدم لا يدخل Git أبداً — معايير الفريق تعيش في مستوى المشروع حصراً.</span><span class="lang-en">User level never enters Git — team standards live at project level, full stop.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">@import</span> = سحب انتقائي لكل حزمة؛ <span dir="ltr" class="font-mono">.claude/rules/</span> = ملفات موضوعية بدل الملف المتضخّم.</span><span class="lang-en"><span class="font-mono">@import</span> = selective pull per package; <span class="font-mono">.claude/rules/</span> = topic files instead of a monolith.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">/memory</span> يعرض المُحمَّل فعلياً — تشخيص، لا مزامنة ولا إصلاح.</span><span class="lang-en"><span class="font-mono">/memory</span> shows what is actually loaded — a diagnostic, not a sync or a fix.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">«يشتغل عندي وما يشتغل عند الزميل» = المعايير في المستوى الغلط، مو عطل تقني.</span><span class="lang-en">"Works for me, not for the teammate" = standards at the wrong level, not a technical fault.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="index.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">نظرة عامة على الدومين 3</span>
+            <span class="lang-en">Domain 3 overview</span>
+          </div>
+        </div>
+      </a>
+      <a href="3-2-commands-skills.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.2 الأوامر المخصّصة والمهارات</span>
+            <span class="lang-en">3.2 Custom commands &amp; skills</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدومين 2: تصميم الأدوات وتكامل MCP — CCAF مرجع</title>
+  <meta name="description" content="نظرة عامة على الدومين الثاني من شهادة CCAF: شجرة مواضيع تصميم واجهات الأدوات، استجابات الأخطاء المنظّمة، توزيع الأدوات وtool_choice، دمج خوادم MCP، والأدوات المدمجة — مع اختبار قصير.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-14 sm:py-20 space-y-6">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></span>
+      </nav>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-xs font-mono px-3 py-1 rounded-full">Tools + MCP</span>
+        <span class="bg-white/10 border border-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          <span class="lang-ar">18% من المحتوى المُقيّم</span><span class="lang-en">18% of scored content</span>
+        </span>
+        <span class="bg-white/10 border border-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full font-mono">
+          <span class="lang-ar">~11 سؤال من 60</span><span class="lang-en">~11 of 60 questions</span>
+        </span>
+      </div>
+
+      <div class="space-y-3">
+        <h1 class="text-3xl sm:text-5xl font-bold leading-tight text-balance">
+          <span class="lang-ar">تصميم الأدوات وتكامل MCP</span>
+          <span class="lang-en">Tool Design &amp; MCP Integration</span>
+        </h1>
+        <p class="text-lg text-emerald-100/90 max-w-3xl leading-relaxed">
+          <span class="lang-ar">خمسة مواضيع تبني عندك حاسّة "عقد الواجهة النظيف": وصف أداة يوجّه النموذج صح، خطأ منظّم يقود قرار التعافي، توزيع أدوات بمبدأ أقل صلاحية، خوادم <span dir="ltr" class="font-mono">MCP</span> بالنطاق الصحيح، وإتقان أدوات <span dir="ltr" class="font-mono">Claude Code</span> المدمجة.</span>
+          <span class="lang-en">Five topics that build your "clean interface contract" instinct: descriptions that route the model correctly, structured errors that drive recovery, least-privilege tool distribution, MCP servers at the right scope, and mastery of Claude Code's built-in tools.</span>
+        </p>
+      </div>
+
+      <!-- scenario chips -->
+      <div class="flex flex-wrap items-center gap-2 pt-2">
+        <span class="text-xs text-emerald-200/80 uppercase tracking-wide font-semibold me-1"><span class="lang-ar">السيناريوهات اللي تختبره:</span><span class="lang-en">Tested in scenarios:</span></span>
+        <span class="bg-black/20 text-emerald-50 text-xs px-3 py-1.5 rounded-lg border border-white/10"><span class="font-mono">S1</span> <span class="lang-ar">دعم العملاء</span><span class="lang-en">Customer Support</span></span>
+        <span class="bg-black/20 text-emerald-50 text-xs px-3 py-1.5 rounded-lg border border-white/10"><span class="font-mono">S3</span> <span class="lang-ar">بحث متعدد الوكلاء</span><span class="lang-en">Multi-Agent Research</span></span>
+        <span class="bg-black/20 text-emerald-50 text-xs px-3 py-1.5 rounded-lg border border-white/10"><span class="font-mono">S4</span> <span class="lang-ar">إنتاجية المطوّرين</span><span class="lang-en">Developer Productivity</span></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== DOMAIN SUMMARY ===== -->
+    <section id="summary" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="scan-search" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">ملخص الدومين</span><span class="lang-en">Domain summary</span>
+        </h2>
+      </div>
+      <div class="lang-ar space-y-4 text-[15px] leading-loose">
+        <p>هذا الدومين يقيس الطبقة اللي تربط تفكير النموذج بأنظمتك الخلفية: <strong>الأداة</strong>. من الوصف اللي يقرأه النموذج قبل ما يختار الأداة، إلى شكل الخطأ اللي ترجعه الأداة لما تفشل، إلى قرار "أي وكيل يمسك أي أداة"، وصولًا لدمج خوادم <span dir="ltr" class="font-mono">MCP</span> بالنطاق الصحيح وبدون تسريب أسرار — وأخيرًا اختيار الأداة المدمجة الصح (<span dir="ltr" class="font-mono">Grep</span> · <span dir="ltr" class="font-mono">Glob</span> · <span dir="ltr" class="font-mono">Read</span> · <span dir="ltr" class="font-mono">Write</span> · <span dir="ltr" class="font-mono">Edit</span>) في استكشاف قواعد الكود. وزنه 18% أي قرابة 11 سؤالًا من 60، وكل أسئلته سيناريوهات: نظام شغّال فيه عيب تصميم صغير، والمطلوب منك تحديد الإصلاح الصحيح.</p>
+        <p>العقلية اللي يكافئها الدومين: <strong>عالج السبب الجذري بأقل تدخل</strong>. وسّع الوصف قبل ما تبني طبقة توجيه، صنّف الخطأ قبل ما تعيد المحاولة، أعطِ كل وكيل أدوات دوره فقط (مبدأ أقل صلاحية)، واستخدم خادم المجتمع قبل ما تبني خادمًا مخصّصًا. القرارات هنا صغيرة لكنها عالية الرافعة — واجهة واضحة وعقد خطأ منظّم يصلحان أكثر مما تصلحه أي معمارية ذكية فوق واجهة غامضة.</p>
+      </div>
+      <div class="lang-en space-y-4 text-[15px] leading-loose">
+        <p>This domain measures the layer that connects the model's reasoning to your backend systems: <strong>the tool</strong>. From the description the model reads before selecting a tool, to the shape of the error a tool returns when it fails, to the decision of which agent holds which tool, through integrating <span class="font-mono">MCP</span> servers at the right scope without leaking secrets — and finally choosing the right built-in tool (<span class="font-mono">Grep</span> · <span class="font-mono">Glob</span> · <span class="font-mono">Read</span> · <span class="font-mono">Write</span> · <span class="font-mono">Edit</span>) when exploring codebases. It weighs 18%, roughly 11 of 60 questions, and every question is a scenario: a working system with a small design flaw, and you must identify the correct fix.</p>
+        <p>The mindset it rewards: <strong>fix the root cause with the smallest intervention</strong>. Expand the description before building a routing layer, classify the error before retrying, give each agent only its role's tools (least privilege), and use a community server before building a custom one. The decisions here are small but high-leverage — a clear interface and a structured error contract fix more than any clever architecture built on top of a vague one.</p>
+      </div>
+    </section>
+
+    <!-- ===== TOPIC TREE ===== -->
+    <section id="topic-tree" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="network" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">شجرة المواضيع</span><span class="lang-en">Topic tree</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">خمسة مواضيع — كل موضوع صفحة درس كاملة</span><span class="lang-en">Five topics — each is a full lesson page</span></p>
+        </div>
+      </div>
+
+      <!-- root node -->
+      <div class="bg-gradient-to-bl from-emerald-800 to-emerald-950 text-white rounded-2xl p-6 flex items-center gap-4 shadow-sm">
+        <span class="bg-white/10 border border-white/20 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="wrench" class="w-6 h-6 text-emerald-300"></i></span>
+        <div>
+          <p class="font-mono text-emerald-300 text-xs mb-0.5">Domain 2 — 18%</p>
+          <p class="font-bold text-lg leading-snug"><span class="lang-ar">تصميم الأدوات وتكامل MCP</span><span class="lang-en">Tool Design &amp; MCP Integration</span></p>
+          <p class="text-sm text-emerald-100/80"><span class="lang-ar">5 مواضيع × درس مركّز = عقد واجهة نظيف</span><span class="lang-en">5 topics x one focused lesson = a clean interface contract</span></p>
+        </div>
+      </div>
+
+      <!-- trunk stub from root -->
+      <div class="ms-8 w-0.5 h-6 bg-emerald-300"></div>
+
+      <!-- branches -->
+      <div class="!mt-0">
+        <!-- 2.1 -->
+        <div class="relative ps-16 pb-5">
+          <span class="absolute start-8 top-0 bottom-0 w-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <span class="absolute start-8 top-10 w-8 h-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <a href="2-1-tool-descriptions.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="bg-emerald-600 text-white font-mono text-sm font-bold px-2.5 py-1.5 rounded-lg shrink-0">2.1</span>
+              <div class="space-y-2 min-w-0">
+                <p class="font-bold text-surface-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                  <span class="lang-ar">تصميم واجهات الأدوات: الأوصاف والحدود</span>
+                  <span class="lang-en">Tool interfaces: descriptions &amp; boundaries</span>
+                </p>
+                <p class="text-sm text-surface-600 leading-relaxed">
+                  <span class="lang-ar">تكتب وصفًا يوجّه النموذج للأداة الصح من أول مرة، وتقسّم الأدوات العامة الغامضة.</span>
+                  <span class="lang-en">Write descriptions that route the model correctly first time, and split vague generic tools.</span>
+                </p>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">description</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">input formats</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">boundaries</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">misrouting</span>
+                </div>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-ar"></i>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-en"></i>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2.2 -->
+        <div class="relative ps-16 pb-5">
+          <span class="absolute start-8 top-0 bottom-0 w-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <span class="absolute start-8 top-10 w-8 h-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <a href="2-2-error-responses.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="bg-emerald-600 text-white font-mono text-sm font-bold px-2.5 py-1.5 rounded-lg shrink-0">2.2</span>
+              <div class="space-y-2 min-w-0">
+                <p class="font-bold text-surface-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                  <span class="lang-ar">استجابات الأخطاء المنظّمة لأدوات MCP</span>
+                  <span class="lang-en">Structured error responses for MCP tools</span>
+                </p>
+                <p class="text-sm text-surface-600 leading-relaxed">
+                  <span class="lang-ar">تحوّل "فشلت العملية" إلى خطأ مصنّف ببيانات وصفية تقود قرار التعافي الصحيح.</span>
+                  <span class="lang-en">Turn "Operation failed" into a classified error whose metadata drives the right recovery.</span>
+                </p>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">isError</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">errorCategory</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">isRetryable</span>
+                </div>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-ar"></i>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-en"></i>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2.3 -->
+        <div class="relative ps-16 pb-5">
+          <span class="absolute start-8 top-0 bottom-0 w-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <span class="absolute start-8 top-10 w-8 h-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <a href="2-3-tool-distribution.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="bg-emerald-600 text-white font-mono text-sm font-bold px-2.5 py-1.5 rounded-lg shrink-0">2.3</span>
+              <div class="space-y-2 min-w-0">
+                <p class="font-bold text-surface-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                  <span class="lang-ar">توزيع الأدوات على الوكلاء وضبط tool_choice</span>
+                  <span class="lang-en">Tool distribution across agents &amp; tool_choice</span>
+                </p>
+                <p class="text-sm text-surface-600 leading-relaxed">
+                  <span class="lang-ar">توزّع الأدوات بمبدأ أقل صلاحية، وتفرّق بين auto وany والإجبار على أداة محددة.</span>
+                  <span class="lang-en">Distribute tools by least privilege, and tell auto, any, and forced selection apart.</span>
+                </p>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">scoped access</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">tool_choice</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">"any"</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">forced tool</span>
+                </div>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-ar"></i>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-en"></i>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2.4 -->
+        <div class="relative ps-16 pb-5">
+          <span class="absolute start-8 top-0 bottom-0 w-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <span class="absolute start-8 top-10 w-8 h-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <a href="2-4-mcp-servers.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="bg-emerald-600 text-white font-mono text-sm font-bold px-2.5 py-1.5 rounded-lg shrink-0">2.4</span>
+              <div class="space-y-2 min-w-0">
+                <p class="font-bold text-surface-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                  <span class="lang-ar">دمج خوادم MCP في Claude Code وسير العمل</span>
+                  <span class="lang-en">Integrating MCP servers into Claude Code &amp; workflows</span>
+                </p>
+                <p class="text-sm text-surface-600 leading-relaxed">
+                  <span class="lang-ar">تختار النطاق الصحيح (مشروع أم مستخدم)، تدير الأسرار بمتغيرات البيئة، وتستغل الموارد.</span>
+                  <span class="lang-en">Pick the right scope (project vs user), manage secrets via env vars, and leverage resources.</span>
+                </p>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">.mcp.json</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">~/.claude.json</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">${VAR}</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">resources</span>
+                </div>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-ar"></i>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-en"></i>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2.5 (last: elbow, trunk stops) -->
+        <div class="relative ps-16">
+          <span class="absolute start-8 top-0 h-10 w-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <span class="absolute start-8 top-10 w-8 h-0.5 bg-emerald-300" aria-hidden="true"></span>
+          <a href="2-5-builtin-tools.html" class="group block bg-white rounded-2xl border border-surface-200 p-5 hover:border-emerald-400 hover:shadow-md transition-all">
+            <div class="flex items-start gap-4">
+              <span class="bg-emerald-600 text-white font-mono text-sm font-bold px-2.5 py-1.5 rounded-lg shrink-0">2.5</span>
+              <div class="space-y-2 min-w-0">
+                <p class="font-bold text-surface-900 group-hover:text-emerald-700 transition-colors leading-snug">
+                  <span class="lang-ar">الأدوات المدمجة: Grep وGlob وRead وWrite وEdit</span>
+                  <span class="lang-en">Built-in tools: Grep, Glob, Read, Write, Edit</span>
+                </p>
+                <p class="text-sm text-surface-600 leading-relaxed">
+                  <span class="lang-ar">تختار الأداة الصح لكل مهمة، وتبني فهم قاعدة الكود تدريجيًا بدل قراءة كل شيء مقدمًا.</span>
+                  <span class="lang-en">Pick the right tool per job, and build codebase understanding incrementally instead of reading everything upfront.</span>
+                </p>
+                <div class="flex flex-wrap gap-1.5" dir="ltr">
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">Grep</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">Glob</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">Read+Write</span>
+                  <span class="bg-surface-100 text-surface-600 text-[11px] font-mono px-2 py-0.5 rounded-md">Edit</span>
+                </div>
+              </div>
+              <i data-lucide="arrow-left" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-ar"></i>
+              <i data-lucide="arrow-right" class="w-5 h-5 text-surface-300 group-hover:text-emerald-500 transition-colors shrink-0 ms-auto mt-1 lang-en"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+      <p class="text-xs text-surface-500 text-center">
+        <span class="lang-ar">اقرأ المواضيع بالترتيب — كل موضوع يبني على اللي قبله، ومنطق 2.1 (الوصف أولًا) يرجع يظهر في 2.4.</span>
+        <span class="lang-en">Read the topics in order — each builds on the previous, and 2.1's logic (description first) resurfaces in 2.4.</span>
+      </p>
+    </section>
+
+    <!-- ===== HOW IT SHOWS UP ON THE EXAM ===== -->
+    <section id="exam-patterns" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="crosshair" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">كيف يظهر في الاختبار</span><span class="lang-en">How it shows up on the exam</span></h2>
+      </div>
+      <p class="text-sm text-surface-400 leading-relaxed">
+        <span class="lang-ar">المشتتات في هذا الدومين لها أنماط ثابتة — إذا حفظتها، نصف الأسئلة ينحل بالاستبعاد:</span>
+        <span class="lang-en">Distractors in this domain follow fixed patterns — memorize them and half the questions solve themselves by elimination:</span>
+      </p>
+      <ul class="space-y-3 text-sm">
+        <li class="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <i data-lucide="layers" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <span class="lang-ar"><strong class="text-white">طُعم الهندسة الزائدة:</strong> طبقة توجيه بالكلمات المفتاحية، حزمة أمثلة few-shot، خادم MCP مخصّص لتكامل قياسي — الإجابة الصح غالبًا الإصلاح الجذري الأبسط (وسّع الوصف، استخدم خادم المجتمع).</span>
+            <span class="lang-en"><strong class="text-white">Over-engineering bait:</strong> keyword routing layers, batches of few-shot examples, a custom MCP server for a standard integration — the right answer is usually the simpler root-cause fix (expand the description, use the community server).</span>
+          </span>
+        </li>
+        <li class="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <i data-lucide="stethoscope" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <span class="lang-ar"><strong class="text-white">علاج العرَض بدل السبب:</strong> "احذف Grep عشان يستخدم أداة MCP"، "ادمج الأداتين عشان يوقف الخلط" — السبب الحقيقي وصف ضعيف، والعلاج تحسينه.</span>
+            <span class="lang-en"><strong class="text-white">Symptom over cause:</strong> "delete Grep so it uses the MCP tool," "merge the two tools so it stops confusing them" — the real cause is a weak description; the fix is improving it.</span>
+          </span>
+        </li>
+        <li class="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <span class="lang-ar"><strong class="text-white">مضادّات أنماط الأخطاء:</strong> رسالة "Operation failed" عامة، نتيجة فارغة موسومة نجاحًا بعد مهلة، إنهاء كامل سير العمل، إعادة لا نهائية — الصح دائمًا: بيانات منظّمة + تعافٍ محلي + تصعيد بنتائج جزئية.</span>
+            <span class="lang-en"><strong class="text-white">Error anti-patterns:</strong> a generic "Operation failed," an empty result marked success after a timeout, terminating the whole workflow, infinite retries — the right answer is always: structured metadata + local recovery + escalation with partial results.</span>
+          </span>
+        </li>
+        <li class="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <i data-lucide="git-branch" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <span class="lang-ar"><strong class="text-white">خلط tool_choice:</strong> <span dir="ltr" class="font-mono">"any"</span> يضمن استدعاء أداة <em>ما</em> لا أداة <em>محددة</em>؛ الإجبار بالاسم يثبّت أداة في دور واحد؛ وفرض تسلسل عبر عدة خطوات شغل الـ hooks (دومين 1) لا tool_choice.</span>
+            <span class="lang-en"><strong class="text-white">tool_choice confusion:</strong> <span class="font-mono">"any"</span> guarantees <em>some</em> tool, not a <em>specific</em> one; forcing by name pins one tool for one turn; multi-step sequencing is hooks territory (Domain 1), not tool_choice.</span>
+          </span>
+        </li>
+        <li class="flex items-start gap-3 bg-white/5 rounded-xl p-4 border border-white/10">
+          <i data-lucide="key-round" class="w-5 h-5 text-emerald-400 shrink-0 mt-0.5"></i>
+          <span>
+            <span class="lang-ar"><strong class="text-white">خلط النطاق والأسرار:</strong> إيداع توكن داخل <span dir="ltr" class="font-mono">.mcp.json</span>، أو حشر خادم الفريق في <span dir="ltr" class="font-mono">~/.claude.json</span> — النمط الصحيح: نطاق المشروع للفريق + توسيع <span dir="ltr" class="font-mono">${VAR}</span> للأسرار.</span>
+            <span class="lang-en"><strong class="text-white">Scope &amp; secrets confusion:</strong> committing a token inside <span class="font-mono">.mcp.json</span>, or stuffing the team server into <span class="font-mono">~/.claude.json</span> — the correct pattern: project scope for the team + <span class="font-mono">${VAR}</span> expansion for secrets.</span>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== DOMAIN QUIZ ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900">
+            <span class="lang-ar">اختبار الدومين 2</span><span class="lang-en">Domain 2 quiz</span>
+          </h2>
+          <p class="text-sm text-surface-500">
+            <span class="lang-ar">8 أسئلة سيناريو بنفس أسلوب الاختبار الرسمي — تغطي المواضيع الخمسة</span>
+            <span class="lang-en">8 scenario questions in the official exam style — covering all five topics</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- score tracker -->
+      <div class="sticky top-[68px] z-10 bg-white/90 backdrop-blur-sm border border-surface-200 rounded-xl py-3 px-5 shadow-sm">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+            <span class="text-2xl font-bold text-emerald-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">8</span></span>
+          </div>
+          <div class="flex items-center gap-3 flex-1 max-w-xs">
+            <span class="text-sm text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+            <div class="flex-1 h-2 bg-surface-200 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 (2.1 / Scenario 4) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.1</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">في أداة إنتاجية للمطوّرين، عندك أداتان <span dir="ltr" class="font-mono">search_code</span> و<span dir="ltr" class="font-mono">find_files</span>، وكل وحدة وصفها "Searches the repository". لما يطلب المطوّر "جِد تعريف الدالة <span dir="ltr" class="font-mono">calculateTax</span>"، ينادي الوكيل <span dir="ltr" class="font-mono">find_files</span> بالخطأ. وش أفضل <em>خطوة أولى</em>؟</span>
+              <span class="lang-en">In a developer-productivity tool you have two tools, <span dir="ltr" class="font-mono">search_code</span> and <span dir="ltr" class="font-mono">find_files</span>, each described "Searches the repository." When a developer asks "find the definition of <span dir="ltr" class="font-mono">calculateTax</span>," the agent wrongly calls <span dir="ltr" class="font-mono">find_files</span>. What is the best <em>first step</em>?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">وسّع وصف كل أداة ليحدد صيغ المدخلات، أمثلة الاستعلامات، والحدّ بين "بحث في المحتوى" و"بحث بأسماء الملفات".</span>
+            <span class="lang-en">Expand each tool's description to specify input formats, example queries, and the boundary between "content search" and "file-name search."</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ادمج الأداتين في أداة <span dir="ltr" class="font-mono">search</span> واحدة تقرر داخليًا نوع البحث.</span>
+            <span class="lang-en">Merge both into a single <span dir="ltr" class="font-mono">search</span> tool that decides the search type internally.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف طبقة توجيه تحلّل المدخل قبل كل دور وتختار الأداة بالكلمات المفتاحية.</span>
+            <span class="lang-en">Add a routing layer that parses input before each turn and picks the tool by keywords.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف 8 أمثلة few-shot في الـ system prompt توضّح التوجيه الصحيح.</span>
+            <span class="lang-en">Add 8 few-shot examples to the system prompt showing correct routing.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> الوصف هو الآلية الأساسية للاختيار؛ توسيعه علاج منخفض الجهد عالي الرافعة للسبب الجذري. الدمج خيار معماري أثقل، وطبقة التوجيه هندسة زائدة، والـ few-shot يزيد التوكنز دون علاج الوصف الناقص.</span>
+            <span class="lang-en"><strong>Correct.</strong> The description is the primary selection mechanism; expanding it is a low-effort, high-leverage fix for the root cause. Consolidation is heavier, a routing layer is over-engineered, and few-shot adds tokens without fixing the thin description.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>توسيع الأوصاف</em>. المشكلة أن الوصفين متطابقان تقريبًا؛ الدمج والتوجيه والـ few-shot كلها أثقل أو تتجاوز السبب الجذري (الوصف الناقص).</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>expanding the descriptions</em>. The two descriptions are near-identical; consolidation, routing, and few-shot are all heavier or sidestep the root cause (the thin description).</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 (2.1 splitting) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.1</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">أداة واحدة <span dir="ltr" class="font-mono">analyze_document</span> تُستخدم لثلاثة أعمال مختلفة جوهريًا: سحب حقول رقمية، تلخيص نصّي، والتحقق من مطابقة ادعاء لمصدر — والنتائج غير متسقة. وش أفضل إصلاح <em>بنيوي</em>؟</span>
+              <span class="lang-en">A single <span dir="ltr" class="font-mono">analyze_document</span> tool is used for three fundamentally different jobs: pulling numeric fields, summarizing text, and verifying a claim against a source — and results are inconsistent. What is the best <em>structural</em> fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">قسّمها إلى <span dir="ltr" class="font-mono">extract_data_points</span> و<span dir="ltr" class="font-mono">summarize_content</span> و<span dir="ltr" class="font-mono">verify_claim_against_source</span>، كل وحدة بعقد مدخلات/مخرجات خاص.</span>
+            <span class="lang-en">Split it into <span dir="ltr" class="font-mono">extract_data_points</span>, <span dir="ltr" class="font-mono">summarize_content</span>, and <span dir="ltr" class="font-mono">verify_claim_against_source</span>, each with its own I/O contract.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف معاملًا <span dir="ltr" class="font-mono">mode</span> من نوع enum إلى <span dir="ltr" class="font-mono">analyze_document</span> يحدّد نوع العمل.</span>
+            <span class="lang-en">Add a <span dir="ltr" class="font-mono">mode</span> enum parameter to <span dir="ltr" class="font-mono">analyze_document</span> that selects the job.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أجبِر <span dir="ltr" class="font-mono">tool_choice</span> على <span dir="ltr" class="font-mono">analyze_document</span> في كل استدعاء.</span>
+            <span class="lang-en">Force <span dir="ltr" class="font-mono">tool_choice</span> to <span dir="ltr" class="font-mono">analyze_document</span> on every call.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ارفع <span dir="ltr" class="font-mono">max_tokens</span> ليتّسع المخرج لكل الأعمال الثلاثة.</span>
+            <span class="lang-en">Raise <span dir="ltr" class="font-mono">max_tokens</span> so the output fits all three jobs.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> ثلاثة أعمال مختلفة الغرض تُقسَّم إلى أدوات محددة الغرض بعقود واضحة؛ هذا يعطي النموذج حدودًا نظيفة للاختيار ومخرجات متسقة. معامل mode يبقي التداخل، والإجبار وmax_tokens ما يعالجان الغموض.</span>
+            <span class="lang-en"><strong>Correct.</strong> Three purpose-different jobs get split into purpose-specific tools with clear contracts; this gives the model clean selection boundaries and consistent outputs. A mode param keeps the overlap; forcing and max_tokens do not address the ambiguity.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>التقسيم</em> إلى ثلاث أدوات محددة الغرض. المعامل mode يُبقي أداة عامة مثقلة، والإجبار وmax_tokens لا علاقة لهما بالغموض الوظيفي.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>splitting</em> into three purpose-specific tools. A mode param keeps one overloaded generic tool; forcing and max_tokens are unrelated to the functional ambiguity.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 (2.2 business error / Scenario 1) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.2</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">في وكيل دعم العملاء، ترفض <span dir="ltr" class="font-mono">process_refund</span> مبلغًا يتجاوز حد السياسة، وترجع حاليًا <span dir="ltr" class="font-mono">isError:true</span> برسالة "Operation failed". الوكيل يعيد المحاولة مرارًا. وش التصميم الصحيح للاستجابة؟</span>
+              <span class="lang-en">In a customer-support agent, <span dir="ltr" class="font-mono">process_refund</span> rejects an amount over the policy cap and currently returns <span dir="ltr" class="font-mono">isError:true</span> with "Operation failed." The agent keeps retrying. What is the correct response design?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أرجِع <span dir="ltr" class="font-mono">errorCategory:"business"</span> و<span dir="ltr" class="font-mono">isRetryable:false</span> ورسالة ودّية للعميل، فيتوقف الوكيل عن الإعادة ويشرح السياسة أو يصعّد.</span>
+            <span class="lang-en">Return <span dir="ltr" class="font-mono">errorCategory:"business"</span>, <span dir="ltr" class="font-mono">isRetryable:false</span>, and a customer-friendly message, so the agent stops retrying and explains the policy or escalates.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أرجِع <span dir="ltr" class="font-mono">isError:false</span> بنتيجة فارغة ليتجاوز الوكيل الطلب.</span>
+            <span class="lang-en">Return <span dir="ltr" class="font-mono">isError:false</span> with an empty result so the agent moves on.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعِد المحاولة تلقائيًا 3 مرات بـ exponential backoff قبل الإبلاغ.</span>
+            <span class="lang-en">Auto-retry 3 times with exponential backoff before reporting.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">صعّد كل استرجاع فاشل لموظف بشري فورًا دون تصنيف.</span>
+            <span class="lang-en">Escalate every failed refund to a human immediately without classification.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> مخالفة السياسة خطأ عمل غير قابل للإعادة؛ البيانات المنظّمة توقف الإعادة المهدورة وتمكّن الوكيل من الشرح للعميل. النتيجة الفارغة كنجاح تخفي الخطأ، والـ backoff يهدر محاولات، والتصعيد الأعمى إفراط.</span>
+            <span class="lang-en"><strong>Correct.</strong> A policy violation is a non-retryable business error; structured metadata stops wasted retries and lets the agent explain to the customer. Empty-as-success hides the error, backoff wastes attempts, and blanket escalation is excessive.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>خطأ عمل منظّم غير قابل للإعادة برسالة ودّية</em>. النتيجة الفارغة تخفي الخطأ، والـ backoff يعيد على خطأ لن يُحل، والتصعيد لكل الحالات إفراط بلا تصنيف.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is a <em>structured non-retryable business error with a friendly message</em>. Empty-as-success hides the error, backoff retries an unresolvable error, and escalating everything is excessive without classification.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q4 (2.2 access failure vs empty / Scenario 3) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q4">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">4</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.2</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">في نظام بحث متعدد الوكلاء، تنتهي مهلة مصدر بيانات وكيل تحليل المستندات، فيرجع قائمة فارغة موسومة "successful". وش المشكلة والإصلاح؟</span>
+              <span class="lang-en">In a multi-agent research system, the document-analysis subagent's data source times out, and it returns an empty list marked "successful." What is the problem and the fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">المهلة فشل وصول لا نتيجة فارغة صالحة؛ أرجِع سياق خطأ منظّمًا (نوع الفشل، الاستعلام المُحاوَل، نتائج جزئية، <span dir="ltr" class="font-mono">isRetryable</span>) ليقرر المنسّق التعافي.</span>
+            <span class="lang-en">A timeout is an access failure, not a valid empty result; return structured error context (failure type, attempted query, partial results, <span dir="ltr" class="font-mono">isRetryable</span>) so the coordinator can recover.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النتيجة الفارغة مقبولة؛ بيلاحظ المنسّق الفجوة لاحقًا.</span>
+            <span class="lang-en">An empty result is fine; the coordinator will notice the gap later.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أنهِ كامل سير عمل البحث لأن أحد المصادر فشل.</span>
+            <span class="lang-en">Terminate the whole research workflow because one source failed.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعِد المحاولة بصمت إلى ما لا نهاية حتى ينجح المصدر.</span>
+            <span class="lang-en">Silently retry forever until the source succeeds.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> فشل الوصول لا يساوي نتيجة فارغة صالحة؛ وسم الفشل كنجاح مضادّ نمط يمنع التعافي. السياق المنظّم يمكّن المنسّق من إعادة باستعلام معدّل أو بديل أو المتابعة بنتائج جزئية مع تعليم الفجوة.</span>
+            <span class="lang-en"><strong>Correct.</strong> An access failure is not a valid empty result; marking failure as success is an anti-pattern that blocks recovery. Structured context lets the coordinator retry with a modified query, try an alternative, or proceed with partial results and annotate the gap.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>أرجِع سياق خطأ منظّمًا</em>. المهلة فشل وصول؛ وسمها نجاحًا يخفي الخطأ، وإنهاء السير كله أو الإعادة اللانهائية كلاهما مضادّ نمط.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>return structured error context</em>. A timeout is an access failure; marking it success hides the error, and terminating the whole workflow or retrying forever are both anti-patterns.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q5 (2.3 distribution / Scenario 3) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q5">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">5</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.3</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">أُعطي وكيل التوليف كل الأدوات الـ18 بما فيها <span dir="ltr" class="font-mono">web_search</span> و<span dir="ltr" class="font-mono">fetch_url</span> وأدوات قاعدة البيانات. صار أحيانًا يشغّل عمليات بحث بنفسه بدل التوليف، فتتضارب الاستشهادات. وش أفضل إصلاح؟</span>
+              <span class="lang-en">The synthesis agent was given all 18 tools including <span dir="ltr" class="font-mono">web_search</span>, <span dir="ltr" class="font-mono">fetch_url</span>, and DB tools. It now sometimes runs its own searches instead of synthesizing, producing inconsistent citations. Best fix?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">قصّ أدواته على أدوات التوليف + أداة <span dir="ltr" class="font-mono">verify_fact</span> مُنطّقة للتحقق البسيط، ووجّه الحالات المعقّدة عبر المنسّق.</span>
+            <span class="lang-en">Scope it to synthesis tools + a single scoped <span dir="ltr" class="font-mono">verify_fact</span> for simple checks, routing complex cases through the coordinator.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعطِه أدوات أكثر حتى لا يعلق أبدًا في أي احتياج تحقق.</span>
+            <span class="lang-en">Give it even more tools so it never gets stuck on any verification need.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اضبط <span dir="ltr" class="font-mono">tool_choice:"any"</span> ليستدعي أداة دائمًا.</span>
+            <span class="lang-en">Set <span dir="ltr" class="font-mono">tool_choice:"any"</span> so it always calls a tool.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">انزع كل الأدوات من وكيل التوليف نهائيًا.</span>
+            <span class="lang-en">Remove all tools from the synthesis agent entirely.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> كثرة الأدوات وخروجها عن التخصص سبب سوء الاستخدام؛ أقل صلاحية = أدوات دوره + <span dir="ltr" class="font-mono">verify_fact</span> مُنطّقة للحالات البسيطة، مع إبقاء المعقّد عبر المنسّق. المزيد يفاقم، و"any" يجبر أداة ولا يحل التخصص، والنزع الكامل يعطّل التحقق البسيط.</span>
+            <span class="lang-en"><strong>Correct.</strong> Too many out-of-specialization tools cause the misuse; least privilege = its role's tools + a scoped <span dir="ltr" class="font-mono">verify_fact</span> for simple cases, keeping complex ones through the coordinator. More tools worsen it, "any" forces a call without fixing specialization, and removing all disables simple verification.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>قصّ الأدوات + <span dir="ltr" class="font-mono">verify_fact</span> مُنطّقة</em>. المزيد من الأدوات يزيد المشكلة، و"any" لا يعالج التخصص، والنزع الكامل مبالغة تعطّل الاحتياج المتكرر البسيط.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>scope the tools + a scoped <span dir="ltr" class="font-mono">verify_fact</span></em>. More tools worsen it, "any" does not fix specialization, and removing all is an overreach that kills the simple high-frequency need.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q6 (2.3 tool_choice forced) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q6">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">6</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.3</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">تعالج مرفقات تذاكر الدعم، وتبي تضمن تشغيل <span dir="ltr" class="font-mono">extract_metadata</span> <em>أولًا</em> على كل مرفق قبل أي أداة إثراء. أي إعداد يحقق ذلك بأعلى ضمان؟</span>
+              <span class="lang-en">You process support-ticket attachments and want to guarantee <span dir="ltr" class="font-mono">extract_metadata</span> runs <em>first</em> on each attachment before any enrichment tool. Which config guarantees this?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice: {"type":"tool","name":"extract_metadata"}</span> في الاستدعاء الأول، ثم تعالج الإثراء في أدوار لاحقة.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">tool_choice: {"type":"tool","name":"extract_metadata"}</span> on the first call, then handle enrichment in follow-up turns.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice:"auto"</span> والاعتماد على النموذج ليبدأ بالميتاداتا.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">tool_choice:"auto"</span> and rely on the model to start with metadata.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">tool_choice:"any"</span> ليضمن استدعاء أداة في كل دور.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">tool_choice:"any"</span> to guarantee a tool call each turn.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اكتب "استدعِ extract_metadata أولًا" في الـ system prompt فقط.</span>
+            <span class="lang-en">Put "call extract_metadata first" in the system prompt only.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> الإجبار بالاسم يضمن تشغيل أداة محددة أولًا بشكل حتمي، ثم تُعالَج الخطوات التالية في أدوار لاحقة. "auto" قد يرجّع نصًا، و"any" يضمن أداةً ما لا <em>أيّها</em>، والـ prompt وحده احتمالي.</span>
+            <span class="lang-en"><strong>Correct.</strong> Forcing by name deterministically guarantees a specific tool runs first, then subsequent steps are handled in follow-up turns. "auto" may return text, "any" guarantees some tool but not <em>which</em>, and the prompt alone is probabilistic.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>الإجبار بالاسم</em>. "auto" قد يرجّع نصًا، و"any" لا يحدّد أي أداة، والتعليمة في الـ prompt وحدها احتمالية لا تضمن الترتيب.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>forced selection by name</em>. "auto" may return text, "any" does not pin which tool, and a prompt-only instruction is probabilistic and does not guarantee ordering.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q7 (2.4 MCP integration / Scenario 4) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q7">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">7</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.4</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">يبي الفريق خادم GitHub MCP مشتركًا يوصل للجميع عند الاستنساخ، موثّقًا بدون إيداع التوكن، ولاحظوا أن الوكيل يفضّل <span dir="ltr" class="font-mono">Grep</span> المدمجة على أداة بحث الكود الأقدر في الخادم. أي تركيبة صحيحة؟</span>
+              <span class="lang-en">The team wants a shared GitHub MCP server available to everyone on clone, authenticated without committing the token, and they notice the agent prefers built-in <span dir="ltr" class="font-mono">Grep</span> over the server's more capable code-search tool. Which combination is correct?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">عرّف الخادم في <span dir="ltr" class="font-mono">.mcp.json</span> بنطاق المشروع مع توسيع <span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span>، وجوّد وصف أداة MCP ليفضّلها الوكيل على <span dir="ltr" class="font-mono">Grep</span>.</span>
+            <span class="lang-en">Define the server in a project-scoped <span dir="ltr" class="font-mono">.mcp.json</span> with <span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span> expansion, and enhance the MCP tool's description so the agent prefers it over <span dir="ltr" class="font-mono">Grep</span>.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">حطّه في <span dir="ltr" class="font-mono">~/.claude.json</span> مع تضمين التوكن مباشرة في الملف.</span>
+            <span class="lang-en">Put it in <span dir="ltr" class="font-mono">~/.claude.json</span> with the token hardcoded in the file.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أودِع التوكن داخل <span dir="ltr" class="font-mono">.mcp.json</span> ليوصل للزملاء تلقائيًا عند السحب.</span>
+            <span class="lang-en">Commit the token inside <span dir="ltr" class="font-mono">.mcp.json</span> so teammates get it automatically on pull.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">احذف <span dir="ltr" class="font-mono">Grep</span> من الأدوات المتاحة لإجبار الوكيل على أداة MCP.</span>
+            <span class="lang-en">Remove <span dir="ltr" class="font-mono">Grep</span> from the available tools to force the agent onto the MCP tool.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> نطاق المشروع يشارك الخادم مع الفريق، وتوسيع المتغير يحمي السر، وتجويد الوصف يقود التبنّي بدل حذف أداة مدمجة. تضمين التوكن أو إيداعه تسريب، وحذف <span dir="ltr" class="font-mono">Grep</span> علاج عرَضي.</span>
+            <span class="lang-en"><strong>Correct.</strong> Project scope shares the server with the team, env expansion protects the secret, and enhancing the description drives adoption instead of deleting a built-in tool. Hardcoding or committing the token is a leak, and deleting <span dir="ltr" class="font-mono">Grep</span> treats a symptom.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>نطاق المشروع + توسيع المتغير + تجويد الوصف</em>. تضمين التوكن أو إيداعه تسريب سر، ونطاق المستخدم لا يشارك الفريق، وحذف <span dir="ltr" class="font-mono">Grep</span> يعالج العرَض لا السبب (وصف MCP ضعيف).</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>project scope + env expansion + a better description</em>. Hardcoding/committing the token leaks a secret, user scope does not share with the team, and deleting <span dir="ltr" class="font-mono">Grep</span> treats the symptom, not the cause (a weak MCP description).</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q8 (2.5 Edit fallback / Scenario 4) -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q8">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">8</span>
+          <div class="space-y-1.5">
+            <span class="inline-block bg-surface-100 text-surface-500 text-[11px] font-mono px-2 py-0.5 rounded-md">Topic 2.5</span>
+            <p class="font-semibold text-lg leading-relaxed">
+              <span class="lang-ar">وكيل Claude Code يحاول تعديل سطر إعداد يتكرر نصّه 4 مرات متطابقة في نفس الملف، وأداة <span dir="ltr" class="font-mono">Edit</span> تفشل برسالة عدم تفرّد النص. وش الأسلوب الموثوق؟</span>
+              <span class="lang-en">A Claude Code agent tries to modify a config line whose text appears 4 identical times in the same file, and <span dir="ltr" class="font-mono">Edit</span> fails with a non-unique match error. What is the reliable approach?</span>
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استخدم <span dir="ltr" class="font-mono">Read</span> لتحميل الملف كاملًا ثم <span dir="ltr" class="font-mono">Write</span> لإعادة كتابته بالتعديل المطلوب.</span>
+            <span class="lang-en">Use <span dir="ltr" class="font-mono">Read</span> to load the full file, then <span dir="ltr" class="font-mono">Write</span> to rewrite it with the intended change.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">كرّر نفس استدعاء <span dir="ltr" class="font-mono">Edit</span> بنفس النص حتى ينجح.</span>
+            <span class="lang-en">Repeat the same <span dir="ltr" class="font-mono">Edit</span> call with the same anchor text until it succeeds.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استخدم <span dir="ltr" class="font-mono">Glob</span> بنمط النص المطلوب تعديله للعثور على السطر.</span>
+            <span class="lang-en">Use <span dir="ltr" class="font-mono">Glob</span> with the target text as a pattern to locate the line.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">احذف الملف وأنشئه من جديد من الذاكرة بدون قراءته.</span>
+            <span class="lang-en">Delete the file and recreate it from memory without reading it.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> لما يفشل <span dir="ltr" class="font-mono">Edit</span> لعدم تفرّد النص، البديل الموثوق حسب دليل الاختبار هو <span dir="ltr" class="font-mono">Read + Write</span>. تكرار Edit بنفس النص بيفشل بنفس السبب، وGlob يطابق مسارات الملفات لا محتواها، وإعادة الإنشاء من الذاكرة تخاطر بفقدان محتوى.</span>
+            <span class="lang-en"><strong>Correct.</strong> When <span dir="ltr" class="font-mono">Edit</span> fails on non-unique text, the reliable fallback per the exam guide is <span dir="ltr" class="font-mono">Read + Write</span>. Repeating Edit with the same anchor fails for the same reason, Glob matches file paths not contents, and recreating from memory risks losing content.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em><span dir="ltr" class="font-mono">Read + Write</span></em>. فشل التفرّد ما ينحل بالتكرار، وGlob للمسارات لا للمحتوى، والحذف وإعادة الإنشاء من الذاكرة مخاطرة غير ضرورية.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em><span dir="ltr" class="font-mono">Read + Write</span></em>. A uniqueness failure will not resolve by repetition, Glob is for paths not contents, and delete-and-recreate from memory is an unnecessary risk.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== PREV / NEXT PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="../domain-1/index.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق · الدومين 1</span><span class="lang-en">Previous · Domain 1</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">المعمارية الوكيلية والتنسيق</span><span class="lang-en">Agentic Architecture &amp; Orchestration</span></p>
+        </div>
+      </a>
+      <a href="../domain-3/index.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · الدومين 3</span><span class="lang-en">Next · Domain 3</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">إعداد Claude Code وسير العمل</span><span class="lang-en">Claude Code Configuration &amp; Workflows</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

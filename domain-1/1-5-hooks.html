@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.5 خطافات الـ Agent SDK — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.5 — Agent SDK hooks: PostToolUse result interception for normalizing heterogeneous data (Unix timestamps, ISO 8601, numeric status codes), tool call interception blocking refunds over $500 with escalation redirect, and hooks vs prompts for guaranteed compliance. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">خطافات الـ Agent SDK</span><span class="lang-en">Agent SDK hooks</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.5</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">خطافات الـ Agent SDK: الاعتراض والتوحيد</span>
+          <span class="lang-en">Agent SDK hooks: interception &amp; normalization</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">الـ hooks هي «قوانين الفيزياء» في نظامك الوكيل: تتنفّذ في كل مرة، ولا تعتمد على انتباه الموديل. بها توحّد البيانات الداخلة وتحظر الأفعال الخارجة المخالفة.</span>
+        <span class="lang-en">Hooks are your agent system's "laws of physics": they fire every single time, independent of the model's attention. With them you normalize incoming data and block outgoing violations.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشرح نمط <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span>: اعتراض نتيجة الأداة وتحويلها قبل أن يعالجها الموديل.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشرح نمط اعتراض النداءات الصادرة: فحص نداء الأداة قبل تنفيذه لفرض قواعد الامتثال.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>توحّد صيغًا غير متجانسة من أدوات MCP مختلفة (Unix timestamps، ISO 8601، رموز حالة رقمية) بهوك <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span>.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تحظر الأفعال المخالفة للسياسة (استرداد فوق 500$) وتوجّه الوكيل لمسار بديل (تصعيد بشري).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تختار الـ hooks على الفرض البرومبتي متى ما تطلّبت قاعدة العمل امتثالًا مضمونًا.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Explain the <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span> pattern: intercepting a tool's result and transforming it before the model processes it.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Explain outgoing-call interception: inspecting a tool call before it executes to enforce compliance rules.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Normalize heterogeneous formats from different MCP tools (Unix timestamps, ISO 8601, numeric status codes) with a <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span> hook.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Block policy-violating actions (refunds over $500) and redirect the agent to an alternative workflow (human escalation).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Choose hooks over prompt-based enforcement whenever a business rule requires guaranteed compliance.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: the pipeline ===== -->
+    <section id="pipeline" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">وش هي الـ hooks؟ نقاط اعتراض في دورة الحياة</span>
+        <span class="lang-en">What are hooks? Interception points in the lifecycle</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الـ hook هو دالة <span class="font-semibold">تكتبها أنت</span> ويشغّلها الـ SDK تلقائيًا عند نقطة محددة من دورة حياة الوكيل. الاختبار يركّز على نمطين مرتبطين باتجاهين متعاكسين: <span class="font-semibold">اعتراض النداء الصادر</span> (نمط <span dir="ltr" class="font-mono text-brand-700">PreToolUse</span>) — يفحص نداء الأداة <span class="font-semibold">قبل تنفيذه</span> ويقدر يسمح أو يرفض؛ و<span class="font-semibold">اعتراض النتيجة الداخلة</span> (<span dir="ltr" class="font-mono text-brand-700">PostToolUse</span>) — يستلم نتيجة الأداة <span class="font-semibold">بعد التنفيذ وقبل أن تصل للموديل</span> ويقدر يحوّلها.</p>
+        <p>الفرق الجوهري عن أي تعليمة برومبت: الـ hook <span class="font-semibold">كود يتنفّذ في كل مرة بلا استثناء</span>. الموديل ما يقدر «ينسى» تشغيله ولا «يجتهد» بتجاوزه — لأنه أصلًا خارج إرادة الموديل. لذلك يوصف الـ hook بأنه <span class="font-semibold">ضمانة حتمية</span>، بينما تعليمة البرومبت <span class="font-semibold">امتثال احتمالي</span>.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A hook is a function <span class="font-semibold">you write</span> that the SDK runs automatically at a defined point in the agent's lifecycle. The exam focuses on two patterns tied to opposite directions: <span class="font-semibold">outgoing-call interception</span> (the <span dir="ltr" class="font-mono text-brand-700">PreToolUse</span> pattern) — inspecting a tool call <span class="font-semibold">before it executes</span>, able to allow or deny; and <span class="font-semibold">incoming-result interception</span> (<span dir="ltr" class="font-mono text-brand-700">PostToolUse</span>) — receiving the tool's result <span class="font-semibold">after execution but before it reaches the model</span>, able to transform it.</p>
+        <p>The essential difference from any prompt instruction: a hook is <span class="font-semibold">code that runs every time without exception</span>. The model cannot "forget" to trigger it or "reason" its way around it — it sits outside the model's will entirely. That is why a hook is described as a <span class="font-semibold">deterministic guarantee</span> while a prompt instruction is <span class="font-semibold">probabilistic compliance</span>.</p>
+      </div>
+
+      <!-- Diagram 1: interception pipeline -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-3">
+          <div class="flex flex-wrap items-center justify-center gap-2 text-center">
+            <div class="bg-brand-600 text-white rounded-lg px-3 py-2 text-xs font-mono font-bold">model emits tool call</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-amber-100 border-2 border-amber-300 rounded-lg px-3 py-2 text-xs font-mono font-bold text-amber-800">PreToolUse gate<br><span class="font-normal">allow / deny</span></div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-surface-100 border border-surface-300 rounded-lg px-3 py-2 text-xs font-mono font-medium text-surface-700">tool executes</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-sky-100 border-2 border-sky-300 rounded-lg px-3 py-2 text-xs font-mono font-bold text-sky-800">PostToolUse<br><span class="font-normal">normalize result</span></div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-brand-600 text-white rounded-lg px-3 py-2 text-xs font-mono font-bold">model processes result</div>
+          </div>
+          <div class="flex items-center justify-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <i data-lucide="shield-x" class="w-4 h-4 text-red-500 shrink-0"></i>
+            <span class="text-[11px] font-mono text-red-700">deny path: call blocked + reason returned to model -&gt; alternative workflow (escalate_to_human)</span>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">خط الأنابيب: بوابة قبل التنفيذ تفرض السياسة، ومحوّل بعد التنفيذ يوحّد النتيجة — والموديل لا يرى إلا الشكل النظيف.</span>
+          <span class="lang-en">The pipeline: a pre-execution gate enforces policy, a post-execution transformer normalizes the result — the model only ever sees the clean shape.</span>
+        </p>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> احفظ اتجاه كل نمط: <span dir="ltr" class="font-mono">PostToolUse</span> يشكّل <span class="font-semibold">البيانات الداخلة</span> للموديل (توحيد/تنظيف النتائج)، واعتراض النداءات يحكم <span class="font-semibold">الأفعال الخارجة</span> منه (حظر/تحويل). أسئلة كثيرة تُحسم بمجرد تحديد الاتجاه المطلوب.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> memorize each pattern's direction: <span dir="ltr" class="font-mono">PostToolUse</span> shapes <span class="font-semibold">data flowing in</span> to the model (normalizing/cleaning results), while call interception governs <span class="font-semibold">actions flowing out</span> of it (blocking/redirecting). Many questions are settled just by identifying which direction is needed.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: PostToolUse normalization ===== -->
+    <section id="posttooluse" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">PostToolUse: توحيد البيانات غير المتجانسة</span>
+        <span class="lang-en">PostToolUse: normalizing heterogeneous data</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الحالة النموذجية من سيناريو 1: وكيل الدعم يستخدم ثلاث أدوات MCP من أنظمة خلفية مختلفة — وحدة ترجع التواريخ <span dir="ltr" class="font-mono">Unix timestamps</span> (أرقام مثل <span dir="ltr" class="font-mono">1789034400</span>)، وثانية <span dir="ltr" class="font-mono">ISO 8601</span>، وثالثة ترجع الحالات كرموز رقمية (<span dir="ltr" class="font-mono">status: 2</span> بدل «موقوف»). لو تركت الموديل «ينتبه للصيَغ» بنفسه، سيقرؤها صح غالبًا... ويغلط أحيانًا — وأحيانًا في خدمة عملاء تعني معلومات شحن خاطئة لعميل حقيقي.</p>
+        <p>الإصلاح المعماري: هوك <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span> يعترض <span class="font-semibold">كل</span> نتيجة أداة ويحوّل الصيَغ الثلاث إلى شكل قياسي واحد <span class="font-semibold">قبل</span> أن تدخل سياق الموديل. النتيجة: الموديل ما يشوف الفوضى أصلًا، فلا توجد فرصة ليخطئ قراءتها — انعدام فرصة الخطأ أقوى من أي «انتباه» له.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The canonical case from Scenario 1: the support agent uses three MCP tools from different backends — one returns dates as <span dir="ltr" class="font-mono">Unix timestamps</span> (numbers like <span dir="ltr" class="font-mono">1789034400</span>), another as <span dir="ltr" class="font-mono">ISO 8601</span>, and a third returns statuses as numeric codes (<span dir="ltr" class="font-mono">status: 2</span> instead of "suspended"). Leave the model to "watch out for formats" on its own and it will read them right most of the time... and wrong occasionally — and in customer support, occasionally means wrong shipping information to a real customer.</p>
+        <p>The architectural fix: a <span dir="ltr" class="font-mono text-brand-700">PostToolUse</span> hook intercepts <span class="font-semibold">every</span> tool result and converts all three formats into one canonical shape <span class="font-semibold">before</span> it enters the model's context. The model never sees the mess at all, so there is no opportunity to misread it — eliminating the opportunity beats any amount of "attention."</p>
+      </div>
+
+      <!-- Code: PostToolUse -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">هوك PostToolUse يوحّد الصيَغ قبل وصولها للموديل</span>
+          <span class="lang-en">A PostToolUse hook normalizing formats before they reach the model</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">from datetime import datetime, timezone
+from claude_agent_sdk import query, ClaudeAgentOptions, HookMatcher
+
+STATUS_LABELS = {0: "inactive", 1: "active", 2: "suspended"}
+
+async def normalize_tool_data(input_data, tool_use_id, context):
+    """PostToolUse: runs AFTER the tool executes, BEFORE the model processes it."""
+    raw = input_data["tool_response"]
+    normalized = dict(raw)
+
+    # Unix timestamp (1789034400) -&gt; ISO 8601
+    if isinstance(raw.get("created_at"), (int, float)):
+        normalized["created_at"] = datetime.fromtimestamp(
+            raw["created_at"], tz=timezone.utc).isoformat()
+
+    # Numeric status code (2) -&gt; semantic label ("suspended")
+    if isinstance(raw.get("status"), int):
+        normalized["status"] = STATUS_LABELS.get(raw["status"], "unknown")
+
+    # Hand the model ONE canonical shape, whatever the backend returned
+    return {
+        "hookSpecificOutput": {
+            "hookEventName": "PostToolUse",
+            "additionalContext": f"Normalized tool data: {normalized}",
+        }
+    }
+
+options = ClaudeAgentOptions(
+    hooks={
+        # No matcher -&gt; applies to every tool result from every MCP server
+        "PostToolUse": [HookMatcher(hooks=[normalize_tool_data])],
+    },
+)</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> «أضف أداة <span dir="ltr" class="font-mono">convert_date</span> يستدعيها الموديل عند الحاجة» تبدو حلًا — لكنها ترجع الاعتماد على أن الموديل <span class="font-semibold">يتذكّر</span> استدعاءها كل مرة. رجعت للاحتمالية من الباب الخلفي. التوحيد في hook يشيل القرار من يد الموديل نهائيًا.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> "add a <span dir="ltr" class="font-mono">convert_date</span> tool the model can call when needed" sounds like a fix — but it re-introduces reliance on the model <span class="font-semibold">remembering</span> to call it every time. Probability sneaks back in through the side door. Normalizing in a hook removes the decision from the model's hands entirely.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: call interception ===== -->
+    <section id="interception" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">اعتراض النداءات: احظر ووجّه لمسار بديل</span>
+        <span class="lang-en">Call interception: block and redirect</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الحالة الثانية: قاعدة عمل تقول «أي استرداد فوق 500$ يتطلّب موافقة بشرية». الحل الحتمي: hook يعترض نداء <span dir="ltr" class="font-mono text-brand-700">process_refund</span> <span class="font-semibold">قبل تنفيذه</span>، يفحص المبلغ، وإذا تجاوز الحد <span class="font-semibold">يرفض النداء</span> ويرجّع للموديل سببَ الرفض مع التوجيه للمسار البديل: <span dir="ltr" class="font-mono text-brand-700">escalate_to_human</span>. الموديل يستلم الرفض كنتيجة، يفهم السبب، ويكمل عبر مسار التصعيد — بملخّص التسليم المنظّم الذي تعلمناه في 1.4.</p>
+        <p>لاحظ جمال التركيبة: الحظر <span class="font-semibold">حتمي</span> (ولا استرداد فوق الحد سيمرّ أبدًا)، لكن الاستجابة له تبقى <span class="font-semibold">ذكية</span> — الموديل يقرأ سبب الرفض ويتصرف بناءً عليه بدل ما ينهار أو يكرر المحاولة عمياء.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The second case: a business rule says "any refund above $500 requires human approval." The deterministic solution: a hook intercepts the <span dir="ltr" class="font-mono text-brand-700">process_refund</span> call <span class="font-semibold">before it executes</span>, checks the amount, and above the threshold it <span class="font-semibold">denies the call</span>, returning the reason to the model along with the pointer to the alternative workflow: <span dir="ltr" class="font-mono text-brand-700">escalate_to_human</span>. The model receives the denial as a result, understands why, and proceeds down the escalation path — with the structured handoff summary from 1.4.</p>
+        <p>Note the elegance of the combination: the block is <span class="font-semibold">deterministic</span> (no over-limit refund will ever pass), yet the response to it stays <span class="font-semibold">intelligent</span> — the model reads the denial reason and acts on it rather than crashing or blindly retrying.</p>
+      </div>
+
+      <!-- Code: PreToolUse -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">هوك اعتراض يحظر الاسترداد فوق 500$ ويوجّه للتصعيد</span>
+          <span class="lang-en">An interception hook blocking refunds over $500 and redirecting to escalation</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">REFUND_LIMIT = 500   # business rule: above this, a human must approve
+
+async def enforce_refund_policy(input_data, tool_use_id, context):
+    """Deterministic guardrail: fires on EVERY call -- it cannot be
+    'forgotten' the way a prompt instruction can."""
+    amount = input_data["tool_input"].get("amount", 0)
+    if amount &gt; REFUND_LIMIT:
+        return {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": "deny",          # block the call outright
+                "permissionDecisionReason": (
+                    f"Refunds over ${REFUND_LIMIT} require human approval "
+                    f"(requested: ${amount}). Use escalate_to_human instead."
+                ),
+            }
+        }
+    return {}   # under the limit -&gt; allow the call through
+
+options = ClaudeAgentOptions(
+    hooks={
+        # Matcher scopes the hook to the refund tool only
+        "PreToolUse": [HookMatcher(matcher="process_refund",
+                                   hooks=[enforce_refund_policy])],
+    },
+)
+# The deny reason is fed back to the model, which then follows the
+# alternative workflow: calling escalate_to_human with a handoff summary.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: hooks vs prompts ===== -->
+    <section id="hooks-vs-prompts" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">04</span>
+        <span class="lang-ar">Hooks أم برومبت؟ قاعدة الاختيار</span>
+        <span class="lang-en">Hooks or prompts? The selection rule</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>القاعدة كما يصوغها الدليل: <span class="font-semibold">إذا كانت قاعدة العمل تتطلّب امتثالًا مضمونًا، اختر الـ hook</span>. البرومبت يبقى مناسبًا للتوجيه السلوكي — النبرة، الأسلوب، التفضيلات — حيث الخطأ النادر مقبول. الفرق ليس في «القوة» بل في <span class="font-semibold">طبيعة الضمان</span>: الـ hook ينفَّذ 100% من المرات لأنه كود؛ البرومبت يُتَّبع «غالبًا» لأنه إقناع.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The rule as the guide frames it: <span class="font-semibold">when a business rule requires guaranteed compliance, choose the hook</span>. Prompts remain right for behavioral guidance — tone, style, preferences — where a rare miss is acceptable. The difference isn't "strength" but the <span class="font-semibold">nature of the guarantee</span>: a hook fires 100% of the time because it's code; a prompt is followed "usually" because it's persuasion.</p>
+      </div>
+
+      <!-- Diagram 2: comparison panels -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="grid sm:grid-cols-2 gap-4">
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 space-y-2.5">
+            <div class="flex items-center gap-2">
+              <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600"></i>
+              <span class="text-sm font-mono font-bold text-emerald-800">HOOK — deterministic</span>
+            </div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">fires on EVERY call, no exceptions</div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">lives in code, outside model judgment</div>
+            <div class="bg-white border border-emerald-200 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-900">fits: refund limits, format normalization</div>
+          </div>
+          <div class="bg-red-50 border-2 border-red-300 rounded-xl p-4 space-y-2.5">
+            <div class="flex items-center gap-2">
+              <i data-lucide="message-square" class="w-5 h-5 text-red-600"></i>
+              <span class="text-sm font-mono font-bold text-red-800">PROMPT — probabilistic</span>
+            </div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">followed "usually" -- until it isn't</div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">lives inside model judgment</div>
+            <div class="bg-white border border-red-200 rounded-lg px-3 py-2 text-[11px] font-mono text-red-900">fits: tone, style, soft preferences</div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">قاعدة ملزمة بعواقب مالية أو قانونية؟ اللوحة الخضراء. توجيه سلوكي يحتمل الخطأ النادر؟ اللوحة الحمراء تكفي.</span>
+          <span class="lang-en">Binding rule with financial or legal stakes? The green panel. Behavioral guidance tolerating a rare miss? The red panel suffices.</span>
+        </p>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-amber-900 leading-relaxed"><span class="font-bold">تنبيه:</span> لا تعكس القاعدة: نقل <span class="font-semibold">كل شيء</span> للـ hooks (حتى النبرة والأسلوب) يجمّد النظام ويحرمك مرونة الموديل. الـ hooks للقواعد الملزمة؛ البرومبت لكل ما عداها.</div>
+          <div class="lang-en text-amber-900 leading-relaxed"><span class="font-bold">Warning:</span> don't invert the rule either: pushing <span class="font-semibold">everything</span> into hooks (even tone and style) rigidifies the system and forfeits the model's flexibility. Hooks are for binding rules; prompts for everything else.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«أضف للبرومبت: لا تسترد فوق 500$» — يبدو منطقيًا لكنه احتمالي؛ للقواعد الملزمة الجواب دائمًا اعتراض برمجي.</span><span class="lang-en">"Add to the prompt: never refund above $500" — sounds reasonable but is probabilistic; for binding rules the answer is always programmatic interception.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«اشرح الصيَغ الثلاث في البرومبت» أو «أضف أداة تحويل يستدعيها عند الحاجة» — كلاهما يعتمد على تذكّر الموديل؛ <span dir="ltr" class="font-mono">PostToolUse</span> يضمن التوحيد.</span><span class="lang-en">"Explain the three formats in the prompt" or "add a conversion tool it can call when needed" — both depend on the model remembering; <span dir="ltr" class="font-mono">PostToolUse</span> guarantees the normalization.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«اطلب من فرق الأنظمة الخلفية توحيد صيَغهم» — حل تنظيمي بطيء خارج سيطرتك؛ الاختبار يبي الإصلاح المعماري في طبقتك أنت.</span><span class="lang-en">"Ask the backend teams to standardize their formats" — a slow organizational fix outside your control; the exam wants the architectural fix in your own layer.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">خلط الاتجاهات: اختيار <span dir="ltr" class="font-mono">PostToolUse</span> لحظر نداء صادر، أو اعتراض النداءات لتنظيف نتيجة داخلة.</span><span class="lang-en">Mixing directions: picking <span dir="ltr" class="font-mono">PostToolUse</span> to block an outgoing call, or call interception to clean an incoming result.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="plug" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: لوحة الكهرباء في البيت</span>
+              <span class="lang-en">Real-life example: the home electrical panel</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>لوحة الكهرباء عندك فيها الجهازان اللذان يشرحان الـ hooks بالضبط. <span class="font-semibold">القاطع (circuit breaker)</span> هو هوك الاعتراض: أي حمل يتجاوز الحد المسموح، يفصل التيار <span class="font-semibold">فورًا وفي كل مرة</span> — ما يسأل عن نيّتك ولا يتأثر بحماسك، والتيار الزائد ببساطة لن يمرّ. هذا بالضبط حظر الاسترداد فوق 500$: القاعدة تتنفّذ في الكود قبل وقوع الضرر، ويوجّهك القاطع للمسار البديل (فنّي الكهرباء = التصعيد البشري).</p>
+              <p>و<span class="font-semibold">منظّم الجهد (voltage stabilizer)</span> هو هوك <span dir="ltr" class="font-mono">PostToolUse</span>: الكهرباء توصل البيت من مصادر بجهد متذبذب، لكنه يسلّم أجهزتك 220V ثابتة <span class="font-semibold">دائمًا</span> — أجهزتك ما تشوف الفوضى أصلًا، فما تحتاج «تنتبه». قارن هذا بورقة ملصوقة على اللوحة: «الرجاء عدم تشغيل السخان والمكيف معًا» — هذي تعليمة البرومبت: أغلب أهل البيت يلتزمون، إلى أن ينسى أحدهم يومًا... والفرق بين الورقة والقاطع هو حرفيًا الفرق بين البرومبت والـ hook.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>Your electrical panel holds the two devices that explain hooks exactly. The <span class="font-semibold">circuit breaker</span> is the interception hook: any load beyond the rated limit and it cuts the current <span class="font-semibold">instantly, every single time</span> — it doesn't ask about your intentions or bend to your enthusiasm; the excess current simply will not pass. That is precisely the over-$500 refund block: the rule executes in code before the damage happens, and the breaker points you to the alternative path (the electrician = human escalation).</p>
+              <p>The <span class="font-semibold">voltage stabilizer</span> is the <span dir="ltr" class="font-mono">PostToolUse</span> hook: power reaches the house from sources with fluctuating voltage, but it hands your appliances a steady 220V <span class="font-semibold">always</span> — your devices never see the chaos, so they never need to "be careful." Compare that with a note taped to the panel: "please don't run the heater and AC together" — that's the prompt instruction: most of the household complies, until someone forgets one day... and the difference between the note and the breaker is literally the difference between a prompt and a hook.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.5 نوعان: «بيانات غير متجانسة تسبّب أخطاء قراءة» (الجواب PostToolUse) و«قاعدة عمل ملزمة تُخالَف أحيانًا» (الجواب اعتراض النداء + توجيه بديل).</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>حدّد الاتجاه أولًا: بيانات داخلة للموديل ← <span dir="ltr" class="font-mono">PostToolUse</span>؛ فعل خارج من الموديل ← اعتراض النداء (deny + سبب + مسار بديل).</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>عبارة «امتثال مضمون / guaranteed compliance» في السؤال = hook، مهما بدت خيارات البرومبت مصقولة.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>المشتّتات الثلاثة الدائمة: تعليمات برومبت عن الصيَغ، أداة تحويل اختيارية، وطلب توحيد من فرق خارجية — كلها تعيد الاحتمالية أو تخرج عن سيطرتك.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.5 questions come in two kinds: "heterogeneous data causes misreads" (answer: PostToolUse) and "a binding business rule gets violated occasionally" (answer: call interception + alternative redirect).</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Identify the direction first: data flowing into the model — <span dir="ltr" class="font-mono">PostToolUse</span>; an action flowing out of the model — call interception (deny + reason + alternative workflow).</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>The phrase "guaranteed compliance" in the stem = hook, however polished the prompt options look.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>The three recurring distractors: prompt instructions about formats, an optional conversion tool, and asking external teams to standardize — each re-introduces probability or leaves your control.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">أدوات MCP عندك ترجع الحالة أحيانًا كرقم (<span dir="ltr" class="font-mono text-[0.9em]">2</span>) وأحيانًا كنص (<span dir="ltr" class="font-mono text-[0.9em]">"suspended"</span>)، والوكيل يخلط بينها أحيانًا. وين تعالج المشكلة بضمان؟</span>
+            <span class="lang-en">Your MCP tools return status sometimes as a number (<span dir="ltr" class="font-mono text-[0.9em]">2</span>) and sometimes as text (<span dir="ltr" class="font-mono text-[0.9em]">"suspended"</span>), and the agent occasionally confuses them. Where do you fix this with a guarantee?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">هوك <span dir="ltr" class="font-mono text-[0.9em]">PostToolUse</span> يحوّل كل الحالات لصيغة دلالية واحدة قبل أن يعالجها الموديل</span>
+            <span class="lang-en">A <span dir="ltr" class="font-mono text-[0.9em]">PostToolUse</span> hook converting every status into one semantic form before the model processes it</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">جدول تحويل داخل برومبت النظام يشرح معنى كل رقم</span>
+            <span class="lang-en">A conversion table inside the system prompt explaining what each number means</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">هوك <span dir="ltr" class="font-mono text-[0.9em]">PreToolUse</span> يمنع استدعاء الأدوات ذات الصيَغ الرقمية</span>
+            <span class="lang-en">A <span dir="ltr" class="font-mono text-[0.9em]">PreToolUse</span> hook preventing calls to the numerically-formatted tools</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أضف أمثلة few-shot تُظهر التفسير الصحيح لكل صيغة</span>
+            <span class="lang-en">Add few-shot examples demonstrating the right interpretation of each format</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> بيانات داخلة غير متجانسة = اعتراض النتيجة وتوحيدها في <span dir="ltr" class="font-mono">PostToolUse</span>. الموديل لا يرى الفوضى، فلا مجال للخلط.</span>
+              <span class="lang-en"><strong>Correct.</strong> Heterogeneous incoming data = intercept and normalize the result in <span dir="ltr" class="font-mono">PostToolUse</span>. The model never sees the mess, so there's nothing to confuse.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: توحيد في <span dir="ltr" class="font-mono">PostToolUse</span>. جدول البرومبت والأمثلة يعتمدان على انتباه الموديل (احتمالي)، ومنع الأدوات نفسها يعطّل وظائف سليمة — المشكلة في شكل النتيجة، لا في شرعية النداء.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct fix: normalization in <span dir="ltr" class="font-mono">PostToolUse</span>. A prompt table and examples rely on model attention (probabilistic), and blocking the tools disables healthy functionality — the problem is the result's shape, not the call's legitimacy.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">هوك الاعتراض رفض استرداد 750$ لتجاوزه الحد. وش السلوك الصحيح بعد الرفض؟</span>
+            <span class="lang-en">The interception hook denied a $750 refund for exceeding the limit. What is the correct behavior after the denial?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ينهي الوكيل المحادثة برسالة اعتذار عامة للعميل</span>
+            <span class="lang-en">The agent ends the conversation with a generic apology to the customer</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">يعيد الوكيل المحاولة بنفس النداء لعل الهوك يسمح هذي المرة</span>
+            <span class="lang-en">The agent retries the same call hoping the hook allows it this time</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">يقسّم الوكيل المبلغ إلى استردادين 375$ ليمرّا تحت الحد</span>
+            <span class="lang-en">The agent splits the amount into two $375 refunds to slip under the limit</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">يقرأ الوكيل سبب الرفض ويتّبع المسار البديل: <span dir="ltr" class="font-mono text-[0.9em]">escalate_to_human</span> مع ملخّص تسليم منظّم</span>
+            <span class="lang-en">The agent reads the denial reason and follows the alternative workflow: <span dir="ltr" class="font-mono text-[0.9em]">escalate_to_human</span> with a structured handoff summary</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> نمط «الحظر والتوجيه»: سبب الرفض يرجع للموديل فيتحوّل للمسار البديل المصمَّم — تصعيد بشري بملف كامل. القاعدة حتمية والاستجابة ذكية.</span>
+              <span class="lang-en"><strong>Correct.</strong> The block-and-redirect pattern: the denial reason returns to the model, which pivots to the designed alternative — human escalation with a complete file. The rule is deterministic; the response stays intelligent.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: اتباع المسار البديل (تصعيد بملخّص). إنهاء المحادثة يتخلى عن العميل، وإعادة المحاولة عبث مع قاعدة حتمية، وتقسيم المبلغ تحايل على سياسة الشركة — كارثة امتثال.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct behavior: follow the alternative workflow (escalate with a summary). Ending the chat abandons the customer, retrying is futile against a deterministic rule, and splitting the amount is gaming company policy — a compliance disaster.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">أي متطلب من التالي يرجّح كفّة hook على تعليمة برومبت؟</span>
+            <span class="lang-en">Which of the following requirements tips the scale toward a hook over a prompt instruction?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">«نبغى ردود الوكيل تكون ودّية ومختصرة»</span>
+            <span class="lang-en">"We want the agent's replies friendly and concise"</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">«قاعدة تنظيمية: يُمنع منعًا باتًا تنفيذ أي استرداد فوق حد معيّن بدون موافقة بشرية»</span>
+            <span class="lang-en">"A regulatory rule: executing any refund above a set limit without human approval is strictly forbidden"</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">«نفضّل يبدأ الوكيل رده بتلخيص طلب العميل»</span>
+            <span class="lang-en">"We prefer the agent to open replies by restating the customer's request"</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">«نبغى الشرح التقني يكون بالإنجليزية المبسّطة»</span>
+            <span class="lang-en">"We want technical explanations in plain English"</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> «يُمنع منعًا باتًا» + عواقب تنظيمية = امتثال مضمون مطلوب، وهذا حصريًا اختصاص الـ hooks. البقية تفضيلات أسلوبية يكفيها البرومبت.</span>
+              <span class="lang-en"><strong>Correct.</strong> "Strictly forbidden" + regulatory stakes = guaranteed compliance required, which is exclusively hook territory. The rest are stylistic preferences a prompt handles fine.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: القاعدة التنظيمية الملزمة. النبرة والافتتاحية واللغة كلها توجيه سلوكي يتحمّل الخطأ النادر — برومبت يكفيها؛ الـ hook للقواعد التي لا تقبل الفشل.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct pick: the binding regulatory rule. Tone, openings, and language are behavioral guidance that tolerates a rare miss — prompts suffice; hooks are for rules that cannot fail.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">PostToolUse</span> = بيانات داخلة: وحّد Unix timestamps وISO 8601 والرموز الرقمية قبل الموديل.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>اعتراض النداءات = أفعال خارجة: deny فوق الحد + سبب + مسار بديل (تصعيد بشري).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Hook = ضمانة حتمية 100%؛ برومبت = امتثال احتمالي. «امتثال مضمون» في السؤال = hook.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>لا تعكسها: النبرة والأسلوب تظل للبرومبت — الـ hooks للقواعد الملزمة فقط.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">PostToolUse</span> = incoming data: normalize Unix timestamps, ISO 8601, and numeric codes before the model.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Call interception = outgoing actions: deny above the limit + reason + alternative workflow (human escalation).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Hook = 100% deterministic guarantee; prompt = probabilistic compliance. "Guaranteed compliance" in the stem = hook.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Don't invert it: tone and style stay in the prompt — hooks are for binding rules only.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-4-workflows-enforcement.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.4 سير العمل: الفرض والتسليم</span><span class="lang-en">1.4 Workflows: enforcement &amp; handoff</span></span>
+          </span>
+        </a>
+        <a href="1-6-task-decomposition.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.6 استراتيجيات تفكيك المهام</span><span class="lang-en">1.6 Task decomposition strategies</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.7 حالة الجلسة: الاستئناف والتفريع — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.7 — session state management: named resumption with --resume, fork_session for independent branches from a shared analysis baseline, informing resumed sessions about changed files, and when a fresh session with a structured summary beats resuming stale results. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">الجلسات</span><span class="lang-en">Sessions</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.7</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">إدارة حالة الجلسة: الاستئناف والتفريع</span>
+          <span class="lang-en">Managing session state: resumption &amp; forking</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">شغلك مع الوكيل ما ينتهي بإغلاق الطرفية. استئناف، تفريع، أو بداية جديدة بملخّص — قرار له قواعد واضحة، والاختبار يقيسها كلها.</span>
+        <span class="lang-en">Your work with the agent doesn't end when the terminal closes. Resume, fork, or start fresh with a summary — a decision with clear rules, and the exam measures all of them.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تستأنف محادثة سابقة محددة بالاسم عبر <span dir="ltr" class="font-mono text-brand-700">--resume &lt;session-name&gt;</span> لمواصلة جلسات استقصاء ممتدة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تنشئ فروعًا مستقلة من أساس تحليلي مشترك بـ <span dir="ltr" class="font-mono text-brand-700">fork_session</span> لمقارنة نهجين متباعدين.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تخبر الجلسة المستأنفة بالملفات المتغيّرة تحديدًا لإعادة تحليل مستهدفة بدل استكشاف كامل.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تعرف متى تكون الجلسة الجديدة بملخّص منظّم أوثق من الاستئناف بنتائج أدوات بائتة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تحسم قرار «استأنف / افرع / ابدأ من جديد» حسب صلاحية السياق السابق.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Resume a specific named prior conversation with <span dir="ltr" class="font-mono text-brand-700">--resume &lt;session-name&gt;</span> to continue extended investigation sessions.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Create independent branches from a shared analysis baseline with <span dir="ltr" class="font-mono text-brand-700">fork_session</span> to compare divergent approaches.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Inform a resumed session exactly which files changed for targeted re-analysis instead of full re-exploration.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Know when a fresh session with a structured summary is more reliable than resuming with stale tool results.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Settle the resume / fork / start-fresh decision by how valid the prior context still is.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: --resume ===== -->
+    <section id="resume" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">الاستئناف بالاسم: جلسة استقصاء تمتد أيامًا</span>
+        <span class="lang-en">Named resumption: an investigation spanning days</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الجلسات أعمارها أطول من نافذة الطرفية. <span dir="ltr" class="font-mono text-brand-700">--resume &lt;session-name&gt;</span> يرجّعك <span class="font-semibold">لمحادثة سابقة محددة بالاسم</span> بكامل سياقها: كل تحليل تراكم، كل ملف قُرئ، كل استنتاج توصّل له الوكيل — كأنك ما سكّرت أبدًا. هذا مثالي لجلسات الاستقصاء المسمّاة الممتدة عبر أيام عمل: تسمّي الجلسة <span dir="ltr" class="font-mono text-brand-700">auth-audit</span> يوم الأحد، وترجع لها الاثنين والثلاثاء بنفس الاسم.</p>
+        <p>لكن انتبه للنقطة اللي يحبها الاختبار: لو رجعت للجلسة <span class="font-semibold">بعد ما تعدّلت ملفات سبق تحليلها</span>، الوكيل ما يدري عن التعديل — بيجاوب من ذاكرة تحليل قديم. الواجب عليك: <span class="font-semibold">أخبره بالتغييرات تحديدًا</span> («ملف <span dir="ltr" class="font-mono">token.py</span> تحوّل لـ async — أعد تحليله هو ومستدعيه فقط») ليقوم بإعادة تحليل <span class="font-semibold">مستهدفة</span> للمتأثر بدل إعادة استكشاف كاملة تحرق الوقت والتوكنز.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Sessions outlive the terminal window. <span dir="ltr" class="font-mono text-brand-700">--resume &lt;session-name&gt;</span> returns you to <span class="font-semibold">a specific prior conversation by name</span> with its full context: every accumulated analysis, every file read, every conclusion the agent reached — as if you never closed it. That is ideal for named investigation sessions spanning workdays: name the session <span dir="ltr" class="font-mono text-brand-700">auth-audit</span> on Sunday and return to it Monday and Tuesday by the same name.</p>
+        <p>But mind the point the exam loves: if you resume <span class="font-semibold">after previously analyzed files were modified</span>, the agent doesn't know about the edits — it will answer from a memory of stale analysis. Your job: <span class="font-semibold">tell it exactly what changed</span> ("<span dir="ltr" class="font-mono">token.py</span> was refactored to async — re-analyze only it and its callers") so it performs a <span class="font-semibold">targeted</span> re-analysis of what's affected instead of a full re-exploration that burns time and tokens.</p>
+      </div>
+
+      <!-- Diagram 1: session timeline -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-3">
+          <div class="flex items-stretch gap-2">
+            <div class="flex flex-col items-center">
+              <span class="text-[10px] font-mono font-bold text-surface-500">DAY 1</span>
+              <div class="w-0.5 flex-1 bg-brand-200"></div>
+            </div>
+            <div class="flex-1 bg-brand-50 border border-brand-200 rounded-xl p-3">
+              <div class="text-[11px] font-mono font-bold text-brand-800">claude &nbsp;(session: auth-audit)</div>
+              <div class="text-[10px] font-mono text-surface-600 mt-1">deep analysis: auth flow, token handling, 3 findings</div>
+            </div>
+          </div>
+          <div class="flex items-stretch gap-2">
+            <div class="flex flex-col items-center">
+              <span class="text-[10px] font-mono font-bold text-surface-500">DAY 2</span>
+              <div class="w-0.5 flex-1 bg-brand-200"></div>
+            </div>
+            <div class="flex-1 bg-brand-50 border border-brand-200 rounded-xl p-3">
+              <div class="text-[11px] font-mono font-bold text-brand-800">claude --resume auth-audit</div>
+              <div class="text-[10px] font-mono text-surface-600 mt-1">full context restored -- continues where it left off</div>
+            </div>
+          </div>
+          <div class="flex items-stretch gap-2">
+            <div class="flex flex-col items-center">
+              <span class="text-[10px] font-mono font-bold text-surface-500">DAY 3</span>
+              <div class="w-0.5 flex-1 bg-transparent"></div>
+            </div>
+            <div class="flex-1 bg-amber-50 border-2 border-amber-300 rounded-xl p-3">
+              <div class="text-[11px] font-mono font-bold text-amber-800">claude --resume auth-audit &nbsp;+&nbsp; "token.py changed"</div>
+              <div class="text-[10px] font-mono text-amber-700 mt-1">code changed since day 2 -- inform the agent: targeted re-analysis of token.py + callers only</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">جلسة مسمّاة تمتد ثلاثة أيام: استئناف كامل السياق، ومع تغيّر الكود تُخبر الوكيل بالتغيير لإعادة تحليل مستهدفة.</span>
+          <span class="lang-en">A named session spanning three days: full-context resumption, and when code changes you inform the agent for targeted re-analysis.</span>
+        </p>
+      </div>
+
+      <!-- Code: CLI -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">الاستئناف والتفريع والبداية الجديدة من الطرفية</span>
+          <span class="lang-en">Resuming, forking, and starting fresh from the CLI</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-bash"># Continue a specific named investigation session where it left off
+claude --resume auth-audit
+
+# Resuming AFTER code changed? Inform the agent precisely what changed,
+# so it re-analyzes only the affected files instead of re-exploring everything.
+claude --resume auth-audit -p "Since our last session, src/auth/token.py was \
+refactored to async. Re-analyze only that file and its callers."
+
+# Fork twice from the SAME baseline to compare divergent approaches in parallel
+claude --resume auth-audit --fork-session -p "Approach A: design the test suite around pytest fixtures"
+claude --resume auth-audit --fork-session -p "Approach B: design the test suite around factory-based mocks"
+
+# Stale tool results? Do NOT resume -- start FRESH with a structured summary:
+claude -p "Context summary: repo uses JWT auth (src/auth/), 3 known bugs listed \
+in notes.md, coverage is 41%. Task: propose a prioritized test plan."</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> «إعادة تحليل مستهدفة» تعني تحديد <span class="font-semibold">الملف ومستدعيه</span> — مو «راجع المشروع» العامة ولا الصمت الكامل. الدقة في وصف التغيير هي اللي توفّر إعادة الاستكشاف.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> "targeted re-analysis" means naming <span class="font-semibold">the file and its callers</span> — not a vague "review the project" and not total silence. Precision in describing the change is what saves you the full re-exploration.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: fork_session ===== -->
+    <section id="fork" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">fork_session: فرعان مستقلان من أساس واحد</span>
+        <span class="lang-en">fork_session: two independent branches from one baseline</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>أحيانًا ما تحتاج «تكمل» الجلسة — تحتاج <span class="font-semibold">تتفرّع منها</span>. <span dir="ltr" class="font-mono text-brand-700">fork_session</span> ينشئ جلسة جديدة <span class="font-semibold">مستقلة</span> تبدأ من نقطة الأساس المستأنفة، ويترك الأصل كما هو. الاستخدام النموذجي: بعد جلسة حلّلت قاعدة الكود بعمق، تبي تقارن <span class="font-semibold">نهجين متباعدين</span> — استراتيجيتي اختبار (fixtures مقابل factory mocks) أو نهجي إعادة هيكلة. تفرع مرتين من نفس الأساس: كل فرع يستكشف نهجه بحرية كاملة، <span class="font-semibold">بلا تلوّث متبادل</span>، والأساس المشترك حُلّل <span class="font-semibold">مرة واحدة فقط</span>.</p>
+        <p>قارن بالبديلين الخاسرين: تجربة النهجين <span class="font-semibold">بالتتابع في جلسة واحدة</span> — النهج الأول يبقى في السياق ويلوّن حكم الوكيل على الثاني (والوكيل ما «ينسى» عند الطلب)؛ أو <span class="font-semibold">جلستان جديدتان من الصفر</span> — تدفع كلفة تحليل قاعدة الكود مرتين كاملتين بلا أي مقابل.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Sometimes you don't need to "continue" a session — you need to <span class="font-semibold">branch from it</span>. <span dir="ltr" class="font-mono text-brand-700">fork_session</span> creates a new <span class="font-semibold">independent</span> session starting from the resumed baseline, leaving the original untouched. The canonical use: after a session that deeply analyzed your codebase, you want to compare <span class="font-semibold">two divergent approaches</span> — two testing strategies (fixtures vs factory mocks) or two refactoring paths. Fork twice from the same baseline: each branch explores its approach with full freedom, <span class="font-semibold">no cross-contamination</span>, and the shared baseline was analyzed <span class="font-semibold">exactly once</span>.</p>
+        <p>Compare the two losing alternatives: trying both approaches <span class="font-semibold">sequentially in one session</span> — the first approach stays in context and colors the agent's judgment of the second (and the agent doesn't "forget" on request); or <span class="font-semibold">two brand-new sessions from scratch</span> — paying the full codebase-analysis cost twice for nothing.</p>
+      </div>
+
+      <!-- Diagram 2: fork branching tree -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto">
+          <div class="flex flex-col items-center gap-2">
+            <div class="bg-brand-600 text-white rounded-xl px-4 py-2.5 text-xs font-mono font-bold shadow-sm text-center">session: auth-audit<br><span class="font-normal text-brand-200">shared analysis baseline (analyzed ONCE)</span></div>
+            <div class="flex items-center gap-12">
+              <i data-lucide="corner-down-left" class="w-5 h-5 text-brand-400"></i>
+              <span class="text-[10px] font-mono font-bold text-brand-500">fork_session x2</span>
+              <i data-lucide="corner-down-right" class="w-5 h-5 text-brand-400"></i>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-3 w-full">
+              <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 text-center space-y-1">
+                <div class="text-[11px] font-mono font-bold text-emerald-800">fork A: pytest fixtures strategy</div>
+                <div class="text-[10px] font-mono text-emerald-700">independent context -- explores freely</div>
+              </div>
+              <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-3 text-center space-y-1">
+                <div class="text-[11px] font-mono font-bold text-emerald-800">fork B: factory mocks strategy</div>
+                <div class="text-[10px] font-mono text-emerald-700">independent context -- explores freely</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 bg-surface-50 border border-surface-200 rounded-lg px-3 py-1.5 mt-1">
+              <i data-lucide="git-branch" class="w-4 h-4 text-surface-500"></i>
+              <span class="text-[10px] font-mono text-surface-600">neither branch pollutes the other -- original session stays untouched</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">شجرة التفريع: أساس يُحلَّل مرة واحدة، وفرعان معزولان يستكشف كل منهما نهجًا — والأصل يبقى سليمًا.</span>
+          <span class="lang-en">The fork tree: one baseline analyzed once, two isolated branches each exploring an approach — and the original stays intact.</span>
+        </p>
+      </div>
+
+      <!-- Code: SDK -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">نفس المفهوم داخل الـ Agent SDK</span>
+          <span class="lang-en">The same concept inside the Agent SDK</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python">from claude_agent_sdk import query, ClaudeAgentOptions
+
+# resume alone -&gt; CONTINUE the same session (its history keeps growing)
+options = ClaudeAgentOptions(resume="auth-audit")
+
+# resume + fork_session -&gt; BRANCH: a new independent session that starts
+# from the resumed baseline, leaving the original untouched
+branch_a = ClaudeAgentOptions(resume="auth-audit", fork_session=True)
+branch_b = ClaudeAgentOptions(resume="auth-audit", fork_session=True)
+# branch_a and branch_b now diverge freely -- neither sees the other.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: resume vs fork vs fresh ===== -->
+    <section id="decision" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">القرار: استأنف، افرع، أم ابدأ من جديد؟</span>
+        <span class="lang-en">The decision: resume, fork, or start fresh?</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>يبقى السؤال الأهم: متى يكون الاستئناف نفسه فكرة سيئة؟ الجواب: لما تكون نتائج الأدوات القديمة <span class="font-semibold text-red-700">بائتة (stale) على نطاق واسع</span> — الكود تغيّر كثيرًا منذ التحليل. الجلسة المستأنفة تحمل النتائج القديمة <span class="font-semibold">كأنها حقائق حاضرة</span>، والوكيل بيبني استنتاجات جديدة فوق واقع ما عاد موجودًا. الدليل صريح هنا: <span class="font-semibold">البدء بجلسة جديدة مع ملخّص منظّم</span> — بالحقائق اللي ما زالت صحيحة فقط — أوثق من الاستئناف بنتائج بائتة.</p>
+        <p>القرار الكامل بأربع حالات: سياق سابق معظمه صالح ← <span class="font-semibold">استأنف</span>. ملفات محددة تغيّرت ← <span class="font-semibold">استأنف + أخبره بالتغييرات</span>. مقارنة نهجين من أساس مشترك ← <span class="font-semibold">افرع</span>. نتائج بائتة على نطاق واسع ← <span class="font-semibold">جلسة جديدة + ملخّص منظّم</span>.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The biggest question remains: when is resuming itself a bad idea? Answer: when the old tool results are <span class="font-semibold text-red-700">broadly stale</span> — the code has moved substantially since the analysis. A resumed session carries the old results <span class="font-semibold">as if they were present-day facts</span>, and the agent will stack new conclusions on top of a reality that no longer exists. The guide is explicit here: <span class="font-semibold">starting a new session with a structured summary</span> — containing only the facts that still hold — is more reliable than resuming with stale results.</p>
+        <p>The full decision in four cases: prior context mostly valid — <span class="font-semibold">resume</span>. Specific files changed — <span class="font-semibold">resume + state the changes</span>. Comparing approaches from a shared baseline — <span class="font-semibold">fork</span>. Broadly stale results — <span class="font-semibold">fresh session + structured summary</span>.</p>
+      </div>
+
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700">الموقف</th>
+              <th class="p-3 text-start font-semibold text-brand-700">القرار الصحيح</th>
+              <th class="p-3 text-start font-semibold text-surface-600">ليش؟</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">السياق السابق معظمه ما زال صالحًا</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">--resume &lt;name&gt;</span></td><td class="p-3 text-surface-600">تستفيد من التحليل المتراكم بلا إعادة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">ملفات محددة تغيّرت بعد التحليل</td><td class="p-3">استأنف + أخبره بالتغييرات</td><td class="p-3 text-surface-600">إعادة تحليل مستهدفة بدل استكشاف كامل</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مقارنة نهجين من نفس الأساس</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">fork_session</span></td><td class="p-3 text-surface-600">فروع معزولة، والأساس يُحلَّل مرة واحدة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">نتائج الأدوات بائتة على نطاق واسع</td><td class="p-3">جلسة جديدة + ملخّص منظّم</td><td class="p-3 text-surface-600">الاستئناف يورّث استنتاجات عن واقع انتهى</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700">Situation</th>
+              <th class="p-3 text-start font-semibold text-brand-700">Correct call</th>
+              <th class="p-3 text-start font-semibold text-surface-600">Why</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Prior context mostly still valid</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">--resume &lt;name&gt;</span></td><td class="p-3 text-surface-600">Reuse the accumulated analysis, no redo</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Specific files changed since analysis</td><td class="p-3">Resume + state the changes</td><td class="p-3 text-surface-600">Targeted re-analysis beats full re-exploration</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Comparing two approaches from one baseline</td><td class="p-3"><span dir="ltr" class="font-mono text-[0.85em]">fork_session</span></td><td class="p-3 text-surface-600">Isolated branches; baseline analyzed once</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Tool results broadly stale</td><td class="p-3">Fresh session + structured summary</td><td class="p-3 text-surface-600">Resuming inherits conclusions about a dead reality</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> السؤال الحاسم قبل أي استئناف: <span class="font-semibold">«هل نتائج الأدوات المخزّنة في الجلسة ما زالت تطابق الواقع؟»</span> نعم ← استأنف (أو افرع). لا ← جلسة جديدة بملخّص الحقائق الصالحة. عمر الجلسة نفسه مو المعيار — صلاحية محتواها هي المعيار.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> the decisive question before any resume: <span class="font-semibold">"do the tool results stored in the session still match reality?"</span> Yes — resume (or fork). No — a fresh session with a summary of the still-valid facts. The session's age is not the criterion — the validity of its contents is.</div>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-amber-900 leading-relaxed"><span class="font-bold">تنبيه:</span> «الاستئناف دائمًا أوفر» فكرة مغرية وخاطئة. لو الكود تغيّر كثيرًا، وفّرت دقائق الإعداد وخسرت موثوقية كل استنتاج لاحق — الوكيل يحاكم واقعًا انتهى.</div>
+          <div class="lang-en text-amber-900 leading-relaxed"><span class="font-bold">Warning:</span> "resuming is always cheaper" is tempting and wrong. If the code has moved a lot, you saved setup minutes and forfeited the reliability of every subsequent conclusion — the agent is reasoning about a reality that's gone.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">تجربة نهجين <span class="font-semibold">بالتتابع في نفس الجلسة</span> — الأول يلوّث سياق الثاني؛ الصح <span dir="ltr" class="font-mono">fork_session</span>.</span><span class="lang-en">Trying two approaches <span class="font-semibold">sequentially in the same session</span> — the first contaminates the second; the right tool is <span dir="ltr" class="font-mono">fork_session</span>.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">جلستان جديدتان تعيدان التحليل كاملًا من الصفر لمقارنة نهجين — تدفع كلفة التحليل مرتين بلا داعٍ.</span><span class="lang-en">Two brand-new sessions redoing the full analysis to compare approaches — paying the analysis cost twice for nothing.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">استئناف جلسة بعد تعديل ملفات <span class="font-semibold">بدون إخبار الوكيل</span> — بيجاوب من ذاكرة تحليل قديم.</span><span class="lang-en">Resuming after file edits <span class="font-semibold">without informing the agent</span> — it will answer from a memory of stale analysis.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">استئناف جلسة نتائجها بائتة على نطاق واسع «للاستفادة من السياق» — الدليل صريح: الجلسة الجديدة بملخّص منظّم أوثق.</span><span class="lang-en">Resuming a broadly-stale session "to leverage the context" — the guide is explicit: a fresh session with a structured summary is more reliable.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="stethoscope" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: ملف المريض عند الطبيب</span>
+              <span class="lang-en">Real-life example: the patient file at the doctor's</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>علاقتك بطبيبك هي إدارة جلسات بامتياز. <span class="font-semibold">المراجعة عند نفس الطبيب</span> هي <span dir="ltr" class="font-mono">--resume</span>: ملفك عنده كامل — التاريخ، التحاليل، الملاحظات — فيكمل من حيث وقف بدل ما يبدأ من الصفر. ولما تدخل عليه تقول: «من آخر زيارة سويت عملية بسيطة وغيّرت الدواء الفلاني» — هذا بالضبط <span class="font-semibold">إخبار الجلسة المستأنفة بالتغييرات</span>: معلومة دقيقة تخلّيه يعيد تقييم الجزء المتأثر فقط، بدل إعادة الفحص الشامل.</p>
+              <p>وتبي <span class="font-semibold">رأيين علاجيين مختلفين</span> لنفس الحالة؟ ما تعيد التحاليل مرتين — تنسخ الملف وترسله لاستشاريين، كل واحد يبني خطته باستقلال من نفس الأساس: هذا <span dir="ltr" class="font-mono">fork_session</span>. أما لو رجعت بعد عشر سنين وصحتك تغيّرت جذريًا، الطبيب الحكيم ما يبني قرارات اليوم على تحاليل 2016 البائتة — يطلب <span class="font-semibold">فحوصات جديدة مع خطاب ملخّص</span> بالثوابت المهمة (الحساسيات، العمليات السابقة): جلسة جديدة بملخّص منظّم، لأن القرارات على بيانات ميتة أخطر من كلفة الفحص الجديد.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>Your relationship with your doctor is session management par excellence. <span class="font-semibold">Following up with the same doctor</span> is <span dir="ltr" class="font-mono">--resume</span>: your file is complete on their desk — history, labs, notes — so they continue where they left off instead of starting over. And when you walk in saying, "since my last visit I had a minor surgery and switched that medication" — that is exactly <span class="font-semibold">informing the resumed session about changes</span>: precise information that lets them re-evaluate only the affected part rather than repeating the full workup.</p>
+              <p>Want <span class="font-semibold">two different treatment opinions</span> on the same case? You don't redo the labs twice — you copy the file to two consultants, each building their plan independently from the same baseline: that is <span dir="ltr" class="font-mono">fork_session</span>. But if you return after ten years with your health fundamentally changed, a wise doctor won't base today's decisions on stale 2016 labs — they order <span class="font-semibold">fresh tests plus a summary letter</span> of the durable constants (allergies, past surgeries): a fresh session with a structured summary, because decisions on dead data cost more than the new workup.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.7 كلها سيناريوهات قرار: يوصفون لك وضع جلسة (تحليل قديم، كود تغيّر، رغبة بمقارنة نهجين) ويطلبون التصرف الأمثل.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>«مقارنة نهجين من تحليل مشترك» ← <span dir="ltr" class="font-mono">fork_session</span> مرتين. «مواصلة استقصاء مسمّى» ← <span dir="ltr" class="font-mono">--resume</span>. «كل شيء تغيّر» ← جلسة جديدة بملخّص.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>لما يذكر السؤال «ملفات معيّنة تعدّلت»، الإجابة الصحيحة تتضمّن إخبار الوكيل بالتغيير تحديدًا لإعادة تحليل مستهدفة.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>استبعد: التجربة المتتابعة في جلسة واحدة (تلوّث)، الجلستين الجديدتين لمقارنة (كلفة مزدوجة)، والاستئناف الأعمى بنتائج بائتة (استنتاجات عن واقع منتهٍ).</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.7 questions are all decision scenarios: they describe a session situation (old analysis, changed code, a wish to compare approaches) and ask for the optimal move.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>"Compare two approaches from shared analysis" — <span dir="ltr" class="font-mono">fork_session</span> twice. "Continue a named investigation" — <span dir="ltr" class="font-mono">--resume</span>. "Everything changed" — a fresh session with a summary.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>When the stem mentions "specific files were modified," the right answer includes telling the agent exactly what changed for targeted re-analysis.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Eliminate: sequential trials in one session (contamination), two fresh sessions for a comparison (double cost), and blind resumption over stale results (conclusions about a dead reality).</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">رجعت لجلسة <span dir="ltr" class="font-mono text-[0.9em]">auth-audit</span> بعد يومين، وفي أثنائهما أعيدت هيكلة <span dir="ltr" class="font-mono text-[0.9em]">token.py</span> فقط. وش التصرف الصحيح؟</span>
+            <span class="lang-en">You return to the <span dir="ltr" class="font-mono text-[0.9em]">auth-audit</span> session after two days, during which only <span dir="ltr" class="font-mono text-[0.9em]">token.py</span> was refactored. What is the correct move?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">استأنف الجلسة بصمت — الوكيل بيكتشف التغيير بنفسه عند الحاجة</span>
+            <span class="lang-en">Resume silently — the agent will notice the change on its own when needed</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ابدأ جلسة جديدة من الصفر وأعد تحليل قاعدة الكود كاملة</span>
+            <span class="lang-en">Start a brand-new session and re-analyze the whole codebase</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">استأنف وأخبر الوكيل تحديدًا: «<span dir="ltr" class="font-mono text-[0.9em]">token.py</span> أعيدت هيكلته — أعد تحليله هو ومستدعيه فقط»</span>
+            <span class="lang-en">Resume and tell the agent precisely: "<span dir="ltr" class="font-mono text-[0.9em]">token.py</span> was refactored — re-analyze only it and its callers"</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">استخدم <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> لعزل التغيير في فرع مستقل</span>
+            <span class="lang-en">Use <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> to isolate the change in a separate branch</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> تغيير محدود = استئناف + إخبار دقيق بالتغيير لإعادة تحليل مستهدفة. تستفيد من التحليل المتراكم وتصحّح الجزء البائت فقط.</span>
+              <span class="lang-en"><strong>Correct.</strong> A contained change = resume + precise notification for targeted re-analysis. You keep the accumulated analysis and refresh only the stale part.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: استئناف + إخبار بالتغيير تحديدًا. الصمت يترك الوكيل يجاوب من تحليل قديم، والجلسة الجديدة الكاملة إهدار لتحليل ما زال معظمه صالحًا، والـ fork لمقارنة نهجين مو لتحديث ملف.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct move: resume + state the specific change. Silence leaves the agent answering from stale analysis, a full new session wastes mostly-valid work, and forking is for comparing approaches, not refreshing a file.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">جلسة تحليل عمرها ثلاثة أشهر، وتغيّر منذها معظم الكود المُحلَّل: هجرة إطار عمل، حذف وحدات، وإعادة تسمية واسعة. تحتاج تكمل الشغل على نفس الموضوع. وش الأوثق؟</span>
+            <span class="lang-en">An analysis session is three months old, and most of the analyzed code has since changed: a framework migration, deleted modules, sweeping renames. You need to continue work on the same topic. What is most reliable?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">استأنف الجلسة — السياق المتراكم أثمن من أي شيء</span>
+            <span class="lang-en">Resume the session — accumulated context beats everything</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ابدأ جلسة جديدة وازرع فيها ملخّصًا منظّمًا بالحقائق التي ما زالت صحيحة</span>
+            <span class="lang-en">Start a fresh session seeded with a structured summary of the facts that still hold</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">افرع الجلسة القديمة بـ <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> واشتغل في الفرع</span>
+            <span class="lang-en">Fork the old session with <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> and work in the branch</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">استأنف واطلب من الوكيل «تجاهل أي معلومة قديمة» أثناء الإجابة</span>
+            <span class="lang-en">Resume and instruct the agent to "ignore any outdated information" while answering</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> نتائج بائتة على نطاق واسع = البداية الجديدة بملخّص منظّم أوثق من الاستئناف — نصّ الدليل حرفيًا. الملخّص يحمل الثوابت الصالحة فقط، والوكيل يستكشف الواقع الحالي.</span>
+              <span class="lang-en"><strong>Correct.</strong> Broadly stale results = starting fresh with a structured summary is more reliable than resuming — the guide verbatim. The summary carries only the still-valid constants, and the agent explores current reality.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: جلسة جديدة + ملخّص منظّم. الاستئناف (والـ fork فرع منه) يورّث نتائج أدوات عن كود ما عاد موجودًا، و«تجاهل القديم» تعليمة احتمالية على سياق ملوّث أصلًا.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct call: fresh session + structured summary. Resuming (and forking, which inherits from it) carries tool results about code that no longer exists, and "ignore the outdated parts" is a probabilistic instruction over already-contaminated context.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">وش الذي يميّز <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> عن <span dir="ltr" class="font-mono text-[0.9em]">--resume</span> العادي؟</span>
+            <span class="lang-en">What distinguishes <span dir="ltr" class="font-mono text-[0.9em]">fork_session</span> from a plain <span dir="ltr" class="font-mono text-[0.9em]">--resume</span>?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">الـ fork يبدأ جلسة فارغة تمامًا بلا أي سياق سابق</span>
+            <span class="lang-en">A fork starts a completely empty session with no prior context</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">الـ fork نسخة للقراءة فقط لا يمكن مواصلة العمل فيها</span>
+            <span class="lang-en">A fork is a read-only snapshot you can't continue working in</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">الـ fork ينشئ جلسة مستقلة جديدة تنطلق من الأساس المستأنَف، بينما يواصل resume نفس الجلسة وتاريخها ينمو</span>
+            <span class="lang-en">A fork creates a new independent session starting from the resumed baseline, while resume continues the same session with its growing history</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">لا فرق عمليًا — الاسمان لنفس الآلية في واجهتين مختلفتين</span>
+            <span class="lang-en">No practical difference — two names for the same mechanism in different interfaces</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> resume = مواصلة نفس الجلسة؛ fork = فرع مستقل يبدأ من الأساس ويترك الأصل سليمًا — ولهذا يصلح لمقارنة نهجين متوازيين من تحليل واحد.</span>
+              <span class="lang-en"><strong>Correct.</strong> Resume = continuing the same session; fork = an independent branch starting from the baseline, leaving the original untouched — which is why it suits comparing parallel approaches from one analysis.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: fork = جلسة مستقلة جديدة من الأساس المستأنَف، وresume = مواصلة نفس الجلسة. الـ fork ليس فارغًا (يحمل الأساس) وليس للقراءة فقط، والآليتان مختلفتان جوهريًا.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct answer: fork = a new independent session from the resumed baseline; resume = continuing the same session. A fork is neither empty (it carries the baseline) nor read-only, and the two mechanisms are fundamentally different.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">--resume &lt;session-name&gt;</span> يستأنف محادثة مسمّاة محددة بكامل سياقها.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">fork_session</span> = فروع مستقلة من أساس مشترك لمقارنة نهجين — الأساس يُحلَّل مرة واحدة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>رجعت بعد تعديل ملفات؟ أخبر الوكيل بالتغيير تحديدًا لإعادة تحليل مستهدفة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>نتائج بائتة على نطاق واسع؟ جلسة جديدة + ملخّص منظّم أوثق من الاستئناف.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>المعيار صلاحية المحتوى لا عمر الجلسة: هل نتائج الأدوات ما زالت تطابق الواقع؟</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">--resume &lt;session-name&gt;</span> continues a specific named conversation with full context.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span><span dir="ltr" class="font-mono">fork_session</span> = independent branches from a shared baseline to compare approaches — the baseline analyzed once.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Back after file edits? Tell the agent exactly what changed for targeted re-analysis.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Broadly stale results? A fresh session + structured summary beats resuming.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The criterion is content validity, not session age: do the tool results still match reality?</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-6-task-decomposition.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.6 استراتيجيات تفكيك المهام</span><span class="lang-en">1.6 Task decomposition strategies</span></span>
+          </span>
+        </a>
+        <a href="../domain-2/index.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">الدومين 2: تصميم الأدوات وتكامل MCP</span><span class="lang-en">Domain 2: Tool Design &amp; MCP Integration</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.4 السياق في استكشاف الأكواد الكبيرة — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.4 من شهادة CCAF: أعراض تدهور السياق، ملفات المسودّة، تفويض الوكلاء الفرعيين، حقن ملخصات المراحل، الاستئناف بعد الانهيار عبر manifest، وأمر /compact.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.4 استكشاف الأكواد</span><span class="lang-en">5.4 Codebase exploration</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.4</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">إدارة السياق في استكشاف الأكواد الكبيرة</span>
+            <span class="lang-en">Managing context in large-codebase exploration</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن الجلسة الطويلة على كود ضخم «تتعب»: تبدأ بإجابات دقيقة عن كلاسات محددة، وتنتهي بكلام عام عن «الأنماط الشائعة».</span>
+            <span class="lang-en">Why it matters: a long session on a huge codebase gets "tired" — it starts with precise answers about specific classes and ends with generic talk about "typical patterns."</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">التعرف على أعراض تدهور السياق: إجابات متضاربة وإشارات لـ«الأنماط الشائعة» بدل الكلاسات المكتشَفة فعليًا.</span><span class="lang-en">Recognizing context-degradation symptoms: inconsistent answers and references to "typical patterns" instead of actually discovered classes.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">استخدام ملفات المسودّة (scratchpad) لحفظ النتائج المفتاحية عبر حدود السياق والرجوع لها لاحقًا.</span><span class="lang-en">Using scratchpad files to persist key findings across context boundaries and reference them later.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تفويض وكلاء فرعيين لأسئلة محددة («جِد كل ملفات الاختبار»، «تتبّع تبعيات مسار الاسترداد») لعزل المخرَج المطوَّل.</span><span class="lang-en">Spawning subagents for specific questions ("find all test files," "trace refund-flow dependencies") to isolate verbose output.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تلخيص نتائج كل مرحلة استكشاف وحقن الملخص في السياق الأولي لوكلاء المرحلة التالية.</span><span class="lang-en">Summarizing each exploration phase's findings and injecting the summary into the next phase's agents' initial context.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">تصميم استئناف بعد الانهيار: كل وكيل يصدّر حالته لمكان معروف، والمنسّق يحمّل الـ manifest ويحقنه في الأوامر.</span><span class="lang-en">Designing crash recovery: each agent exports state to a known location; the coordinator loads the manifest on resume and injects it into prompts.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">استخدام <span dir="ltr" class="font-mono">/compact</span> لتقليص استهلاك السياق لما تمتلئ الجلسة بمخرجات استكشاف مطوَّلة.</span><span class="lang-en">Using <span dir="ltr" class="font-mono">/compact</span> to reduce context usage when the session fills with verbose discovery output.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: DEGRADATION SYMPTOMS ===== -->
+    <section id="symptoms" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">أعراض تدهور السياق — اعرفها قبل ما تعالجها</span>
+        <span class="lang-en">Context-degradation symptoms — know them before you treat them</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>في الجلسات الممتدة على قاعدة كود ضخمة، السياق «يتدهور» بأعراض واضحة يجب أن تلتقطها مبكرًا:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>إجابات متضاربة</strong>: يقول شيئًا عن بنية الموديول ثم يناقضه بعد أسئلة قليلة.</li>
+          <li><strong>الرجوع لـ«الأنماط الشائعة»</strong>: بدل ذكر <span dir="ltr" class="font-mono">UserService</span> اللي حلّله فعلًا قبل ساعة، يقول «عادةً خدمات المستخدمين تتبع نمط كذا…» — يعني فقد التفاصيل المكتشَفة وبدأ يسدّ الفراغ من معرفته العامة.</li>
+        </ul>
+        <p>السبب: السياق امتلأ بمخرجات استكشاف مطوَّلة (مئات المقاطع من ملفات وأوامر بحث)، فتاهت الاكتشافات المحددة وسط الضجيج. المهم للاختبار: هذي الأعراض <strong>إشارة للتصرف</strong> — مو شيء تتجاهله وتكمل، لأن الإجابات بعدها تزداد سوءًا فقط.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>In extended sessions over a huge codebase, context "degrades" with clear symptoms you should catch early:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Inconsistent answers</strong>: it says one thing about a module's structure, then contradicts itself a few questions later.</li>
+          <li><strong>Falling back to "typical patterns"</strong>: instead of naming the <span dir="ltr" class="font-mono">UserService</span> it actually analyzed an hour ago, it says "user services usually follow this pattern..." — the discovered specifics are gone and it's padding from general knowledge.</li>
+        </ul>
+        <p>The cause: context filled with verbose exploration output (hundreds of file excerpts and search results), and the specific discoveries drowned in the noise. What matters for the exam: these symptoms are a <strong>signal to act</strong> — not something to push through, because subsequent answers only get worse.</p>
+      </div>
+
+      <!-- DIAGRAM 1: degradation timeline -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-4 font-mono text-center">Context degradation timeline — an extended exploration session</p>
+        <div class="grid sm:grid-cols-3 gap-2.5 max-w-2xl mx-auto">
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl p-3.5">
+            <p class="text-emerald-300 font-mono text-[11px] font-bold mb-2">EARLY SESSION</p>
+            <p class="text-surface-300 font-mono text-[10px] leading-relaxed">"AuthService.validate() at src/auth/service.ts:42 calls TokenStore"</p>
+            <div class="mt-2.5 h-1.5 bg-surface-700 rounded-full overflow-hidden"><div class="h-full w-1/4 bg-emerald-400"></div></div>
+            <p class="text-surface-500 font-mono text-[9px] mt-1">context: 25% full &middot; answers: specific</p>
+          </div>
+          <div class="bg-amber-500/15 border border-amber-400/50 rounded-xl p-3.5">
+            <p class="text-amber-300 font-mono text-[11px] font-bold mb-2">MID SESSION</p>
+            <p class="text-surface-300 font-mono text-[10px] leading-relaxed">"I believe the auth flow goes through a token store... let me re-check"</p>
+            <div class="mt-2.5 h-1.5 bg-surface-700 rounded-full overflow-hidden"><div class="h-full w-2/3 bg-amber-400"></div></div>
+            <p class="text-surface-500 font-mono text-[9px] mt-1">context: 65% full &middot; answers: hesitant</p>
+          </div>
+          <div class="bg-red-500/15 border border-red-400/50 rounded-xl p-3.5">
+            <p class="text-red-300 font-mono text-[11px] font-bold mb-2">DEGRADED</p>
+            <p class="text-surface-300 font-mono text-[10px] leading-relaxed">"Auth services typically follow a middleware pattern..." (contradicts earlier)</p>
+            <div class="mt-2.5 h-1.5 bg-surface-700 rounded-full overflow-hidden"><div class="h-full w-full bg-red-400"></div></div>
+            <p class="text-surface-500 font-mono text-[9px] mt-1">context: full of noise &middot; answers: generic + inconsistent</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-surface-700">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span class="text-surface-400 font-mono text-[11px]">"typical patterns" + contradictions = the signal to act (scratchpad / subagent / /compact)</span>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">من إجابات محددة بأسماء ملفات وأسطر، إلى تردد، إلى كلام عام متناقض — كلما امتلأ السياق بمخرجات مطوَّلة.</span>
+        <span class="lang-en">From specific answers with file names and line numbers, to hesitation, to generic contradictions — as context fills with verbose output.</span>
+      </p>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي: العرَض قبل العلاج</span><span class="lang-en">Key concept: symptom before cure</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">أعراض التدهور (تضارب + «أنماط شائعة» بدل تفاصيل مكتشَفة) هي <strong>إشارتك للتصرف</strong>: احقن ملخصًا من المسودّة، أو فوّض وكيلًا فرعيًا، أو نفّذ <span dir="ltr" class="font-mono">/compact</span>. الاستمرار وكأن شيئًا لم يكن يعني إجابات أسوأ وقرارات مبنية على «تخمين عام» بدل الكود الفعلي.</span>
+              <span class="lang-en">Degradation symptoms (contradictions + "typical patterns" instead of discovered specifics) are your <strong>signal to act</strong>: inject a scratchpad summary, delegate to a subagent, or run <span dir="ltr" class="font-mono">/compact</span>. Pushing on as if nothing happened means worse answers and decisions built on generic guessing instead of the actual code.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: THE FOUR COUNTERMEASURES ===== -->
+    <section id="countermeasures" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">أدوات المقاومة الأربع</span>
+        <span class="lang-en">The four countermeasures</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <ul class="space-y-3 list-disc ps-6 marker:text-rose-400">
+          <li><strong>ملفات المسودّة (scratchpad)</strong>: الوكيل يسجّل النتائج المفتاحية (الكلاسات المكتشفة، نقاط الدخول، القرارات) في ملف، ويرجع له عند الأسئلة اللاحقة — ذاكرة تعبر حدود السياق ولا تتأثر بامتلائه.</li>
+          <li><strong>تفويض الوكلاء الفرعيين</strong>: وكيل فرعي يحقق في سؤال محدد («جِد كل ملفات الاختبار»، «تتبّع تبعيات مسار الاسترداد») ويستهلك المخرَج المطوَّل في <em>سياقه هو</em>، ثم يرجّع ملخصًا مركّزًا — بينما الوكيل الرئيسي يحافظ على التنسيق عالي المستوى بسياق نظيف.</li>
+          <li><strong>حقن ملخصات المراحل</strong>: قبل إطلاق وكلاء المرحلة التالية، لخّص نتائج المرحلة الحالية واحقن الملخص في سياقهم الأولي — فيبدؤون «عارفين» بدون ما يعيدوا الاستكشاف.</li>
+          <li><strong><span dir="ltr" class="font-mono">/compact</span></strong>: لما تمتلئ الجلسة بمخرجات استكشاف مطوَّلة، الأمر يضغط السياق ويقلّص استهلاكه — أداة الإسعاف داخل الجلسة الممتدة في Claude Code.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <ul class="space-y-3 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Scratchpad files</strong>: the agent records key findings (discovered classes, entry points, decisions) in a file and references it on subsequent questions — memory that crosses context boundaries and doesn't care how full the window is.</li>
+          <li><strong>Subagent delegation</strong>: a subagent investigates one specific question ("find all test files," "trace refund-flow dependencies"), burns the verbose output in <em>its own</em> context, and returns a focused summary — while the main agent keeps high-level coordination with a clean context.</li>
+          <li><strong>Injecting phase summaries</strong>: before spawning the next phase's agents, summarize the current phase's findings and inject that summary into their initial context — they start "already knowing" without re-exploring.</li>
+          <li><strong><span dir="ltr" class="font-mono">/compact</span></strong>: when the session fills with verbose discovery output, the command compresses context and reduces usage — the in-session first-aid tool in Claude Code.</li>
+        </ul>
+      </div>
+
+      <!-- DIAGRAM 2: delegation hub -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Subagent delegation — verbose output isolated, summaries returned</p>
+        <div class="flex flex-col items-center gap-3 max-w-2xl mx-auto">
+          <div class="bg-brand-500/20 border border-brand-400/40 rounded-xl px-5 py-3 text-center">
+            <p class="text-brand-200 font-mono text-sm font-semibold">MAIN AGENT (coordinator)</p>
+            <p class="text-brand-300/70 font-mono text-[10px] mt-0.5">clean context &middot; high-level understanding &middot; scratchpad</p>
+          </div>
+          <div class="grid grid-cols-2 gap-x-10 gap-y-1 w-full max-w-md">
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center">
+              <p class="text-surface-200 font-mono text-[11px] font-semibold">subagent A</p>
+              <p class="text-surface-400 font-mono text-[10px] mt-0.5">"find all test files"</p>
+              <p class="text-rose-300/70 font-mono text-[9px] mt-1.5">verbose Grep/Glob output<br>stays HERE</p>
+            </div>
+            <div class="bg-surface-800 border border-surface-600 rounded-xl p-3 text-center">
+              <p class="text-surface-200 font-mono text-[11px] font-semibold">subagent B</p>
+              <p class="text-surface-400 font-mono text-[10px] mt-0.5">"trace refund flow deps"</p>
+              <p class="text-rose-300/70 font-mono text-[9px] mt-1.5">dozens of file reads<br>stay HERE</p>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-up" class="w-4 h-4 text-emerald-400"></i></div>
+            <div class="flex justify-center"><i data-lucide="arrow-up" class="w-4 h-4 text-emerald-400"></i></div>
+          </div>
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-emerald-200 font-mono text-xs font-semibold">only concise summaries return to the main context</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">كل وكيل فرعي «يحرق» مخرجاته المطوَّلة في سياقه الخاص، ويرجّع للوكيل الرئيسي خلاصة مركّزة فقط.</span>
+        <span class="lang-en">Each subagent burns its verbose output in its own context and returns only a focused summary to the main agent.</span>
+      </p>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">المسودّة تحمي <strong>النتائج</strong>، والوكيل الفرعي يحمي <strong>السياق</strong>، وملخص المرحلة يحمي <strong>الانتقال</strong>، و<span dir="ltr" class="font-mono">/compact</span> يسعف <strong>الجلسة الحالية</strong>. أربع أدوات لأربع زوايا من نفس المشكلة.</span>
+              <span class="lang-en">The scratchpad protects the <strong>findings</strong>, the subagent protects the <strong>context</strong>, the phase summary protects the <strong>transition</strong>, and <span dir="ltr" class="font-mono">/compact</span> rescues the <strong>current session</strong>. Four tools for four corners of the same problem.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: CRASH RECOVERY VIA MANIFEST ===== -->
+    <section id="crash-recovery" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">الاستئناف بعد الانهيار — تصدير الحالة والـ manifest</span>
+        <span class="lang-en">Crash recovery — state exports and the manifest</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الاستكشاف الممتد ممكن ينقطع: انهيار عملية، انتهاء جلسة، خطأ شبكة. التصميم الصحيح للتعافي: <strong>حِفظ حالة منظّم (structured state persistence)</strong> — كل وكيل يصدّر حالته (آخر خطوة مكتملة، النتائج، الملفات المفحوصة) إلى <u>مكان معروف</u>، وملف <span dir="ltr" class="font-mono">manifest.json</span> يفهرس كل شيء. عند الاستئناف، المنسّق يحمّل الـ manifest أولًا، ثم <strong>يحقن ملخص حالة كل وكيل في برومبته</strong> — فيكمل الفريق من حيث توقف بدل إعادة كل شيء.</p>
+        <p>لاحظ نقطة يحبها الاختبار: عند الاستئناف، <strong>بدء جلسة جديدة بملخص منظّم أكثر موثوقية من استئناف جلسة قديمة مليئة بنتائج أدوات بايتة (stale)</strong> — النتائج القديمة قد تكون تغيّرت على القرص أصلًا.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Extended exploration can be interrupted: a process crash, an expired session, a network error. The correct recovery design: <strong>structured state persistence</strong> — each agent exports its state (last completed step, findings, files examined) to a <u>known location</u>, and a <span dir="ltr" class="font-mono">manifest.json</span> indexes everything. On resume, the coordinator loads the manifest first, then <strong>injects each agent's state summary into its prompt</strong> — so the team continues from where it stopped instead of redoing everything.</p>
+        <p>Note a point the exam likes: on resume, <strong>starting a fresh session with a structured summary is more reliable than resuming an old session full of stale tool results</strong> — those old results may no longer match what's on disk.</p>
+      </div>
+
+      <!-- DIAGRAM 3: manifest recovery architecture -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Crash-recovery architecture — export, index, resume, inject</p>
+        <div class="flex flex-col items-center gap-3 max-w-2xl mx-auto">
+          <div class="grid grid-cols-3 gap-2 w-full">
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">web_search</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">exports state.json</p></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">doc_analysis</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">exports state.json</p></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">synthesis</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">exports draft.md</p></div>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-rose-500/20 border border-rose-400/40 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-rose-200 font-mono text-xs font-semibold">manifest.json — the resume index (known location)</p>
+          </div>
+          <div class="flex items-center gap-2 text-surface-500 font-mono text-[10px]"><i data-lucide="zap-off" class="w-3.5 h-3.5"></i> CRASH / interruption</div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-brand-500/20 border border-brand-400/40 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-brand-200 font-mono text-xs font-semibold">ON RESUME: coordinator loads manifest FIRST</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl px-5 py-2.5 text-center">
+            <p class="text-emerald-200 font-mono text-xs font-semibold">injects each agent's state summary into its prompt &middot; completed phases NOT re-run</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">التصدير لمكان معروف + فهرس manifest = استئناف يبدأ من آخر نقطة مكتملة، لا من الصفر.</span>
+        <span class="lang-en">Exports to a known location + a manifest index = a resume that starts from the last completed point, not from zero.</span>
+      </p>
+
+      <!-- CODE: layout + manifest -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="folder-tree" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — تخطيط الاستئناف بعد الانهيار عبر manifest</span><span class="lang-en">Example — a manifest-based crash-recovery layout</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">bash</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-bash"><code class="language-bash"># Each agent exports state to a known location. On resume the coordinator reads
+# manifest.json FIRST, then re-injects each agent's summary into its prompt.
+.research-run/
+├── manifest.json          # index the coordinator loads on resume
+├── phase-1-map/
+│   └── findings.md        # scratchpad: key classes / entry points discovered
+├── web-search/
+│   └── state.json         # last completed query + captured sources
+├── doc-analysis/
+│   └── state.json
+└── synthesis/
+    └── draft.md</code></pre>
+        </div>
+        <div class="group relative mt-3" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">json</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-json"><code class="language-json">{
+  "run_id": "run-2026-07-18-cri",
+  "topic": "impact of AI on creative industries",
+  "phase": "synthesis",
+  "agents": {
+    "web_search":   { "status": "complete",    "state": "web-search/state.json",   "sources": 34 },
+    "doc_analysis": { "status": "complete",    "state": "doc-analysis/state.json",  "docs": 12 },
+    "synthesis":    { "status": "in_progress", "state": "synthesis/draft.md",       "coverage_gaps": ["film"] }
+  },
+  "resume_hint": "reload agent summaries from state files; do NOT re-run completed phases"
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- tip callout -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-emerald-100 rounded-lg p-2 shrink-0"><i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600"></i></div>
+          <div>
+            <h4 class="font-bold text-emerald-900 mb-1"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></h4>
+            <p class="text-emerald-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">اجعل المسودّة والـ manifest <strong>منظّمين وقابلين للحقن مباشرة</strong>: عناوين ثابتة، حقائق قصيرة، حالة لكل وكيل. الهدف أن يُقرأ الملف ويُحقَن في برومبت بدون معالجة إضافية — لا مقالات إنشائية في ملفات الحالة.</span>
+              <span class="lang-en">Keep the scratchpad and manifest <strong>structured and directly injectable</strong>: stable headers, short facts, per-agent status. The goal is a file that can be read and dropped into a prompt with zero extra processing — no essays in state files.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«اقرأ كل الملفات مقدّمًا في السياق الرئيسي»</strong> — يغرق السياق بمخرجات مطوَّلة ويسرّع التدهور؛ الاستكشاف المطوَّل يُفوَّض لوكيل فرعي.</span><span class="lang-en"><strong>"Read all files upfront into the main context"</strong> — floods context with verbose output and accelerates degradation; verbose exploration belongs in a subagent.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«ابدأ من الصفر عند كل سؤال»</strong> — يهدر الاستكشاف المنجز؛ المسودّات والـ manifests أرخص وأدق.</span><span class="lang-en"><strong>"Start over on every question"</strong> — wastes completed exploration; scratchpads and manifests are cheaper and more accurate.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«استأنف الجلسة القديمة بنتائج أدوات بايتة»</strong> — جلسة جديدة بملخص منظّم أكثر موثوقية من نتائج قديمة قد لا تطابق الواقع.</span><span class="lang-en"><strong>"Resume the old session with stale tool results"</strong> — a fresh session with a structured summary beats old results that may no longer match reality.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="hard-hat" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: مهندس الموقع ودفتر الورديات</span><span class="lang-en">Real-life example: the site engineer and the shift logbook</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>مهندس يستلم فحص مشروع إنشائي ضخم. لو حاول يحفظ كل تفصيلة في ذاكرته — كل عمود وكل تمديدة — بنهاية اليوم بيخلط ويقول «عادةً الأبراج تُبنى كذا» بدل ما يتذكر برجه هو. المهندس الشاطر: يمشي بـ<strong>دفتر ميداني</strong> يسجّل فيه الاكتشافات المهمة (المسودّة)، ويرسل <strong>فنيين متخصصين</strong> يفحصون زوايا محددة ويرجعون له بخلاصة من سطرين، مو بتقرير 50 صفحة يقرأه كامل (تفويض الوكلاء الفرعيين).</p>
+              <p>وقبل ما تبدأ وردية الليل، يسلّمهم <strong>ملخص وردية</strong> مركّزًا: وش انفحص، ووش باقي، ووين توقفنا (حقن ملخص المرحلة). ولو صار طارئ وتوقف المشروع فجأة، <strong>دفتر أحوال الموقع</strong> المحفوظ في مكتب الموقع (الـ manifest) يخلّي أي فريق جديد يكمل من آخر نقطة مسجّلة — ما يعيد فحص الأساسات من أول.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>An engineer takes over inspection of a huge construction project. If he tried to hold every detail in memory — every column, every conduit — by day's end he'd blur it all and say "towers are usually built like this" instead of recalling <em>his</em> tower. The sharp engineer: carries a <strong>field notebook</strong> recording key discoveries (the scratchpad), and sends <strong>specialist technicians</strong> to inspect specific corners, each returning a two-line summary rather than a 50-page dump to read in full (subagent delegation).</p>
+              <p>Before the night shift starts, he hands over a focused <strong>shift summary</strong>: what's been inspected, what remains, where we stopped (phase-summary injection). And if an emergency halts the project abruptly, the <strong>site logbook</strong> kept in the site office (the manifest) lets any new crew continue from the last recorded point — no re-inspecting the foundations from scratch.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>يظهر هذا الموضوع في سيناريوهات «توليد الأكواد» و«إنتاجية المطورين»: يعطونك أعراضًا (إجابات متضاربة، «أنماط شائعة» بدل كلاس محدد، جلسة ممتدة ممتلئة) ويسألون عن التشخيص أو أفضل علاج. الإجابة من صندوق الأدوات الرباعي: مسودّة، وكيل فرعي، ملخص مرحلة، <span dir="ltr" class="font-mono">/compact</span> — وللانقطاعات: manifest يُحمَّل عند الاستئناف ويُحقَن في الأوامر.</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>This topic appears in the "code generation" and "developer productivity" scenarios: you're given symptoms (inconsistent answers, "typical patterns" instead of a specific class, a long full session) and asked for the diagnosis or best remedy. The answer comes from the four-tool kit: scratchpad, subagent, phase summary, <span dir="ltr" class="font-mono">/compact</span> — and for interruptions: a manifest loaded on resume and injected into prompts.</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">«اقرأ كل شيء مقدّمًا» — يملأ السياق ويسرّع التدهور.</span><span class="lang-en">"Read everything upfront" — fills context and speeds degradation.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">«جلسة جديدة لكل سؤال» — يهدر الاستكشاف المنجز.</span><span class="lang-en">"A new session per question" — wastes completed exploration.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">«نافذة أكبر تحل التدهور» — التدهور مشكلة ضجيج وتنظيم، لا سعة.</span><span class="lang-en">"A bigger window fixes degradation" — degradation is a noise and organization problem, not capacity.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">«استئناف بنتائج بايتة» — ملخص منظّم في جلسة جديدة أدق وأأمن.</span><span class="lang-en">"Resuming with stale results" — a structured summary in a fresh session is safer and more accurate.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">أي ملاحظة من التالية هي العلامة المميزة لتدهور السياق في جلسة استكشاف ممتدة — وإشارتك لاستخدام المسودّة أو <span dir="ltr" class="font-mono">/compact</span>؟</span>
+            <span class="lang-en">Which observation below is the hallmark of context degradation in an extended exploration session — your signal to reach for the scratchpad or <span dir="ltr" class="font-mono">/compact</span>?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النموذج يطرح سؤال توضيح قبل تعديل ملف حساس.</span><span class="lang-en">The model asks a clarifying question before editing a sensitive file.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النموذج يستخدم <span dir="ltr" class="font-mono">Grep</span> بدل قراءة الملفات كاملة.</span><span class="lang-en">The model uses <span dir="ltr" class="font-mono">Grep</span> instead of reading whole files.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النموذج يشير لـ«الأنماط الشائعة عادةً» بدل الكلاسات المحددة اللي اكتشفها سابقًا، وإجاباته صارت متضاربة.</span><span class="lang-en">The model references "typical patterns" instead of the specific classes it discovered earlier, and its answers have become inconsistent.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النموذج يستغرق وقتًا أطول في الرد مع نمو حجم المشروع.</span><span class="lang-en">The model takes longer to respond as the project grows.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذان العرضان الرسميان: إجابات متضاربة + عموميات بدل التفاصيل المكتشَفة. عندها تتصرف: مسودّة، وكيل فرعي، أو <span dir="ltr" class="font-mono">/compact</span>.</span><span class="lang-en">These are the two official symptoms: inconsistent answers + generalities replacing discovered specifics. That's when you act: scratchpad, subagent, or <span dir="ltr" class="font-mono">/compact</span>.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">أسئلة التوضيح واستخدام Grep سلوكان صحيان، وبطء الرد ليس العرض المميز. العلامة: «أنماط شائعة» بدل كلاسات مكتشَفة + تضارب الإجابات.</span><span class="lang-en">Clarifying questions and Grep usage are healthy behaviors, and slower responses aren't the hallmark. The signature: "typical patterns" replacing discovered classes + inconsistent answers.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">أنهيت مرحلة «رسم خريطة الكود» وستطلق وكلاء فرعيين جددًا لمرحلة «تتبّع التبعيات». كيف تنقل لهم معرفة المرحلة الأولى؟</span>
+            <span class="lang-en">You've finished the "codebase mapping" phase and are about to spawn new subagents for the "dependency tracing" phase. How do you transfer phase-one knowledge to them?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">مرّر كامل نص جلسة المرحلة الأولى (بكل مخرجات الأدوات) في سياق كل وكيل جديد.</span><span class="lang-en">Pass the full phase-one transcript (with all tool outputs) into each new agent's context.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لخّص النتائج المفتاحية للمرحلة الأولى، واحقن الملخص في السياق الأولي لوكلاء المرحلة التالية.</span><span class="lang-en">Summarize phase one's key findings and inject the summary into the next phase's agents' initial context.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اعتمد على وراثة السياق التلقائية — الوكلاء الفرعيون يرثون معرفة المنسّق تلقائيًا.</span><span class="lang-en">Rely on automatic context inheritance — subagents automatically inherit the coordinator's knowledge.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">خلّ وكلاء المرحلة الثانية يعيدون استكشاف الكود بأنفسهم من الصفر لضمان الدقة.</span><span class="lang-en">Have phase-two agents re-explore the codebase from scratch themselves to guarantee accuracy.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">المهارة الرسمية: لخّص نتائج المرحلة قبل إطلاق وكلاء المرحلة التالية واحقن الملخص في سياقهم الأولي — معرفة مركّزة بدون ضجيج النص الكامل.</span><span class="lang-en">The official skill: summarize the phase's findings before spawning the next phase's agents and inject the summary into their initial context — focused knowledge without full-transcript noise.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">النص الكامل يورّث الضجيم للسياق الجديد، والوراثة التلقائية غير مضمونة (السياق يُمرَّر صراحة)، وإعادة الاستكشاف تهدر ما أُنجز. الصحيح: ملخص مركّز يُحقَن.</span><span class="lang-en">The full transcript inherits the noise into the new context, automatic inheritance isn't a given (context is passed explicitly), and re-exploring wastes completed work. Correct: a focused, injected summary.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">استكشاف متعدد الوكلاء يستغرق ساعات وقد ينقطع في أي لحظة. كيف تصمم التعافي من الانهيار؟</span>
+            <span class="lang-en">A multi-agent exploration runs for hours and may be interrupted at any moment. How do you design crash recovery?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أبقِ كل الحالة في سياق المحادثة فقط — هو مصدر الحقيقة الوحيد.</span><span class="lang-en">Keep all state in the conversation context only — it's the single source of truth.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">عند أي انقطاع، أعد تشغيل كل الوكلاء من الصفر لضمان النظافة.</span><span class="lang-en">On any interruption, restart all agents from scratch for cleanliness.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">كل وكيل يصدّر حالته المنظّمة لمكان معروف، والمنسّق يحمّل manifest عند الاستئناف ويحقن ملخصات الحالة في أوامر الوكلاء — بدون إعادة المراحل المكتملة.</span><span class="lang-en">Each agent exports structured state to a known location; the coordinator loads a manifest on resume and injects state summaries into agent prompts — without re-running completed phases.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استأنف الجلسة القديمة كما هي بكل نتائج الأدوات القديمة داخلها.</span><span class="lang-en">Resume the old session as-is with all its old tool results inside.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذا نمط «حفظ الحالة المنظّم» الرسمي: تصدير لمكان معروف + manifest يُحمَّل عند الاستئناف ويُحقَن في الأوامر. السياق وحده يتبخر بالانهيار، والنتائج البايتة قد تخالف الواقع.</span><span class="lang-en">This is the official structured-state-persistence pattern: exports to a known location + a manifest loaded on resume and injected into prompts. Context alone evaporates on crash, and stale results may contradict reality.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">السياق وحده يضيع بالانهيار، وإعادة كل شيء تهدر ساعات العمل، واستئناف النتائج البايتة غير موثوق. الصحيح: تصدير حالة منظّم + manifest يُحقَن عند الاستئناف.</span><span class="lang-en">Context alone is lost on crash, full restarts waste hours of work, and resuming stale results is unreliable. Correct: structured state exports + a manifest injected on resume.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">أعراض التدهور: إجابات متضاربة + «أنماط شائعة» بدل الكلاسات المكتشَفة — إشارة للتصرف، لا للتجاهل.</span><span class="lang-en">Degradation symptoms: inconsistent answers + "typical patterns" instead of discovered classes — a signal to act, not to ignore.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">المسودّة تحفظ النتائج المفتاحية عبر حدود السياق ويُرجَع لها في الأسئلة اللاحقة.</span><span class="lang-en">The scratchpad persists key findings across context boundaries for later reference.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">الاستكشاف المطوَّل يُفوَّض لوكلاء فرعيين يرجعون ملخصات — والوكيل الرئيسي يبقى نظيف السياق للتنسيق.</span><span class="lang-en">Verbose exploration is delegated to subagents that return summaries — the main agent stays context-clean for coordination.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">لخّص كل مرحلة واحقن الملخص في المرحلة التالية؛ و<span dir="ltr" class="font-mono">/compact</span> عند امتلاء الجلسة.</span><span class="lang-en">Summarize each phase and inject it into the next; <span dir="ltr" class="font-mono">/compact</span> when the session fills.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">للتعافي من الانهيار: تصدير حالة لكل وكيل + manifest يحمّله المنسّق عند الاستئناف ويحقنه في الأوامر.</span><span class="lang-en">For crash recovery: per-agent state exports + a manifest the coordinator loads on resume and injects into prompts.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="5-3-error-propagation.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.3 انتشار الأخطاء بين الوكلاء</span><span class="lang-en">5.3 Error propagation</span></span>
+        </span>
+      </a>
+      <a href="5-5-human-review.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.5 مراجعة البشر ومعايرة الثقة</span><span class="lang-en">5.5 Human review &amp; confidence calibration</span></span>
+        </span>
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.3 انتشار الأخطاء بين الوكلاء — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.3 من شهادة CCAF: سياق الخطأ المنظّم، فشل الوصول مقابل النتيجة الفارغة الصحيحة، التعافي المحلي، الأنماط المضادة، وتعليقات التغطية في التجميع.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.3 انتشار الأخطاء</span><span class="lang-en">5.3 Error propagation</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.3</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">انتشار الأخطاء في الأنظمة متعددة الوكلاء</span>
+            <span class="lang-en">Error propagation across multi-agent systems</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن الوكيل اللي يفشل بصمت أخطر من اللي يفشل بصوت عالٍ — التقرير الناقص اللي «يبدو كاملًا» ما أحد يشك فيه.</span>
+            <span class="lang-en">Why it matters: an agent that fails silently is more dangerous than one that fails loudly — nobody doubts an incomplete report that "looks complete."</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">بناء سياق خطأ منظّم: نوع الفشل، الاستعلام المُحاوَل، النتائج الجزئية، والبدائل الممكنة — كوقود لقرار تعافٍ ذكي.</span><span class="lang-en">Building structured error context — failure type, attempted query, partial results, alternative approaches — as fuel for intelligent recovery decisions.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">التمييز الحاسم بين فشل الوصول (timeout يحتاج قرار إعادة) والنتيجة الفارغة الصحيحة (استعلام ناجح بلا تطابقات).</span><span class="lang-en">The critical distinction between an access failure (a timeout needing a retry decision) and a valid empty result (a successful query with no matches).</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">لماذا الحالات العامة («البحث غير متاح») تخفي سياقًا قيّمًا عن المنسّق.</span><span class="lang-en">Why generic statuses ("search unavailable") hide valuable context from the coordinator.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">لماذا الإخماد الصامت (فارغ-كنجاح) وإنهاء كامل سير العمل عند فشل واحد كلاهما نمط مضاد.</span><span class="lang-en">Why silent suppression (empty-as-success) and terminating the whole workflow on one failure are both anti-patterns.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">التعافي المحلي للأخطاء العابرة داخل الوكيل الفرعي، وتصعيد ما لا يُحَل فقط — مع ما جُرِّب والنتائج الجزئية.</span><span class="lang-en">Local recovery for transient failures inside the subagent, propagating only what it cannot resolve — with attempts and partial results.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">هيكلة مخرَج التجميع بتعليقات تغطية: أي النتائج مدعوم جيدًا وأي المجالات فيها فجوات بسبب مصادر غير متاحة.</span><span class="lang-en">Structuring synthesis output with coverage annotations: which findings are well-supported and which topic areas have gaps due to unavailable sources.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: STRUCTURED ERROR CONTEXT ===== -->
+    <section id="structured-context" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">سياق الخطأ المنظّم — مدخل قرار، لا سطر log</span>
+        <span class="lang-en">Structured error context — a decision input, not a log line</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>لما يفشل وكيل فرعي (بحث الويب صار عليه <span dir="ltr" class="font-mono">timeout</span> مثلًا)، الطريقة اللي ينتقل بها الفشل للمنسّق تحدد مصير النظام كله: يتعافى بذكاء، أو ينتج تقريرًا ناقصًا، أو ينهار بلا داعٍ. القاعدة الذهبية: أرجِع <strong>سياق خطأ منظّمًا</strong> يتضمن أربعة عناصر:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>نوع الفشل</strong> (<span dir="ltr" class="font-mono">failure_type</span>): فشل وصول؟ عابر؟ قابل للإعادة؟</li>
+          <li><strong>الاستعلام المُحاوَل</strong>: وش كان الوكيل يحاول بالضبط لحظة الفشل.</li>
+          <li><strong>النتائج الجزئية</strong>: وش انحفظ قبل الفشل — قد تكفي للمتابعة.</li>
+          <li><strong>البدائل الممكنة</strong>: اقتراحات ملموسة (استعلام أضيق، مصدر بديل، متابعة مع توثيق الفجوة).</li>
+        </ul>
+        <p>بهذي الأربعة، المنسّق يقدر يقرر بذكاء: يعيد المحاولة باستعلام معدَّل؟ يجرب نهجًا بديلًا؟ أو يمشي بالنتائج الجزئية ويوثّق الفجوة؟ بدونها، قراره تخمين.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>When a subagent fails (say the web search hits a <span dir="ltr" class="font-mono">timeout</span>), how the failure travels to the coordinator decides the whole system's fate: recover intelligently, produce an incomplete report, or collapse needlessly. The golden rule: return <strong>structured error context</strong> with four elements:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>Failure type</strong> (<span dir="ltr" class="font-mono">failure_type</span>): access failure? transient? retryable?</li>
+          <li><strong>Attempted query</strong>: exactly what the agent was trying at the moment of failure.</li>
+          <li><strong>Partial results</strong>: what was captured before the failure — it may be enough to proceed.</li>
+          <li><strong>Potential alternatives</strong>: concrete suggestions (a narrower query, an alternative source, proceeding while documenting the gap).</li>
+        </ul>
+        <p>With these four, the coordinator can decide intelligently: retry with a modified query? try an alternative approach? or proceed with partial results and annotate the gap? Without them, its decision is a guess.</p>
+      </div>
+
+      <!-- DIAGRAM 1: error propagation flow -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">Error propagation flow — subagent to coordinator and back to recovery</p>
+        <div class="flex flex-col items-center gap-3">
+          <div class="bg-rose-500/20 border border-rose-400/40 rounded-xl px-4 py-2.5 text-rose-200 font-mono text-sm">web_search subagent &middot; TIMEOUT</div>
+          <i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl px-4 py-3 text-center">
+            <div class="text-emerald-300 font-mono text-xs mb-1">1) LOCAL RECOVERY first (bounded retries for transient errors)</div>
+            <div class="text-surface-300 font-mono text-xs">2) still failing -&gt; emit STRUCTURED error (type + attempted + partials + alternatives)</div>
+          </div>
+          <i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i>
+          <div class="bg-brand-500/20 border border-brand-400/40 rounded-xl px-4 py-2.5 text-brand-200 font-mono text-sm">coordinator receives full context</div>
+          <i data-lucide="arrow-down" class="w-5 h-5 text-surface-500"></i>
+          <div class="grid grid-cols-3 gap-2 w-full max-w-xl">
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-2 py-2.5 text-center text-surface-200 text-xs font-mono">retry with<br>narrower query</div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-2 py-2.5 text-center text-surface-200 text-xs font-mono">alternative<br>source / agent</div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg px-2 py-2.5 text-center text-surface-200 text-xs font-mono">proceed +<br>annotate gap</div>
+          </div>
+          <div class="mt-2 pt-3 border-t border-surface-700 w-full max-w-xl text-center">
+            <span class="text-surface-400 font-mono text-[11px]">an informed choice — possible ONLY because the error carried context</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">الوكيل الفرعي يتعافى محليًا أولًا؛ وإذا عجز، يرفع خطأً منظّمًا يفتح للمنسّق ثلاث طرق تعافٍ بدل طريق مسدود.</span>
+        <span class="lang-en">The subagent recovers locally first; if it can't, it raises a structured error that opens three recovery paths for the coordinator instead of a dead end.</span>
+      </p>
+
+      <!-- CODE: structured error context JSON -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="triangle-alert" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — سياق خطأ منظّم من وكيل فرعي فاشل</span><span class="lang-en">Example — structured error context from a failed subagent</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">json</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-json"><code class="language-json">{
+  "status": "error",
+  "failure_type": "access_failure",
+  "note": "access_failure != valid empty result — the source was UNREACHABLE",
+  "is_retryable": true,
+  "tool": "web_search",
+  "attempted_query": "impact of AI on film production 2026",
+  "error": "upstream search API timed out after 30s (2 local retries exhausted)",
+  "partial_results": [
+    { "title": "AI in VFX pipelines", "url": "https://example.com/vfx", "captured": true }
+  ],
+  "alternatives": [
+    "retry with a narrower query: 'AI film post-production 2026'",
+    "delegate to document_analysis agent over the local corpus",
+    "proceed and annotate 'film' as a COVERAGE GAP in synthesis"
+  ]
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">الخطأ في نظام متعدد الوكلاء <strong>مدخل قرار للمنسّق</strong>، مو مجرد سطر في السجل. قيمته تُقاس بسؤال واحد: هل يمكّن المنسّق من اختيار أفضل مسار تعافٍ؟ «البحث غير متاح» لا يمكّنه — والـ JSON المنظّم أعلاه يمكّنه.</span>
+              <span class="lang-en">In a multi-agent system, an error is a <strong>decision input for the coordinator</strong>, not just a log line. Its value is measured by one question: does it let the coordinator pick the best recovery path? "Search unavailable" doesn't — the structured JSON above does.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: ACCESS FAILURE vs VALID EMPTY ===== -->
+    <section id="access-vs-empty" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">فشل الوصول لا يساوي «نتيجة فارغة صحيحة»</span>
+        <span class="lang-en">An access failure is not a "valid empty result"</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>أخطر خلط في هذا الموضوع: التعامل مع «ما قدرت أوصل للمصدر» كأنها «بحثت وما لقيت شيئًا». الأولى <strong>فشل وصول</strong> (<span dir="ltr" class="font-mono">access failure</span>) — المصدر ما انفحص أصلًا، والسؤال المفتوح: نعيد المحاولة؟ الثانية <strong>نتيجة فارغة صحيحة</strong> — استعلام نجح فعلًا ولم يجد تطابقات، وهذي معلومة مكتملة يبني عليها المنسّق.</p>
+        <p>الخلط بينهما يعني: فجوة تغطية حقيقية تتنكّر في هيئة «لا توجد بيانات»، فيكتب التقرير خلاصات عن مجال ما فُحص إطلاقًا. لذلك <strong>تقرير الخطأ لازم يفرّق بين الحالتين صراحةً</strong> — حقل <span dir="ltr" class="font-mono">failure_type</span> موجود لهذا السبب بالذات.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The most dangerous conflation in this topic: treating "I couldn't reach the source" as "I searched and found nothing." The first is an <strong>access failure</strong> — the source was never actually examined, and the open question is: should we retry? The second is a <strong>valid empty result</strong> — a query that genuinely succeeded and found no matches, which is complete information the coordinator can build on.</p>
+        <p>Conflating them means a real coverage gap masquerades as "no data exists," and the report draws conclusions about an area that was never examined at all. That's why <strong>error reporting must explicitly distinguish the two cases</strong> — the <span dir="ltr" class="font-mono">failure_type</span> field exists for exactly this reason.</p>
+      </div>
+
+      <!-- DIAGRAM 2: access failure vs valid empty comparison panels -->
+      <div class="grid md:grid-cols-2 gap-4" dir="ltr">
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-red-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="wifi-off" class="w-4 h-4"></i> ACCESS FAILURE</p>
+          <div class="bg-white/70 rounded-xl border border-red-200 p-3 font-mono text-[11px] leading-relaxed text-surface-700 space-y-1">
+            <p>"failure_type": "access_failure"</p>
+            <p>"error": "timeout after 30s"</p>
+            <p>"is_retryable": true</p>
+            <p class="text-red-600">source was NEVER examined</p>
+          </div>
+          <ul class="mt-3 space-y-1 text-xs text-red-800">
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>open question: retry? alternative source?</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>if unresolved: a COVERAGE GAP in the report</span></li>
+          </ul>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-emerald-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="search-check" class="w-4 h-4"></i> VALID EMPTY RESULT</p>
+          <div class="bg-white/70 rounded-xl border border-emerald-200 p-3 font-mono text-[11px] leading-relaxed text-surface-700 space-y-1">
+            <p>"status": "success"</p>
+            <p>"results": []</p>
+            <p>"query_completed": true</p>
+            <p class="text-emerald-600">source WAS examined — no matches</p>
+          </div>
+          <ul class="mt-3 space-y-1 text-xs text-emerald-800">
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>complete information: nothing exists there</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>coordinator can safely build on it</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">شكلهما متقارب في الكود («لا نتائج») لكن معناهما متضاد: الأول سؤال معلّق، والثاني جواب مكتمل.</span>
+        <span class="lang-en">They look similar in code ("no results") but mean opposite things: the first is an open question, the second a complete answer.</span>
+      </p>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">اسأل دائمًا: «هل المصدر <em>انفحص</em> فعلًا؟». انفحص وما فيه شيء = فارغ صحيح. ما انفحص = فشل وصول. سؤال واحد يفكّ أعقد أسئلة 5.3.</span>
+              <span class="lang-en">Always ask: "was the source actually <em>examined</em>?" Examined and empty = valid empty. Never examined = access failure. One question untangles the hardest 5.3 items.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: ANTI-PATTERNS + COVERAGE ANNOTATIONS ===== -->
+    <section id="anti-patterns" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">الأنماط المضادة الثلاثة — وتعليقات التغطية</span>
+        <span class="lang-en">The three anti-patterns — and coverage annotations</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>ثلاثة أنماط تتكرر كمموِّهات في السؤال الرسمي عن الـ timeout، وكلها خاطئة لنفس السبب: تحرم المنسّق من سياق القرار:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>الحالة العامة</strong>: إعادة محاولة داخلية بـ backoff ثم إرجاع «البحث غير متاح» — الإعادة المحلية ممتازة، لكن الحالة العامة بعدها تخفي كل السياق القيّم (وش جُرِّب؟ وش انحفظ؟ وش البدائل؟).</li>
+          <li><strong>الإخماد الصامت</strong>: التقاط الـ timeout وإرجاع مجموعة فارغة «ناجحة» — يحوّل الفشل لنجاح، يمنع أي تعافٍ، وينتج بحثًا ناقصًا يبدو كاملًا.</li>
+          <li><strong>الإنهاء الشامل</strong>: تمرير الاستثناء لمعالج علوي يقتل كامل سير البحث — إنهاء بلا داعٍ بينما استراتيجيات التعافي كانت ستنجح.</li>
+        </ul>
+        <p>والصورة الكاملة الصحيحة: <strong>تعافٍ محلي</strong> للأخطاء العابرة داخل الوكيل الفرعي (إعادة محدودة، انتظار قصير)، و<strong>تصعيد منظّم</strong> لما يعجز عنه — ثم في النهاية، <strong>تعليقات تغطية</strong> في مخرَج التجميع: «مدعوم جيدًا: الفنون البصرية والموسيقى | فجوة: إنتاج الأفلام (المصدر غير متاح)». التقرير الصادق يعلن حدوده.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Three patterns recur as distractors in the official timeout question, all wrong for the same reason: they starve the coordinator of decision context:</p>
+        <ul class="space-y-2 list-disc ps-6 marker:text-rose-400">
+          <li><strong>The generic status</strong>: internal retries with backoff, then returning "search unavailable" — the local retries are great, but the generic status afterward hides all the valuable context (what was attempted? what was captured? what alternatives exist?).</li>
+          <li><strong>Silent suppression</strong>: catching the timeout and returning an empty set marked successful — turns failure into success, prevents any recovery, and yields incomplete research that looks complete.</li>
+          <li><strong>Total termination</strong>: propagating the exception to a top-level handler that kills the whole research workflow — unnecessary when recovery strategies could have succeeded.</li>
+        </ul>
+        <p>The complete correct picture: <strong>local recovery</strong> for transient errors inside the subagent (bounded retries, short waits), <strong>structured propagation</strong> of what it can't resolve — and finally, <strong>coverage annotations</strong> in the synthesis output: "Well-supported: visual arts, music | Gap: film production (source unavailable)." An honest report declares its limits.</p>
+      </div>
+
+      <!-- DIAGRAM 3: anti-patterns trio -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-4 font-mono text-center">Three anti-patterns vs the correct pattern</p>
+        <div class="grid sm:grid-cols-3 gap-2.5 max-w-2xl mx-auto">
+          <div class="bg-red-500/10 border border-red-400/40 rounded-xl p-3 text-center">
+            <p class="text-red-300 font-mono text-[11px] font-bold mb-1.5">GENERIC STATUS</p>
+            <p class="text-surface-400 font-mono text-[10px]">"search unavailable"</p>
+            <p class="text-red-400/80 text-[10px] mt-1.5 font-mono">hides context</p>
+          </div>
+          <div class="bg-red-500/10 border border-red-400/40 rounded-xl p-3 text-center">
+            <p class="text-red-300 font-mono text-[11px] font-bold mb-1.5">EMPTY-AS-SUCCESS</p>
+            <p class="text-surface-400 font-mono text-[10px]">{"status":"ok","results":[]}</p>
+            <p class="text-red-400/80 text-[10px] mt-1.5 font-mono">blocks recovery</p>
+          </div>
+          <div class="bg-red-500/10 border border-red-400/40 rounded-xl p-3 text-center">
+            <p class="text-red-300 font-mono text-[11px] font-bold mb-1.5">KILL THE WORKFLOW</p>
+            <p class="text-surface-400 font-mono text-[10px]">raise -&gt; terminate all</p>
+            <p class="text-red-400/80 text-[10px] mt-1.5 font-mono">overreacts</p>
+          </div>
+        </div>
+        <div class="flex justify-center py-2.5"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i></div>
+        <div class="max-w-2xl mx-auto bg-emerald-500/15 border border-emerald-400/50 rounded-xl p-3.5 text-center">
+          <p class="text-emerald-200 font-mono text-xs font-bold">CORRECT: local recovery -&gt; structured error (type + attempted + partials + alternatives) -&gt; coordinator decides -&gt; synthesis annotates coverage</p>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">الثلاثة الحمراء تحرم المنسّق من القرار؛ النمط الأخضر يسلسل التعافي: محلي، فمنظّم، فمُعلَّق التغطية.</span>
+        <span class="lang-en">The three red boxes rob the coordinator of the decision; the green pattern sequences recovery: local, then structured, then coverage-annotated.</span>
+      </p>
+
+      <!-- tip callout -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-emerald-100 rounded-lg p-2 shrink-0"><i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600"></i></div>
+          <div>
+            <h4 class="font-bold text-emerald-900 mb-1"><span class="lang-ar">نصيحة: التغطية جزء من المخرَج</span><span class="lang-en">Tip: coverage is part of the output</span></h4>
+            <p class="text-emerald-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">تقرير التجميع الجيد ما يدّعي الكمال. لو مصدر «الأفلام» فشل، يقول صراحةً: «مغطّى جيدًا: الفنون البصرية والموسيقى | فجوة: إنتاج الأفلام (المصدر غير متاح)». هكذا يعرف المنسّق والقارئ حدود الثقة بدل ما ينخدعوا بتقرير أملس.</span>
+              <span class="lang-en">A good synthesis report doesn't claim completeness. If the "film" source failed, it states plainly: "Well-supported: visual arts, music | Gap: film production (source unavailable)." The coordinator and the reader then know the limits of confidence instead of being fooled by a smooth report.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«إعادة تلقائية بـ exponential backoff ثم حالة عامة»</strong> — نصفها الأول صحيح (تعافٍ محلي) لكن الحالة العامة في النهاية تخفي السياق؛ لذلك الخيار كله خاطئ. انتبه للمموِّهات «نصف الصحيحة».</span><span class="lang-en"><strong>"Automatic retry with exponential backoff, then a generic status"</strong> — the first half is right (local recovery) but the generic status at the end hides context, so the whole option is wrong. Watch for "half-correct" distractors.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«التقط الـ timeout وأرجِع فارغًا ناجحًا»</strong> — إخماد صامت: يمنع التعافي وينتج مخرجات ناقصة تبدو كاملة.</span><span class="lang-en"><strong>"Catch the timeout and return an empty success"</strong> — silent suppression: blocks recovery and produces incomplete outputs that look complete.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«مرّر الاستثناء لمعالج يُنهي كل شيء»</strong> — إنهاء زائد عن الحاجة بينما التعافي الجزئي ممكن.</span><span class="lang-en"><strong>"Propagate the exception to a handler that terminates everything"</strong> — unnecessary termination when partial recovery was possible.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="chef-hat" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: مطبخ المطعم وقت الذروة</span><span class="lang-en">Real-life example: a restaurant kitchen at rush hour</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>طباخ القسم (الوكيل الفرعي) اكتشف أن السلمون خلص في منتصف الذروة. الطباخ الشاطر يحاول أولًا محليًا: يفحص الثلاجة الثانية، يسأل المخزن (إعادة محاولة محدودة). فشلت؟ يبلّغ الشيف التنفيذي (المنسّق) بتقرير كامل: «السلمون خلص، فحصت الثلاجتين، عندي 6 صحون جاهزة من طلبية سابقة، وأقدر أستبدله بالهامور أو نشيل الطبق من القائمة الليلة» — نوع الفشل، وش جُرِّب، النتائج الجزئية، والبدائل.</p>
+              <p>الكوارث الثلاث المقابلة: يقول «المطبخ فيه مشكلة» بس (حالة عامة)؛ أو يطلع صحون سلمون ناقصة وكأن شيئًا لم يكن (فارغ-كنجاح)؛ أو يقفل المطبخ كله على أساس مكوّن واحد (إنهاء شامل). وفي آخر الليل، تقرير الشيف الصادق يقول: «كل الأطباق طلعت كاملة إلا السلمون — شلناه الساعة 9» — هذي تعليقات التغطية.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A station cook (the subagent) discovers the salmon ran out mid-rush. A good cook tries locally first: checks the second fridge, asks the storeroom (bounded retries). Still nothing? He reports to the executive chef (the coordinator) with full context: "Salmon is out; I checked both fridges; I have 6 plated portions from the earlier batch; I can substitute grouper, or we pull the dish tonight" — failure type, what was attempted, partial results, alternatives.</p>
+              <p>The three matching disasters: saying only "the kitchen has a problem" (generic status); sending out incomplete salmon plates as if nothing happened (empty-as-success); or shutting down the entire kitchen over one ingredient (total termination). And at close, the honest chef's report reads: "All dishes went out complete except salmon — pulled at 9 pm" — that's a coverage annotation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>سؤال رسمي كامل هنا: «وكيل البحث صار عليه timeout — أي نهج انتشار خطأ يمكّن التعافي الذكي؟» والإجابة: <strong>سياق منظّم (نوع الفشل + الاستعلام المُحاوَل + النتائج الجزئية + البدائل)</strong>. المموِّهات الثلاثة كانت حرفيًا: الحالة العامة، والفارغ-كنجاح، والإنهاء الشامل.</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>A full official question lives here: "the web search subagent times out — which error propagation approach best enables intelligent recovery?" Answer: <strong>structured context (failure type + attempted query + partial results + alternatives)</strong>. The three distractors were literally: the generic status, empty-as-success, and total termination.</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">أي خيار ينتهي بحالة عامة تخفي التفاصيل — حتى لو بدايته (إعادة محلية) صحيحة.</span><span class="lang-en">Any option ending in a generic status that hides details — even if its start (local retries) is right.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">أي خيار يعلّم الفشل كنجاح («أرجِع فارغًا وامشِ»).</span><span class="lang-en">Any option marking failure as success ("return empty and move on").</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">أي خيار يقتل سير العمل كله على فشل واحد قابل للتعافي.</span><span class="lang-en">Any option killing the whole workflow over one recoverable failure.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">وكيل بحث الويب يفشل بـ timeout أثناء بحث موضوع معقد. تصمم كيف تتدفق معلومة الفشل للمنسّق. أي نهج يمكّن التعافي الذكي؟</span>
+            <span class="lang-en">The web search subagent times out while researching a complex topic. You're designing how this failure flows back to the coordinator. Which approach best enables intelligent recovery?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أرجِع سياق خطأ منظّمًا للمنسّق: نوع الفشل، الاستعلام المُحاوَل، أي نتائج جزئية، والنُّهج البديلة الممكنة.</span><span class="lang-en">Return structured error context to the coordinator: the failure type, the attempted query, any partial results, and potential alternative approaches.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">طبّق إعادة تلقائية بـ exponential backoff داخل الوكيل، وأرجِع حالة عامة «البحث غير متاح» بعد استنفاد المحاولات.</span><span class="lang-en">Implement automatic retry with exponential backoff inside the subagent, returning a generic "search unavailable" status after retries are exhausted.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">التقط الـ timeout داخل الوكيل وأرجِع مجموعة نتائج فارغة مُعلَّمة كنجاح.</span><span class="lang-en">Catch the timeout within the subagent and return an empty result set marked as successful.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">مرّر استثناء الـ timeout مباشرة لمعالج علوي يُنهي كامل سير عمل البحث.</span><span class="lang-en">Propagate the timeout exception directly to a top-level handler that terminates the entire research workflow.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">السياق المنظّم يعطي المنسّق ما يحتاجه ليقرر: إعادة باستعلام معدَّل، نهج بديل، أو المتابعة بالجزئي. الحالة العامة تخفي، والفارغ-كنجاح يمنع التعافي، والإنهاء الشامل مبالغة.</span><span class="lang-en">Structured context gives the coordinator what it needs to decide: retry modified, try an alternative, or proceed with partials. The generic status hides, empty-as-success blocks recovery, and full termination overreacts.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">هذا سؤال رسمي وإجابته: سياق الخطأ المنظّم (نوع + استعلام + جزئي + بدائل). الحالة العامة والإخماد الصامت والإنهاء الشامل هي المموِّهات الثلاثة بعينها.</span><span class="lang-en">This is an official sample; the answer is structured error context (type + query + partials + alternatives). The generic status, silent suppression, and total termination are the three canonical distractors.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">وكيل فرعي يواجه خطأ شبكة عابرًا (انقطاع لثوانٍ) من مصدره. حسب تقسيم المسؤوليات الصحيح، من يتعامل مع هذا الخطأ أولًا وكيف؟</span>
+            <span class="lang-en">A subagent hits a transient network error (a few seconds' blip) from its source. Under the right division of responsibility, who handles this error first, and how?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يمرّره فورًا للمنسّق — كل خطأ مهما صغر قرارُه للمنسّق وحده.</span><span class="lang-en">Propagate it to the coordinator immediately — every error, however small, is the coordinator's call alone.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الوكيل الفرعي يتعافى محليًا (إعادات محدودة) لأنه خطأ عابر، ويصعّد فقط ما يعجز عن حله — مرفقًا ما جرّبه ونتائجه الجزئية.</span><span class="lang-en">The subagent recovers locally (bounded retries) since it's transient, propagating only what it cannot resolve — including what was attempted and partial results.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يعيد المحاولة للأبد حتى ينجح — التصعيد اعتراف بالفشل.</span><span class="lang-en">Retry forever until it succeeds — escalation is admitting defeat.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يتجاهل الخطأ ويرجّع ما جمعه سابقًا كنتيجة نهائية ناجحة.</span><span class="lang-en">Ignore the error and return whatever it previously gathered as a successful final result.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذا التقسيم الرسمي: تعافٍ محلي للعابر داخل الوكيل الفرعي، وتصعيد منظّم لما لا يُحَل فقط — مع ما جُرِّب والجزئي. لا إغراق للمنسّق بكل خطأ، ولا حلقات لا نهائية، ولا نجاح مزيّف.</span><span class="lang-en">That's the official division: local recovery for transients inside the subagent, structured propagation only for the unresolvable — with attempts and partials. No flooding the coordinator with every blip, no infinite loops, no fake success.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">تمرير كل خطأ يغرق المنسّق بضجيج قرارات، والإعادة الأبدية تعلّق النظام، والتجاهل نجاح مزيّف. الصحيح: تعافٍ محلي محدود ثم تصعيد منظّم للمستعصي.</span><span class="lang-en">Propagating everything floods the coordinator with decision noise, infinite retries hang the system, and ignoring is fake success. Correct: bounded local recovery, then structured propagation of the unresolvable.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">بعد فشل غير قابل للحل في مصدر «إنتاج الأفلام»، قرر المنسّق المتابعة بالنتائج الجزئية. كيف يجب أن يعكس تقريرُ التجميع النهائي هذا الوضع؟</span>
+            <span class="lang-en">After an unresolvable failure of the "film production" source, the coordinator decides to proceed with partial results. How should the final synthesis report reflect this?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يحذف مجال الأفلام بصمت — الأقسام الموجودة كلها موثوقة والقارئ ما يحتاج يعرف.</span><span class="lang-en">Silently omit the film area — the remaining sections are all reliable and the reader doesn't need to know.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يملأ فجوة الأفلام من معرفة النموذج العامة حتى يكتمل التقرير.</span><span class="lang-en">Fill the film gap from the model's general knowledge so the report is complete.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يؤجَّل التقرير كله لأجل غير مسمى حتى يعود المصدر للعمل.</span><span class="lang-en">Postpone the entire report indefinitely until the source comes back.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يتضمن تعليقات تغطية صريحة: أي النتائج مدعومة جيدًا، وأي المجالات فيها فجوات بسبب مصادر غير متاحة (الأفلام).</span><span class="lang-en">Include explicit coverage annotations: which findings are well-supported, and which topic areas have gaps due to unavailable sources (film).</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">تعليقات التغطية هي المهارة الرسمية: التقرير يعلن حدوده (مدعوم جيدًا مقابل فجوة بسبب مصدر غير متاح) بدل ادّعاء كمالٍ زائف أو حشوٍ من خارج المصادر.</span><span class="lang-en">Coverage annotations are the official skill: the report declares its limits (well-supported vs. gap due to an unavailable source) instead of faking completeness or padding from outside the sources.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">الحذف الصامت يخفي الفجوة، والحشو من المعرفة العامة يخالف مبدأ الاستناد للمصادر، والتأجيل اللانهائي يقتل القيمة. الصحيح: تعليقات تغطية صريحة.</span><span class="lang-en">Silent omission hides the gap, padding from general knowledge breaks source grounding, and indefinite postponement kills the value. Correct: explicit coverage annotations.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">سياق الخطأ المنظّم = نوع الفشل + الاستعلام المُحاوَل + النتائج الجزئية + البدائل — هذا ما يمكّن تعافي المنسّق الذكي.</span><span class="lang-en">Structured error context = failure type + attempted query + partial results + alternatives — that's what enables intelligent coordinator recovery.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">فشل الوصول (المصدر ما انفحص) لا يساوي نتيجة فارغة صحيحة (انفحص وما فيه تطابقات) — ميّزهما في التقرير دائمًا.</span><span class="lang-en">An access failure (source never examined) is not a valid empty result (examined, no matches) — always distinguish them in reporting.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">ثلاثة أنماط مضادة: الحالة العامة، الفارغ-كنجاح، والإنهاء الشامل — كلها تحرم المنسّق من القرار.</span><span class="lang-en">Three anti-patterns: the generic status, empty-as-success, and total termination — all rob the coordinator of the decision.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">تعافٍ محلي للأخطاء العابرة داخل الوكيل الفرعي؛ يُصعَّد فقط ما لا يُحَل — مع ما جُرِّب والجزئي.</span><span class="lang-en">Local recovery for transient errors inside the subagent; propagate only the unresolvable — with attempts and partials.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">مخرَج التجميع يحمل تعليقات تغطية: المدعوم جيدًا مقابل الفجوات بسبب مصادر غير متاحة.</span><span class="lang-en">Synthesis output carries coverage annotations: well-supported vs. gaps due to unavailable sources.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="5-2-escalation.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.2 التصعيد وحل الغموض</span><span class="lang-en">5.2 Escalation &amp; ambiguity resolution</span></span>
+        </span>
+      </a>
+      <a href="5-4-codebase-exploration.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.4 السياق في استكشاف الأكواد الكبيرة</span><span class="lang-en">5.4 Context in large-codebase exploration</span></span>
+        </span>
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

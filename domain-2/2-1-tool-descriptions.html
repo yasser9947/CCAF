@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.1 تصميم واجهات الأدوات — CCAF مرجع</title>
+  <meta name="description" content="الموضوع 2.1 من شهادة CCAF: وصف الأداة كآلية الاختيار الأساسية، مكونات الوصف القوي، سوء التوجيه بين الأدوات المتشابهة، سلّم العلاج (وسّع، أعد التسمية، قسّم)، وحساسية system prompt للكلمات المفتاحية.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-4">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">واجهات الأدوات</span><span class="lang-en">Tool interfaces</span></span>
+      </nav>
+
+      <div class="flex items-start gap-4">
+        <span class="bg-white/10 border border-white/20 text-emerald-200 font-mono font-bold text-lg px-3.5 py-2 rounded-xl shrink-0">2.1</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl sm:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">تصميم واجهات الأدوات: الأوصاف والحدود</span>
+            <span class="lang-en">Tool Interfaces: Descriptions &amp; Boundaries</span>
+          </h1>
+          <p class="text-emerald-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن النموذج ما يختار الأداة بالاسم ولا بالحظ — يختارها بالوصف. وصف ناقص يعني توجيه غلط، مهما كانت معماريتك ذكية.</span>
+            <span class="lang-en">Why it matters: the model does not pick a tool by its name or by luck — it picks by the description. A thin description means misrouting, no matter how clever your architecture is.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">ليش الوصف هو <strong>الآلية الأساسية</strong> لاختيار الأداة، وليش الأوصاف المختصرة تسبب اختيارًا غير موثوق بين الأدوات المتشابهة.</span><span class="lang-en">Why the description is the <strong>primary mechanism</strong> for tool selection, and why minimal descriptions cause unreliable selection among similar tools.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">المكونات الأربعة للوصف القوي: صيغ المدخلات، أمثلة الاستعلامات، الحالات الحدّية، والحدود مقابل الأدوات المشابهة.</span><span class="lang-en">The four components of a strong description: input formats, example queries, edge cases, and boundaries versus similar tools.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">كيف يحصل سوء التوجيه (misrouting) بين أدوات متداخلة مثل <span dir="ltr" class="font-mono">analyze_content</span> و<span dir="ltr" class="font-mono">analyze_document</span>، وسلّم العلاج: وسّع، أعد التسمية، قسّم.</span><span class="lang-en">How misrouting happens between overlapping tools like <span dir="ltr" class="font-mono">analyze_content</span> and <span dir="ltr" class="font-mono">analyze_document</span>, and the fix ladder: expand, rename, split.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">كيف تخلق صياغة الـ <span dir="ltr" class="font-mono">system prompt</span> الحسّاسة للكلمات ارتباطات غير مقصودة تتجاوز أوصافك المكتوبة بعناية — وكيف تراجعها.</span><span class="lang-en">How keyword-sensitive <span dir="ltr" class="font-mono">system prompt</span> wording creates unintended associations that override your carefully written descriptions — and how to review for it.</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== SECTION 1: THE SELECTION MECHANISM ===== -->
+    <section id="selection-mechanism" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">1</span>
+        <span><span class="lang-ar">الوصف هو آلية الاختيار — مو الاسم</span><span class="lang-en">The description is the selection mechanism — not the name</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>لما يوصل طلب المستخدم، النموذج يقرأ <strong>أوصاف كل الأدوات المتاحة</strong> ويقارنها بنيّة الطلب، ثم يختار. هذي هي اللحظة الحاسمة: <strong>وصف الأداة (<span dir="ltr" class="font-mono">description</span>) هو الآلية الأساسية اللي يعتمد عليها النموذج</strong>. الاسم لوحده إشارة ضعيفة، والـ system prompt يوجّه السلوك العام لكنه ما يفرّق بين أداتين متشابهتين.</p>
+          <p>النتيجة المنطقية: <strong>الأوصاف المختصرة تنتج اختيارًا غير موثوق</strong> بين الأدوات المتشابهة. لو عندك <span dir="ltr" class="font-mono">search_code</span> و<span dir="ltr" class="font-mono">find_files</span> وكل وحدة وصفها "Searches the repository"، النموذج ما عنده أي معلومة يفرّق فيها — فيتخبط. وهذا اللي يسمّيه دليل الاختبار <strong>سوء التوجيه (misrouting)</strong>: استدعاء الأداة الغلط لأن وصفين متقاربين مثل <span dir="ltr" class="font-mono">analyze_content</span> و<span dir="ltr" class="font-mono">analyze_document</span> ما يرسمان حدًا واضحًا بينهما.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>When a user request arrives, the model reads <strong>the descriptions of every available tool</strong>, compares them against the request's intent, then selects. This is the decisive moment: <strong>the tool <span class="font-mono">description</span> is the primary mechanism the model relies on</strong>. The name alone is a weak signal, and the system prompt steers general behavior but cannot differentiate two similar tools.</p>
+          <p>The logical consequence: <strong>minimal descriptions produce unreliable selection</strong> among similar tools. If you have <span class="font-mono">search_code</span> and <span class="font-mono">find_files</span> both described as "Searches the repository," the model has no information to differentiate with — so it guesses. That is what the exam guide calls <strong>misrouting</strong>: calling the wrong tool because two near-identical descriptions like <span class="font-mono">analyze_content</span> and <span class="font-mono">analyze_document</span> draw no clear boundary between themselves.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 1: tool-selection flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-fork" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: كيف يختار النموذج الأداة</span>
+          <span class="lang-en">Diagram: how the model selects a tool</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[620px] flex flex-col items-center gap-2 font-mono text-xs">
+            <div class="bg-surface-100 border border-surface-300 rounded-xl px-5 py-3 text-surface-800 font-semibold">User request: "find the definition of calculateTax"</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl px-5 py-3 text-emerald-900 font-semibold">Model reads ALL tool descriptions</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-3 text-amber-900 font-semibold">Do descriptions draw clear boundaries?</div>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-[560px] mt-1">
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-emerald-600 text-white rounded-md px-2.5 py-1 font-bold">YES</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-emerald-500"></i>
+                <div class="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 text-emerald-900 text-center w-full">Confident match<br>search_code called<br><span class="text-emerald-600">reliable selection</span></div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-red-600 text-white rounded-md px-2.5 py-1 font-bold">NO</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-red-500"></i>
+                <div class="bg-red-50 border border-red-300 rounded-xl px-4 py-3 text-red-900 text-center w-full">Guess between twins<br>find_files called<br><span class="text-red-600">MISROUTING</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">القرار كله يتوقف على سؤال واحد: هل الأوصاف ترسم حدودًا واضحة؟ لو لا، الاختيار يصير تخمينًا.</span>
+          <span class="lang-en">The whole decision hinges on one question: do the descriptions draw clear boundaries? If not, selection becomes a guess.</span>
+        </p>
+      </div>
+
+      <!-- quick insight -->
+      <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-cyan-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+            <p class="lang-ar text-cyan-800 leading-relaxed text-sm">النموذج يقرأ الأوصاف في <em>كل دور</em> من جديد — ما يتذكر "المرة الماضية اخترت صح". يعني الوصف الجيد استثمار يشتغل لك في كل استدعاء.</p>
+            <p class="lang-en text-cyan-800 leading-relaxed text-sm">The model reads the descriptions fresh <em>every turn</em> — it does not remember "I picked correctly last time." A good description is an investment that works for you on every single call.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: ANATOMY OF A STRONG DESCRIPTION ===== -->
+    <section id="strong-description" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">2</span>
+        <span><span class="lang-ar">تشريح الوصف القوي: أربعة مكونات</span><span class="lang-en">Anatomy of a strong description: four components</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>الوصف القوي يجاوب على أربعة أسئلة قبل ما يسألها النموذج:</p>
+          <ol class="space-y-2 ps-5 list-decimal marker:text-emerald-600 marker:font-bold">
+            <li><strong>صيغ المدخلات (input formats):</strong> وش شكل المدخل المقبول بالضبط؟ (مثال: رقم طلب بصيغة <span dir="ltr" class="font-mono">ORD-#####</span>)</li>
+            <li><strong>أمثلة استعلامات (example queries):</strong> وش الطلبات اللي تناسب هذي الأداة؟ ("check my order #12345")</li>
+            <li><strong>الحالات الحدّية (edge cases):</strong> وش يصير لو الطلب ما وُجد؟ لو المدخل ناقص؟</li>
+            <li><strong>الحدود (boundaries):</strong> متى <em>لا</em> تستخدم هذي الأداة، وأي أداة تستخدم بدلها؟ ("NOT for customer lookup — use get_customer")</li>
+          </ol>
+          <p>المكوّن الرابع هو الأهم والأكثر إهمالًا: الحد الصريح مقابل الأداة الجارة هو اللي يقطع سوء التوجيه من جذره.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>A strong description answers four questions before the model has to ask them:</p>
+          <ol class="space-y-2 ps-5 list-decimal marker:text-emerald-600 marker:font-bold">
+            <li><strong>Input formats:</strong> what exactly does an acceptable input look like? (e.g. an order number in the <span class="font-mono">ORD-#####</span> format)</li>
+            <li><strong>Example queries:</strong> which requests fit this tool? ("check my order #12345")</li>
+            <li><strong>Edge cases:</strong> what happens when the order does not exist? When the input is incomplete?</li>
+            <li><strong>Boundaries:</strong> when should this tool <em>not</em> be used, and which tool should be used instead? ("NOT for customer lookup — use get_customer")</li>
+          </ol>
+          <p>The fourth component is the most important and the most neglected: the explicit boundary against the neighboring tool is what cuts misrouting at the root.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: BAD vs GOOD side-by-side panels -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-compare" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط مقارنة: وصف ضعيف مقابل وصف قوي لنفس الأداة</span>
+          <span class="lang-en">Comparison: a weak vs a strong description of the same tool</span>
+        </p>
+        <div class="grid lg:grid-cols-2 gap-4" dir="ltr">
+          <!-- BAD panel -->
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 overflow-hidden">
+            <div class="bg-red-100 border-b border-red-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="x-octagon" class="w-4 h-4 text-red-600"></i>
+              <span class="font-mono text-xs font-bold text-red-700">BAD — causes misrouting</span>
+            </div>
+            <div class="p-4 space-y-3 font-mono text-xs text-red-900">
+              <div class="bg-white/70 rounded-lg p-3 border border-red-200">
+                <p class="font-bold">lookup_order</p>
+                <p class="mt-1 text-red-700">"Retrieves order details"</p>
+              </div>
+              <div class="bg-white/70 rounded-lg p-3 border border-red-200">
+                <p class="font-bold">get_customer</p>
+                <p class="mt-1 text-red-700">"Retrieves customer information"</p>
+              </div>
+              <ul class="space-y-1 text-red-800">
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>no input format</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>no example queries</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>no edge cases</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="x" class="w-3.5 h-3.5"></i>no boundary between the twins</li>
+              </ul>
+            </div>
+          </div>
+          <!-- GOOD panel -->
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 overflow-hidden">
+            <div class="bg-emerald-100 border-b border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              <span class="font-mono text-xs font-bold text-emerald-700">GOOD — differentiates clearly</span>
+            </div>
+            <div class="p-4 space-y-3 font-mono text-xs text-emerald-900">
+              <div class="bg-white/70 rounded-lg p-3 border border-emerald-200 space-y-1.5">
+                <p class="font-bold">lookup_order</p>
+                <p><span class="bg-emerald-200/70 rounded px-1">format:</span> ORD-##### e.g. 'ORD-12345'</p>
+                <p><span class="bg-emerald-200/70 rounded px-1">examples:</span> "check my order #12345"</p>
+                <p><span class="bg-emerald-200/70 rounded px-1">edge:</span> returns 'not_found' if absent</p>
+                <p><span class="bg-emerald-200/70 rounded px-1">boundary:</span> NOT for customers -&gt; get_customer</p>
+              </div>
+              <ul class="space-y-1 text-emerald-800">
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>input format stated</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>example queries listed</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>empty-result behavior defined</li>
+                <li class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5"></i>boundary to the twin tool explicit</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">نفس الأداة، نفس الاسم — الفرق الوحيد كثافة المعلومات في الوصف، وهو الفرق بين تخمين وقرار.</span>
+          <span class="lang-en">Same tool, same name — the only difference is information density in the description, and that is the difference between a guess and a decision.</span>
+        </p>
+      </div>
+
+      <!-- full JSON example -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="file-json" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">الوصف القوي كاملًا (JSON)</span>
+          <span class="lang-en">The full strong description (JSON)</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">{
+  "name": "lookup_order",
+  "description": "Retrieve a single order by its order number (format: ORD-#####, e.g. 'ORD-12345'). Use for order-scoped queries: status, items, refund eligibility, shipping. Example queries: 'check my order #12345', 'is order ORD-88 delivered?'. NOT for looking up a customer by name or email -> use get_customer for that. Returns 'not_found' (valid empty result) when the order number does not exist.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "order_number": {
+        "type": "string",
+        "description": "Order number, format ORD-#####"
+      }
+    },
+    "required": ["order_number"]
+  }
+}</code></pre>
+        </div>
+        <p class="text-xs text-surface-500 leading-relaxed">
+          <span class="lang-ar">لاحظ: حتى وصف <em>المعامل</em> داخل <span dir="ltr" class="font-mono">input_schema</span> يعيد ذكر الصيغة — كل طبقة توثيق تخدم الاختيار.</span>
+          <span class="lang-en">Note: even the <em>parameter</em> description inside <span class="font-mono">input_schema</span> restates the format — every documentation layer serves selection.</span>
+        </p>
+      </div>
+
+      <!-- key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+            <p class="lang-ar text-brand-800 leading-relaxed text-sm">لما سؤال يصف "أدوات متشابهة بأوصاف مختصرة والنموذج يخلط بينها"، أول علاج <strong>دائمًا</strong> هو توسيع الأوصاف — مو طبقة توجيه، مو دمج الأدوات، مو أمثلة few-shot. توسيع الوصف يعالج السبب الجذري بأقل جهد وأعلى رافعة.</p>
+            <p class="lang-en text-brand-800 leading-relaxed text-sm">When a question describes "similar tools with minimal descriptions that the model confuses," the first fix is <strong>always</strong> to expand the descriptions — not a routing layer, not tool consolidation, not few-shot examples. Expanding the description addresses the root cause with the least effort and the highest leverage.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-emerald-900"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+            <p class="lang-ar text-emerald-800 leading-relaxed text-sm">اكتب الوصف كأنك تشرح لموظف جديد أول يوم له: وش تسوي الأداة، وش تعطيها، وش ترجّع لك، ومتى تروح للأداة الثانية بدلها. لو موظف جديد بيفهمها، النموذج بيفهمها.</p>
+            <p class="lang-en text-emerald-800 leading-relaxed text-sm">Write the description as if onboarding a new hire on day one: what the tool does, what you feed it, what it returns, and when to go to the other tool instead. If a new hire would get it, the model will get it.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: THE FIX LADDER ===== -->
+    <section id="fix-ladder" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">3</span>
+        <span><span class="lang-ar">سلّم العلاج: وسّع، أعد التسمية، قسّم</span><span class="lang-en">The fix ladder: expand, rename, split</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>لما تكتشف سوء توجيه، عندك ثلاث درجات علاج مرتّبة حسب الجهد. تبدأ بالأرخص، وتصعد فقط لو التداخل أعمق من مجرد وصف:</p>
+          <ul class="space-y-2 ps-4">
+            <li><strong>الدرجة 1 — وسّع الوصف:</strong> أضف صيغ المدخلات، أمثلة، حالات حدّية، وحدودًا. علاج معظم الحالات.</li>
+            <li><strong>الدرجة 2 — أعد التسمية + حدّث الوصف:</strong> لو الاسم نفسه مضلّل ويتداخل وظيفيًا مع أداة ثانية. مثال الدليل: <span dir="ltr" class="font-mono">analyze_content</span> تصير <span dir="ltr" class="font-mono">extract_web_results</span> بوصف خاص بنتائج الويب — فينزاح التداخل مع <span dir="ltr" class="font-mono">analyze_document</span>.</li>
+            <li><strong>الدرجة 3 — قسّم الأداة العامة:</strong> لو أداة واحدة تسوّي أعمالًا مختلفة جوهريًا، قسّمها إلى أدوات محددة الغرض بعقود مدخلات/مخرجات معرّفة: <span dir="ltr" class="font-mono">analyze_document</span> تتفكك إلى <span dir="ltr" class="font-mono">extract_data_points</span> و<span dir="ltr" class="font-mono">summarize_content</span> و<span dir="ltr" class="font-mono">verify_claim_against_source</span>.</li>
+          </ul>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>When you discover misrouting, you have three escalating fixes ordered by effort. Start with the cheapest, and climb only if the overlap runs deeper than the description:</p>
+          <ul class="space-y-2 ps-4">
+            <li><strong>Rung 1 — expand the description:</strong> add input formats, examples, edge cases, and boundaries. Fixes most cases.</li>
+            <li><strong>Rung 2 — rename + update the description:</strong> when the name itself misleads and functionally overlaps another tool. The guide's example: <span class="font-mono">analyze_content</span> becomes <span class="font-mono">extract_web_results</span> with a web-specific description — dissolving the overlap with <span class="font-mono">analyze_document</span>.</li>
+            <li><strong>Rung 3 — split the generic tool:</strong> when one tool performs fundamentally different jobs, split it into purpose-specific tools with defined input/output contracts: <span class="font-mono">analyze_document</span> decomposes into <span class="font-mono">extract_data_points</span>, <span class="font-mono">summarize_content</span>, and <span class="font-mono">verify_claim_against_source</span>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 3: fix ladder -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="list-ordered" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: سلّم العلاج من الأرخص للأثقل</span>
+          <span class="lang-en">Diagram: the fix ladder, cheapest to heaviest</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[620px] space-y-2 font-mono text-xs">
+            <div class="flex items-center gap-3">
+              <span class="bg-emerald-600 text-white rounded-lg w-9 h-9 flex items-center justify-center font-bold shrink-0">1</span>
+              <div class="flex-1 bg-emerald-50 border-2 border-emerald-400 rounded-xl px-4 py-3">
+                <p class="font-bold text-emerald-900">EXPAND the description</p>
+                <p class="text-emerald-700">"Retrieves order details" -&gt; formats + examples + edges + boundaries</p>
+              </div>
+              <span class="text-emerald-700 font-bold shrink-0 w-24 text-right">low effort</span>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i></div>
+            <div class="flex items-center gap-3">
+              <span class="bg-amber-500 text-white rounded-lg w-9 h-9 flex items-center justify-center font-bold shrink-0">2</span>
+              <div class="flex-1 bg-amber-50 border-2 border-amber-400 rounded-xl px-4 py-3">
+                <p class="font-bold text-amber-900">RENAME + update description</p>
+                <p class="text-amber-700">analyze_content -&gt; extract_web_results (web-specific description)</p>
+              </div>
+              <span class="text-amber-700 font-bold shrink-0 w-24 text-right">medium</span>
+            </div>
+            <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i></div>
+            <div class="flex items-center gap-3">
+              <span class="bg-red-500 text-white rounded-lg w-9 h-9 flex items-center justify-center font-bold shrink-0">3</span>
+              <div class="flex-1 bg-red-50 border-2 border-red-400 rounded-xl px-4 py-3">
+                <p class="font-bold text-red-900">SPLIT into purpose-specific tools</p>
+                <p class="text-red-700">analyze_document -&gt; extract_data_points + summarize_content + verify_claim_against_source</p>
+              </div>
+              <span class="text-red-700 font-bold shrink-0 w-24 text-right">high effort</span>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">"أفضل خطوة أولى" في الاختبار تعني غالبًا الدرجة 1. الدرجتان 2 و3 صحيحتان لما يذكر السؤال تداخلًا وظيفيًا حقيقيًا أو أعمالًا مختلفة جوهريًا.</span>
+          <span class="lang-en">"Best first step" on the exam usually means rung 1. Rungs 2 and 3 are correct when the question states real functional overlap or fundamentally different jobs.</span>
+        </p>
+      </div>
+
+      <!-- split code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="split" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">الدرجة 3 عمليًا: تقسيم أداة عامة</span>
+          <span class="lang-en">Rung 3 in practice: splitting a generic tool</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">// BEFORE: one vague tool doing three unrelated jobs
+{ "name": "analyze_document", "description": "Analyzes a document" }
+
+// AFTER: three tools, each with a defined input/output contract
+[
+  { "name": "extract_data_points",
+    "description": "Extract structured numeric/tabular fields (amounts, dates, IDs) from a document. Returns a JSON object of typed fields; null when a field is absent." },
+  { "name": "summarize_content",
+    "description": "Produce a 3-5 sentence abstractive summary of a document's main points. Returns prose text; no numbers are computed." },
+  { "name": "verify_claim_against_source",
+    "description": "Check whether a specific claim is supported by a given source document. Returns { supported: bool, evidence_excerpt, confidence }." }
+]</code></pre>
+        </div>
+      </div>
+
+      <!-- system prompt keyword sensitivity -->
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>آخر قطعة في الموضوع، وأكثرها مكرًا: حتى مع أوصاف ممتازة، <strong>صياغة الـ <span dir="ltr" class="font-mono">system prompt</span> حسّاسة للكلمات المفتاحية</strong>. تعليمة بريئة مثل "Always document your findings" فيها كلمة "document" — وقد تخلق ارتباطًا غير مقصود يسحب النموذج نحو أداة <span dir="ltr" class="font-mono">analyze_document</span> في طلبات ما لها علاقة بالمستندات، <em>متجاوزةً</em> أوصاف الأدوات المكتوبة بعناية. لذلك من مهارات الدليل: <strong>راجع الـ system prompt</strong> بحثًا عن تعليمات حسّاسة للكلمات قد تتغلب على الأوصاف.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The final and sneakiest piece: even with excellent descriptions, <strong><span class="font-mono">system prompt</span> wording is keyword-sensitive</strong>. An innocent instruction like "Always document your findings" contains the word "document" — and can create an unintended association that pulls the model toward <span class="font-mono">analyze_document</span> on requests that have nothing to do with documents, <em>overriding</em> well-written tool descriptions. Hence the guide's skill: <strong>review the system prompt</strong> for keyword-sensitive instructions that might override the descriptions.</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="search-check" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مراجعة system prompt من الكلمات الحسّاسة</span>
+          <span class="lang-en">Reviewing a system prompt for keyword sensitivity</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-markdown"># RISKY system prompt (keyword pulls toward analyze_document)
+"You are a research assistant. Always document your findings
+ thoroughly and analyze content carefully."
+  ^ "document" + "analyze content" = unintended tool associations
+
+# SAFER wording (behavior stated without tool-name collisions)
+"You are a research assistant. Record your findings thoroughly
+ and examine sources carefully."</code></pre>
+        </div>
+      </div>
+
+      <!-- warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+            <p class="lang-ar text-amber-800 leading-relaxed text-sm">لو وسّعت الأوصاف وما زال التوجيه غلط، لا تقفز مباشرة للحلول الثقيلة — افحص الـ system prompt أولًا. كلمة وحدة متصادمة مع اسم أداة تقدر تهدم أفضل أوصافك.</p>
+            <p class="lang-en text-amber-800 leading-relaxed text-sm">If you expanded the descriptions and routing is still wrong, do not jump to heavy solutions — inspect the system prompt first. A single word colliding with a tool name can defeat your best descriptions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>فخ الـ few-shot:</strong> "أضف 5-8 أمثلة في الـ system prompt" يبدو معقولًا لكنه يزيد التوكنز بدون علاج السبب — الوصف الناقص. الوصف أولًا.</span>
+              <span class="lang-en"><strong>The few-shot trap:</strong> "add 5-8 examples to the system prompt" sounds reasonable but adds token overhead without fixing the root cause — the thin description. Description first.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>فخ طبقة التوجيه:</strong> "طبقة تحلّل المدخل وتختار الأداة بالكلمات المفتاحية" هندسة زائدة تتجاوز فهم اللغة الطبيعي عند النموذج.</span>
+              <span class="lang-en"><strong>The routing-layer trap:</strong> "a layer that parses input and pre-selects the tool by keywords" is over-engineered and bypasses the model's natural-language understanding.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>فخ الدمج:</strong> "ادمج الأداتين في أداة وحدة" خيار معماري صحيح أحيانًا، لكنه جهد أكبر من "خطوة أولى" لما تكون المشكلة مجرد أوصاف ضعيفة.</span>
+              <span class="lang-en"><strong>The consolidation trap:</strong> "merge both into one tool" is sometimes a valid architectural choice, but it is more effort than a "first step" warrants when the real problem is just weak descriptions.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="pill" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg">
+              <span class="lang-ar">مثال من الحياة: صيدلية المستشفى</span>
+              <span class="lang-en">Real-life example: the hospital pharmacy</span>
+            </h2>
+            <p class="lang-ar text-amber-900/90 leading-loose">
+              تخيّل صيدلية مستشفى فيها دواءان علبتاهما متشابهتان، ومكتوب على كل وحدة "مسكّن ألم" وبس. الصيدلي الجديد بيمسك العلبة الغلط عاجلًا أم آجلًا — مو لأنه مهمل، لأن <strong>الملصق ما يعطيه معلومة يفرّق فيها</strong>. الملصق الصحيح يذكر: التركيز والجرعة (صيغة المدخل)، الحالات اللي يوصف لها (أمثلة الاستعلامات)، تحذيرات الاستخدام (الحالات الحدّية)، والأهم: "غير مناسب لمرضى الضغط — استخدم البديل X" (الحدود مقابل الأداة المشابهة). ولو علّقت في الصيدلية لوحة تقول "اصرف المسكّن بسرعة لكل مراجع"، صارت اللوحة نفسها تسحب الصيدلي نحو دواء معيّن حتى لو ملصقه ما ينطبق — هذي بالضبط حساسية الـ system prompt للكلمات المفتاحية.
+            </p>
+            <p class="lang-en text-amber-900/90 leading-loose">
+              Picture a hospital pharmacy with two near-identical medicine boxes, each labeled only "pain reliever." Sooner or later the new pharmacist grabs the wrong one — not from carelessness, but because <strong>the label gives nothing to differentiate with</strong>. A proper label states: concentration and dosage (input format), the conditions it treats (example queries), usage warnings (edge cases), and most importantly: "not for hypertensive patients — use alternative X" (the boundary against the similar tool). And if the pharmacy hangs a sign saying "dispense the pain reliever quickly for every visitor," the sign itself now pulls the pharmacist toward one specific medicine even when its label does not apply — that is exactly system-prompt keyword sensitivity.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+      </div>
+      <div class="lang-ar space-y-3 text-sm leading-relaxed">
+        <p>السؤال النموذجي: نظام فيه أداتان متشابهتان، النموذج ينادي الغلط، ويسألك عن "أفضل خطوة أولى" أو "الإصلاح الجذري". طريقة الحل:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>ابحث عن الخيار اللي يلمس <strong>الوصف نفسه</strong> (توسيع/توضيح حدود) — هذا الجواب في 90% من الصيغ.</li>
+          <li>استبعد فورًا: طبقة توجيه بالكلمات المفتاحية، حزم few-shot، الدمج "عشان يرتاح النموذج من الاختيار"، ورفع max_tokens.</li>
+          <li>لو السؤال يذكر أن الاسم نفسه مضلّل أو الأعمال مختلفة جوهريًا — اصعد درجة: أعد التسمية أو قسّم.</li>
+          <li>لو الأوصاف ممتازة والتوجيه لسه غلط والسؤال يذكر تعليمة في الـ system prompt — الجواب مراجعة صياغة الـ prompt من الكلمات الحسّاسة.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 text-sm leading-relaxed">
+        <p>The typical question: a system with two similar tools, the model calls the wrong one, and you are asked for the "best first step" or the "root-cause fix." How to solve it:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>Look for the option that touches <strong>the description itself</strong> (expanding / clarifying boundaries) — that is the answer in 90% of phrasings.</li>
+          <li>Eliminate immediately: keyword routing layers, few-shot bundles, merging "to spare the model the choice," and raising max_tokens.</li>
+          <li>If the question states the name itself misleads or the jobs are fundamentally different — climb a rung: rename or split.</li>
+          <li>If descriptions are excellent, routing is still wrong, and the question mentions a system-prompt instruction — the answer is reviewing the prompt wording for keyword sensitivity.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">3 أسئلة على هذا الموضوع</span><span class="lang-en">3 questions on this topic</span></p>
+        </div>
+        <div class="ms-auto flex items-center gap-2 bg-white border border-surface-200 rounded-xl px-4 py-2 text-sm">
+          <span class="font-bold text-emerald-600"><span id="score">0</span>/<span id="total-q">3</span></span>
+          <span class="text-surface-400">·</span>
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+          <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">أداتان: <span dir="ltr" class="font-mono">analyze_content</span> (المفروض تحلل نتائج الويب) و<span dir="ltr" class="font-mono">analyze_document</span> (المفروض تحلل ملفات PDF)، بوصفين شبه متطابقين، والنموذج يخلط بينهما باستمرار. وسّعت الوصفين لكن الاسمين لسه متداخلين وظيفيًا. وش العلاج المناسب؟</span>
+            <span class="lang-en">Two tools: <span dir="ltr" class="font-mono">analyze_content</span> (meant for web results) and <span dir="ltr" class="font-mono">analyze_document</span> (meant for PDF files), with near-identical descriptions, constantly confused by the model. You expanded both descriptions but the names still functionally overlap. What is the appropriate fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعد تسمية <span dir="ltr" class="font-mono">analyze_content</span> إلى <span dir="ltr" class="font-mono">extract_web_results</span> مع وصف خاص بالويب يزيل التداخل الوظيفي.</span>
+            <span class="lang-en">Rename <span dir="ltr" class="font-mono">analyze_content</span> to <span dir="ltr" class="font-mono">extract_web_results</span> with a web-specific description that eliminates the functional overlap.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">احذف إحدى الأداتين واجعل الثانية تعالج النوعين.</span>
+            <span class="lang-en">Delete one tool and make the other handle both types.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أجبِر <span dir="ltr" class="font-mono">tool_choice</span> على الأداة الصحيحة في كل استدعاء يدويًا.</span>
+            <span class="lang-en">Force <span dir="ltr" class="font-mono">tool_choice</span> to the correct tool manually on every call.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف تعليمة في الـ system prompt: "انتبه للفرق بين الأداتين".</span>
+            <span class="lang-en">Add a system-prompt instruction: "pay attention to the difference between the two tools."</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذا مثال الدليل الرسمي حرفيًا: لما يبقى التداخل بعد توسيع الوصف، الدرجة الثانية هي إعادة التسمية مع وصف متخصص. الحذف يفقدك قدرة، والإجبار اليدوي يلغي فائدة الاختيار الذاتي، وتعليمة "انتبه" ما تعطي النموذج معلومة يفرّق بها.</span>
+            <span class="lang-en"><strong>Correct.</strong> This is literally the official guide's example: when overlap persists after expanding descriptions, rung 2 is renaming with a specialized description. Deleting loses capability, manual forcing defeats autonomous selection, and a "pay attention" instruction gives the model nothing to differentiate with.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>إعادة التسمية إلى <span dir="ltr" class="font-mono">extract_web_results</span> بوصف خاص بالويب</em> — الدرجة الثانية من سلّم العلاج لما يكون الاسم نفسه جزءًا من التداخل.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>renaming to <span dir="ltr" class="font-mono">extract_web_results</span> with a web-specific description</em> — rung 2 of the fix ladder when the name itself is part of the overlap.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">بعد إضافة تعليمة "Always document your findings" للـ system prompt، صار الوكيل ينادي <span dir="ltr" class="font-mono">analyze_document</span> حتى في طلبات ما لها علاقة بالمستندات — رغم أن أوصاف الأدوات ممتازة. وش السبب الأرجح والإصلاح؟</span>
+            <span class="lang-en">After adding "Always document your findings" to the system prompt, the agent started calling <span dir="ltr" class="font-mono">analyze_document</span> even on requests unrelated to documents — despite excellent tool descriptions. What is the likely cause and fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">كلمة "document" في التعليمة خلقت ارتباطًا غير مقصود يتجاوز الأوصاف؛ راجع صياغة الـ system prompt واستبدل الكلمة الحسّاسة (مثل "record your findings").</span>
+            <span class="lang-en">The word "document" in the instruction created an unintended association overriding the descriptions; review the system prompt wording and replace the sensitive keyword (e.g. "record your findings").</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">وصف <span dir="ltr" class="font-mono">analyze_document</span> صار قويًا زيادة عن اللزوم؛ اختصره.</span>
+            <span class="lang-en">The <span dir="ltr" class="font-mono">analyze_document</span> description became too strong; shorten it.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">النموذج نفسه صار متحيزًا؛ بدّل إلى نموذج أكبر.</span>
+            <span class="lang-en">The model itself became biased; switch to a larger model.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">احذف أداة <span dir="ltr" class="font-mono">analyze_document</span> مؤقتًا حتى تختفي المشكلة.</span>
+            <span class="lang-en">Remove the <span dir="ltr" class="font-mono">analyze_document</span> tool temporarily until the problem goes away.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذي حساسية الـ system prompt للكلمات المفتاحية: تعليمة فيها كلمة تتصادم مع اسم أداة تقدر تتغلب على أفضل الأوصاف. المراجعة والاستبدال هو المهارة المطلوبة في الدليل. اختصار الوصف عكس المطلوب، وتبديل النموذج وحذف الأداة يعالجان العرَض.</span>
+            <span class="lang-en"><strong>Correct.</strong> This is system-prompt keyword sensitivity: an instruction containing a word that collides with a tool name can defeat the best descriptions. Reviewing and rewording is the exact skill the guide lists. Shortening the description is backwards, and swapping models or removing the tool treats the symptom.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>مراجعة صياغة الـ system prompt</em> — كلمة "document" خلقت ارتباطًا غير مقصود يسحب النموذج نحو الأداة رغم جودة الأوصاف.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>reviewing the system prompt wording</em> — the word "document" created an unintended association pulling the model toward the tool despite the quality descriptions.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">أي مجموعة عناصر يجب أن يتضمنها وصف الأداة القوي حسب دليل الاختبار؟</span>
+            <span class="lang-en">Per the exam guide, which set of elements must a strong tool description include?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">صيغ المدخلات، أمثلة استعلامات، الحالات الحدّية، وشرح الحدود مقابل الأدوات المشابهة.</span>
+            <span class="lang-en">Input formats, example queries, edge cases, and boundary explanations versus similar tools.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">تفاصيل التنفيذ الداخلي: لغة البرمجة، المكتبات، وعدد أسطر الكود.</span>
+            <span class="lang-en">Internal implementation details: programming language, libraries, and lines of code.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">فقط <span dir="ltr" class="font-mono">input_schema</span> دقيق — الوصف النصي ثانوي ويُفضَّل اختصاره.</span>
+            <span class="lang-en">Only a precise <span dir="ltr" class="font-mono">input_schema</span> — the text description is secondary and best kept minimal.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">قائمة بكل الأدوات الأخرى في النظام وأوصافها كاملة داخل وصف كل أداة.</span>
+            <span class="lang-en">A list of every other tool in the system with their full descriptions inside each tool's description.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> المكونات الأربعة بالنص من الدليل: صيغ المدخلات، أمثلة الاستعلامات، الحالات الحدّية، وشرح الحدود. تفاصيل التنفيذ ضجيج، والاعتماد على الـ schema وحده يترك الاختيار بلا سياق، ونسخ أوصاف الأدوات الأخرى تضخيم بلا فائدة — يكفي ذكر حد الأداة الجارة المباشرة.</span>
+            <span class="lang-en"><strong>Correct.</strong> The four components verbatim from the guide: input formats, example queries, edge cases, and boundary explanations. Implementation details are noise, schema-only leaves selection without context, and copying every other tool's description is bloat — naming the immediate neighbor's boundary is enough.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>صيغ المدخلات + أمثلة الاستعلامات + الحالات الحدّية + الحدود</em> — هذي القائمة الحرفية في دليل الاختبار.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>input formats + example queries + edge cases + boundaries</em> — the literal list in the exam guide.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20 bg-gradient-to-bl from-emerald-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-white/10 border border-white/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 text-emerald-300"></i></span>
+        <h2 class="text-2xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+      </div>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">الوصف هو <strong>الآلية الأساسية</strong> لاختيار الأداة — وصف ناقص = اختيار غير موثوق بين الأدوات المتشابهة.</span><span class="lang-en">The description is the <strong>primary mechanism</strong> of tool selection — a thin description = unreliable selection among similar tools.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">الوصف القوي = صيغ مدخلات + أمثلة استعلامات + حالات حدّية + <strong>حدود مقابل الأداة المشابهة</strong>.</span><span class="lang-en">A strong description = input formats + example queries + edge cases + <strong>boundaries versus the similar tool</strong>.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">سلّم العلاج: وسّع الوصف (أولًا دائمًا) ← أعد التسمية (<span dir="ltr" class="font-mono">analyze_content → extract_web_results</span>) ← قسّم (<span dir="ltr" class="font-mono">analyze_document</span> إلى 3 أدوات).</span><span class="lang-en">The fix ladder: expand the description (always first) — rename (<span dir="ltr" class="font-mono">analyze_content → extract_web_results</span>) — split (<span dir="ltr" class="font-mono">analyze_document</span> into 3 tools).</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">الـ system prompt حسّاس للكلمات المفتاحية — كلمة متصادمة مع اسم أداة تتجاوز أفضل الأوصاف؛ راجعه.</span><span class="lang-en">The system prompt is keyword-sensitive — a word colliding with a tool name overrides the best descriptions; review it.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">مشتتات ثابتة تستبعدها: طبقة توجيه، few-shot، دمج الأدوات، رفع max_tokens.</span><span class="lang-en">Fixed distractors to eliminate: routing layers, few-shot, tool merging, raising max_tokens.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="index.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">نظرة عامة على الدومين 2</span><span class="lang-en">Domain 2 overview</span></p>
+        </div>
+      </a>
+      <a href="2-2-error-responses.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · 2.2</span><span class="lang-en">Next · 2.2</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">استجابات الأخطاء المنظّمة</span><span class="lang-en">Structured error responses</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5.6 المرجعية والغموض في التجميع — CCAF مرجع</title>
+  <meta name="description" content="الدرس 5.6 من شهادة CCAF: خرائط الادّعاء-المصدر، التعامل مع الإحصاءات المتعارضة، البيانات الزمنية، فصل الراسخ عن المتنازع عليه، والعرض حسب نوع المحتوى.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+    :target { scroll-margin-top: 5rem; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-rose-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-rose-800 via-rose-700 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-6 py-10">
+      <nav class="flex items-center gap-2 text-rose-200/80 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 5</span><span class="lang-en">Domain 5</span></a>
+        <span aria-hidden="true">&rsaquo;</span>
+        <span class="text-white font-semibold"><span class="lang-ar">5.6 المرجعية</span><span class="lang-en">5.6 Provenance</span></span>
+      </nav>
+      <div class="flex items-start gap-4">
+        <span class="font-mono text-lg font-bold text-white bg-white/15 border border-white/20 rounded-xl px-3 py-2 shrink-0">5.6</span>
+        <div>
+          <h1 class="text-2xl md:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">المرجعية والغموض في التجميع متعدد المصادر</span>
+            <span class="lang-en">Provenance &amp; uncertainty in multi-source synthesis</span>
+          </h1>
+          <p class="text-rose-100/90 mt-2 leading-relaxed">
+            <span class="lang-ar">ليش مهم؟ لأن التقرير المُجمَّع بلا مصادر مجرد «كلام واثق» — والرقم اللي فقد مصدره وتاريخه ما عاد يمكن التحقق منه أبدًا.</span>
+            <span class="lang-en">Why it matters: a synthesized report without sources is just "confident talk" — and a number that lost its source and date can never be verified again.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-6 py-10 space-y-12">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-rose-500 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-surface-900 flex items-center gap-2">
+          <i data-lucide="graduation-cap" class="w-5 h-5 text-rose-600"></i>
+          <span class="lang-ar">وش بتتعلم في هذي الصفحة</span>
+          <span class="lang-en">What you'll learn on this page</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">كيف تضيع نسبة المعلومة لمصدرها أثناء خطوات التلخيص، وكيف تمنع ذلك بخرائط ادّعاء-مصدر منظّمة.</span><span class="lang-en">How source attribution gets lost during summarization steps, and how structured claim-source mappings prevent it.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">إلزام الوكلاء الفرعيين بإخراج (رابط/اسم المستند، الاقتباس، التاريخ) وحفظها عبر التجميع والدمج.</span><span class="lang-en">Requiring subagents to output (URL/document name, excerpt, date) and preserving them through synthesis and merging.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">التعامل مع الإحصاءات المتعارضة من مصادر موثوقة: تعليق التعارض بمصادره بدل الاختيار التعسّفي — والمنسّق يقرر التوفيق.</span><span class="lang-en">Handling conflicting statistics from credible sources: annotating the conflict with attribution instead of arbitrary selection — the coordinator decides reconciliation.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">إلزام تواريخ النشر/الجمع في المخرجات المنظّمة حتى لا تُفسَّر الفروق الزمنية كتناقضات.</span><span class="lang-en">Requiring publication/collection dates in structured outputs so temporal differences aren't misread as contradictions.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">هيكلة التقارير بأقسام صريحة تفصل الراسخ عن المتنازع عليه، مع حفظ توصيف المصدر الأصلي وسياقه المنهجي.</span><span class="lang-en">Structuring reports with explicit sections separating well-established from contested findings, preserving original source characterizations and methodological context.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-rose-500 mt-0.5 shrink-0"></i><p><span class="lang-ar">عرض كل نوع محتوى بصيغته المناسبة: المالي جداول، الأخبار نثر، التقني قوائم منظّمة — لا صيغة موحّدة للجميع.</span><span class="lang-en">Rendering each content type appropriately: financial data as tables, news as prose, technical findings as structured lists — no uniform format for everything.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION A: THE CLAIM-SOURCE CHAIN ===== -->
+    <section id="claim-source" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">1</span>
+        <span class="lang-ar">سلسلة الادّعاء-المصدر — لا تنقطع عند التلخيص</span>
+        <span class="lang-en">The claim-source chain — unbroken through summarization</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>في نظام بحث متعدد الوكلاء، أكبر خسارة صامتة تحدث في <strong>خطوات التلخيص</strong>: وكيل البحث يقرأ عشرين مصدرًا ويكتب «تشير الدراسات إلى نمو 3 أضعاف» — وضاع للأبد <em>أي</em> دراسة قالت ذلك ومتى وبأي منهجية. بعد خطوتي تلخيص، عندك تقرير مليء بالأرقام اليتيمة اللي لا يمكن التحقق منها.</p>
+        <p>العلاج الرسمي: ألزم الوكلاء الفرعيين بإخراج <strong>خرائط ادّعاء-مصدر منظّمة</strong> — كل ادّعاء ذري يحمل: اسم المصدر، الرابط أو اسم المستند، اقتباسًا حرفيًا داعمًا، وتاريخ النشر/الجمع. ووكيل التجميع مسؤول عن <strong>حفظ ودمج</strong> هذي الخرائط، لا عن إذابتها في نثر أملس.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>In a multi-agent research system, the biggest silent loss happens at <strong>summarization steps</strong>: the search agent reads twenty sources and writes "studies indicate 3x growth" — and <em>which</em> study said it, when, and with what methodology is gone forever. Two summarization steps later, your report is full of orphan numbers no one can verify.</p>
+        <p>The official treatment: require subagents to output <strong>structured claim-source mappings</strong> — every atomic claim carries: the source name, the URL or document name, a verbatim supporting excerpt, and the publication/collection date. And the synthesis agent's job is to <strong>preserve and merge</strong> these mappings, not dissolve them into smooth prose.</p>
+      </div>
+
+      <!-- DIAGRAM 1: claim-source mapping chain -->
+      <div class="bg-surface-900 rounded-2xl p-6" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-5 font-mono text-center">The provenance chain — attribution survives every hop</p>
+        <div class="flex flex-col items-center gap-3 max-w-2xl mx-auto">
+          <div class="grid grid-cols-3 gap-2 w-full">
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">source A</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">report, 2023</p></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">source B</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">article, 2026</p></div>
+            <div class="bg-surface-800 border border-surface-600 rounded-lg p-2.5 text-center"><p class="text-surface-200 font-mono text-[11px]">source C</p><p class="text-surface-500 font-mono text-[9px] mt-0.5">paper, 2025</p></div>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-rose-500/20 border border-rose-400/40 rounded-xl px-4 py-3 w-full text-center">
+            <p class="text-rose-200 font-mono text-xs font-semibold">subagent finding = claim + excerpt + url/doc + date</p>
+            <p class="text-rose-300/70 font-mono text-[10px] mt-0.5">structured mapping, NOT free prose</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-brand-500/20 border border-brand-400/40 rounded-xl px-4 py-3 w-full text-center">
+            <p class="text-brand-200 font-mono text-xs font-semibold">synthesis agent PRESERVES + MERGES mappings</p>
+            <p class="text-brand-300/70 font-mono text-[10px] mt-0.5">compresses wording — never drops attribution</p>
+          </div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-surface-500"></i>
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl px-4 py-3 w-full text-center">
+            <p class="text-emerald-200 font-mono text-xs font-semibold">final report: every claim traceable to source + date</p>
+          </div>
+          <div class="pt-2 border-t border-surface-700 w-full text-center">
+            <p class="text-surface-400 font-mono text-[11px]">break ANY link (a summary without sources) and verification dies downstream</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">من المصدر إلى التقرير النهائي: النسبة للمصدر والتاريخ تسافر مع الادّعاء في كل قفزة — وأي حلقة تنكسر لا تُستعاد.</span>
+        <span class="lang-en">From source to final report: attribution and date travel with the claim at every hop — and a broken link is never restored.</span>
+      </p>
+
+      <!-- CODE: claim-source mapping schema -->
+      <div>
+        <p class="text-sm font-semibold text-surface-600 mb-2 flex items-center gap-2">
+          <i data-lucide="link" class="w-4 h-4 text-rose-500"></i>
+          <span class="lang-ar">مثال — مخطط JSON لخريطة الادّعاء-المصدر</span><span class="lang-en">Example — a claim-source mapping JSON schema</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <div class="absolute top-2.5 right-2.5 z-10 flex items-center gap-2">
+            <span class="text-[11px] uppercase tracking-wider text-surface-400 font-mono">json</span>
+            <button onclick="copyCode(this)" aria-label="Copy code" class="p-1.5 rounded-md bg-surface-800/80 hover:bg-surface-700 text-surface-300 hover:text-white transition-colors"><i data-lucide="copy" class="w-3.5 h-3.5"></i></button>
+          </div>
+          <pre class="language-json"><code class="language-json">{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClaimSourceMapping",
+  "type": "object",
+  "required": ["claim", "sources", "confidence", "collected_at"],
+  "properties": {
+    "claim":  { "type": "string", "description": "One atomic factual assertion" },
+    "sources": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_name", "url_or_doc", "excerpt", "published"],
+        "properties": {
+          "source_name": { "type": "string" },
+          "url_or_doc":  { "type": "string" },
+          "excerpt":     { "type": "string", "description": "Verbatim supporting text" },
+          "published":   { "type": "string", "format": "date",
+                           "description": "Publication/collection date — stops temporal diffs reading as conflicts" }
+        }
+      }
+    },
+    "confidence":     { "type": "string", "enum": ["well_established", "contested"] },
+    "conflicts_with": { "type": ["string", "null"],
+                        "description": "claim id this value contradicts — annotate, never silently drop" },
+    "collected_at":   { "type": "string", "format": "date" }
+  }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- quick insight callout -->
+      <div class="bg-sky-50 border border-sky-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-sky-100 rounded-lg p-2 shrink-0"><i data-lucide="zap" class="w-5 h-5 text-sky-600"></i></div>
+          <div>
+            <h4 class="font-bold text-sky-900 mb-1"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></h4>
+            <p class="text-sky-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">التلخيص هو المكان اللي «تموت» فيه المرجعية بصمت. القاعدة: لخّص <strong>الصياغة</strong>، لا <strong>الميتاداتا</strong> — الاقتباس ممكن يقصر، لكن (المصدر، الرابط، التاريخ) لا تُمَس.</span>
+              <span class="lang-en">Summarization is where provenance silently dies. The rule: compress the <strong>wording</strong>, never the <strong>metadata</strong> — the excerpt may shrink, but (source, URL, date) are untouchable.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION B: CONFLICTS + TEMPORAL DATA ===== -->
+    <section id="conflicts" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">2</span>
+        <span class="lang-ar">التعارض يُعلَّق والزمن يُوثَّق</span>
+        <span class="lang-en">Conflicts get annotated; time gets recorded</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>لما يعطيك مصدران موثوقان إحصائيتين مختلفتين، عندك ثلاثة إغراءات خاطئة: تختار «الأفضل»، تأخذ المتوسط، أو تحذف الاثنتين. الصحيح رسميًا: <strong>علّق على القيمتين معًا بنسبة كل واحدة لمصدرها</strong> — وأكمل التحليل والقيم المتعارضة مضمّنة ومُعلَّمة صراحةً، وخلّ <strong>المنسّق</strong> يقرر كيفية التوفيق (إن لزم) قبل التمرير للتجميع. وكيل التحليل لا يملك قرار الحسم.</p>
+        <p>والزاوية الثانية: <strong>البيانات الزمنية</strong>. رقم من 2023 ورقم من 2026 ليسا «تناقضًا» — هما نقطتان على منحنى نموّ. بدون تاريخ نشر/جمع إلزامي في المخرجات المنظّمة، وكيل التجميع سيقرأ الفرق الزمني كتعارض ويتصرف معه غلط (يختار، يوسّط، أو يحذف). التاريخ حقل <u>إلزامي</u>، مو «إن توفر».</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>When two credible sources give you different statistics, three wrong temptations appear: pick the "better" one, take the average, or drop both. The officially correct move: <strong>annotate both values with their source attribution</strong> — complete the analysis with the conflicting values included and explicitly flagged, and let the <strong>coordinator</strong> decide how to reconcile (if at all) before passing to synthesis. The analysis agent doesn't own the reconciliation decision.</p>
+        <p>The second angle: <strong>temporal data</strong>. A 2023 figure and a 2026 figure aren't a "contradiction" — they're two points on a growth curve. Without a mandatory publication/collection date in structured outputs, the synthesis agent will read the temporal difference as a conflict and mishandle it (pick, average, or drop). The date is a <u>required</u> field, not "if available."</p>
+      </div>
+
+      <!-- DIAGRAM 2: conflicting-sources annotation panels -->
+      <div class="grid md:grid-cols-2 gap-4" dir="ltr">
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-red-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="x" class="w-4 h-4"></i> BAD — resolve it yourself</p>
+          <div class="bg-white/70 rounded-xl border border-red-200 p-3 font-mono text-[11px] leading-relaxed text-surface-700 space-y-1">
+            <p>"market_size": "$6.8B"</p>
+            <p class="text-red-500">// picked the newer one, dropped the other</p>
+            <p class="text-red-500">// or: "$5.5B" — an average NO source stated</p>
+          </div>
+          <ul class="mt-3 space-y-1 text-xs text-red-800">
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>information irrecoverably lost</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>coordinator never learns a conflict existed</span></li>
+          </ul>
+        </div>
+        <div class="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5">
+          <p class="font-mono text-xs uppercase tracking-wider text-emerald-600 font-bold mb-3 flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4"></i> GOOD — annotate both, pass up</p>
+          <div class="bg-white/70 rounded-xl border border-emerald-200 p-3 font-mono text-[11px] leading-relaxed text-surface-700 space-y-1">
+            <p>"values": [</p>
+            <p class="ps-3">{"v":"$4.2B","src":"Report A","date":"2023"},</p>
+            <p class="ps-3">{"v":"$6.8B","src":"Report B","date":"2026"}</p>
+            <p>], "conflict_flag": true</p>
+          </div>
+          <ul class="mt-3 space-y-1 text-xs text-emerald-800">
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>nothing lost — coordinator reconciles, fully informed</span></li>
+            <li class="flex items-start gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i><span>dates reveal it's a trend, not a contradiction</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">اللوحة الحمراء تحسم مبكرًا وتفقد معلومة للأبد؛ الخضراء تعلّق التعارض بمصادره وتواريخه وترفعه لصاحب القرار.</span>
+        <span class="lang-en">The red panel resolves early and loses information forever; the green one annotates the conflict with sources and dates and passes it to the decision owner.</span>
+      </p>
+
+      <!-- DIAGRAM 3: temporal strip -->
+      <div class="bg-surface-900 rounded-2xl p-5" dir="ltr">
+        <p class="text-surface-400 text-xs uppercase tracking-wider mb-4 font-mono text-center">Temporal data — dates turn a "contradiction" into a trend</p>
+        <div class="flex items-center justify-center gap-3 flex-wrap">
+          <div class="bg-surface-800 border border-surface-600 rounded-xl px-4 py-2.5 text-center">
+            <p class="text-surface-200 font-mono text-sm font-semibold">$4.2B</p>
+            <p class="text-surface-500 font-mono text-[10px]">Report A &middot; published 2023</p>
+          </div>
+          <div class="flex items-center gap-1 text-emerald-400"><i data-lucide="arrow-right" class="w-5 h-5"></i><span class="font-mono text-[10px]">growth</span><i data-lucide="arrow-right" class="w-5 h-5"></i></div>
+          <div class="bg-surface-800 border border-surface-600 rounded-xl px-4 py-2.5 text-center">
+            <p class="text-surface-200 font-mono text-sm font-semibold">$6.8B</p>
+            <p class="text-surface-500 font-mono text-[10px]">Report B &middot; published 2026</p>
+          </div>
+          <div class="bg-emerald-500/15 border border-emerald-400/50 rounded-xl px-4 py-2.5 text-center">
+            <p class="text-emerald-200 font-mono text-[11px] font-semibold">WITH dates: a trend</p>
+            <p class="text-rose-300/80 font-mono text-[10px] mt-0.5">WITHOUT dates: a fake "conflict"</p>
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-surface-500 text-center -mt-2">
+        <span class="lang-ar">نفس الرقمين: مع التواريخ قصة نمو منطقية، وبدونها «تعارض» زائف يستفز قرارًا خاطئًا.</span>
+        <span class="lang-en">The same two numbers: with dates, a coherent growth story; without them, a fake "conflict" provoking a wrong decision.</span>
+      </p>
+
+      <!-- key concept callout -->
+      <div class="bg-brand-50 border border-brand-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-brand-100 rounded-lg p-2 shrink-0"><i data-lucide="key" class="w-5 h-5 text-brand-600"></i></div>
+          <div>
+            <h4 class="font-bold text-brand-900 mb-1"><span class="lang-ar">مفهوم أساسي: التعارض يُعلَّق، لا يُحسَم</span><span class="lang-en">Key concept: annotate the conflict, don't resolve it</span></h4>
+            <p class="text-brand-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">وكيل التحليل مهمته أن يحفظ التعارض <strong>صراحةً مع مصادره</strong> ويمرّره لأعلى — لا أن يختار قيمة ويرمي الأخرى. قرار التوفيق (إن لزم) للمنسّق، بمعلومات كاملة. الاختيار المبكر التعسّفي = فقدان معلومة لا يُسترجَع.</span>
+              <span class="lang-en">The analysis agent's job is to preserve the conflict <strong>explicitly, with its sources</strong>, and pass it up — not to pick one value and discard the other. The reconciliation decision (if any) belongs to the coordinator, fully informed. An early arbitrary pick is irrecoverable information loss.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION C: REPORT STRUCTURE + RENDER BY TYPE ===== -->
+    <section id="report-structure" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <span class="bg-rose-600 text-white rounded-lg w-8 h-8 flex items-center justify-center text-sm font-mono shrink-0">3</span>
+        <span class="lang-ar">هيكلة التقرير — راسخ مقابل متنازَع، وصيغة لكل نوع</span>
+        <span class="lang-en">Report structure — established vs. contested, and a format per type</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>التقرير النهائي الجيد يفصل بأقسام صريحة بين <strong>النتائج الراسخة</strong> (المدعومة بمصادر متعددة متوافقة) و<strong>المتنازَع عليها</strong> (اللي فيها تعارض حقيقي) — مع حفظ <em>توصيف المصدر الأصلي</em> وسياقه المنهجي: إذا وصف المصدر نتيجته بـ«تقديرية من عينة صغيرة»، لا يحق للتجميع ترقيتها إلى «حقيقة مؤكدة».</p>
+        <p>وأخيرًا، <strong>العرض حسب نوع المحتوى</strong>: تحويل كل شيء لصيغة موحّدة يفقد المعنى. البيانات المالية تحتاج جداول للمقارنة صفًا بصف وحفظ الدقة الرقمية، والأخبار تحتاج نثرًا يحفظ السياق والتسلسل، والنتائج التقنية تحتاج قوائم منظّمة قابلة للمسح والإحالة.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A good final report separates, in explicit sections, <strong>well-established findings</strong> (supported by multiple agreeing sources) from <strong>contested ones</strong> (with genuine conflicts) — while preserving each <em>source's original characterization</em> and methodological context: if a source calls its own result "an estimate from a small sample," synthesis has no right to promote it to "established fact."</p>
+        <p>Finally, <strong>render by content type</strong>: flattening everything into one uniform format loses meaning. Financial data needs tables for row-by-row comparison and numeric precision; news needs prose that preserves context and sequence; technical findings need structured, scannable, referenceable lists.</p>
+      </div>
+
+      <!-- content-type rendering table (bilingual) -->
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100"><tr>
+            <th class="p-3 text-start font-semibold">نوع المحتوى</th>
+            <th class="p-3 text-start font-semibold">الصيغة الصحيحة</th>
+            <th class="p-3 text-start font-semibold">ليش</th>
+          </tr></thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">بيانات مالية / أرقام</td><td class="p-3 text-rose-700 font-semibold">جدول</td><td class="p-3 text-surface-600">مقارنة صفًا بصف وحفظ الدقة الرقمية</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">أخبار / سرد</td><td class="p-3 text-rose-700 font-semibold">نثر</td><td class="p-3 text-surface-600">السياق والتسلسل أهم من البنية</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">نتائج تقنية</td><td class="p-3 text-rose-700 font-semibold">قائمة منظّمة</td><td class="p-3 text-surface-600">عناصر منفصلة قابلة للمسح والإحالة</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100"><tr>
+            <th class="p-3 text-start font-semibold">Content type</th>
+            <th class="p-3 text-start font-semibold">Right format</th>
+            <th class="p-3 text-start font-semibold">Why</th>
+          </tr></thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Financial data / figures</td><td class="p-3 text-rose-700 font-semibold">Table</td><td class="p-3 text-surface-600">Row-by-row comparison, preserves numeric precision</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">News / narrative</td><td class="p-3 text-rose-700 font-semibold">Prose</td><td class="p-3 text-surface-600">Context and sequence matter more than structure</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Technical findings</td><td class="p-3 text-rose-700 font-semibold">Structured list</td><td class="p-3 text-surface-600">Discrete, scannable, referenceable items</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- tip callout -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-emerald-100 rounded-lg p-2 shrink-0"><i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600"></i></div>
+          <div>
+            <h4 class="font-bold text-emerald-900 mb-1"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></h4>
+            <p class="text-emerald-900/90 text-sm leading-relaxed">
+              <span class="lang-ar">افصل <strong>المحتوى</strong> عن <strong>الميتاداتا</strong> في مخرجات الوكلاء: الادّعاء في حقل، والمصدر والتاريخ والاقتباس والسياق المنهجي في حقول مرافقة. هذا الفصل هو اللي يسمح للتجميع أن يضغط الصياغة ويحفظ المرجعية في آن واحد.</span>
+              <span class="lang-en">Separate <strong>content</strong> from <strong>metadata</strong> in agent outputs: the claim in one field; source, date, excerpt, and methodological context in companion fields. That separation is what lets synthesis compress wording while preserving provenance at the same time.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap callout -->
+      <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-5">
+        <div class="flex items-start gap-3">
+          <div class="bg-red-100 rounded-lg p-2 shrink-0"><i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i></div>
+          <div>
+            <h4 class="font-bold text-red-900 mb-2"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h4>
+            <ul class="text-red-900/90 text-sm leading-relaxed space-y-2">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«اختر الرقم الأحدث/الأعلى مصداقية واكتبه وحده»</strong> — اختيار تعسّفي يفقد معلومة لا تُسترجَع؛ علّق القيمتين بمصدريهما.</span><span class="lang-en"><strong>"Pick the newer / more credible number and write it alone"</strong> — an arbitrary pick with irrecoverable loss; annotate both values with their sources.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«خذ متوسط القيمتين المتعارضتين»</strong> — يلفّق رقمًا لم يقله أي مصدر ويخفي وجود التعارض أصلًا.</span><span class="lang-en"><strong>"Average the two conflicting values"</strong> — fabricates a number no source stated and hides that a conflict ever existed.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«حوّل كل المخرجات لصيغة موحّدة أنيقة»</strong> — إجبار المالي على النثر أو الأخبار على الجداول يفقد المعنى؛ اعرض حسب النوع.</span><span class="lang-en"><strong>"Convert all output to one elegant uniform format"</strong> — forcing financials into prose or news into tables destroys meaning; render by type.</span></p></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 mt-0.5 shrink-0"></i><p><span class="lang-ar"><strong>«أضِف تعليمة (اذكر المصادر) لوكيل التجميع فقط»</strong> — متأخر جدًا: المرجعية ضاعت في تلخيصات الوكلاء الأدنى قبل وصولها إليه؛ الإلزام يبدأ من مخرجات الوكلاء الفرعيين.</span><span class="lang-en"><strong>"Just add a 'cite sources' instruction to the synthesis agent"</strong> — far too late: attribution already died in upstream summaries before reaching it; the requirement starts at subagent outputs.</span></p></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-200 rounded-xl p-3 shrink-0"><i data-lucide="newspaper" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl"><span class="lang-ar">مثال من الحياة: محرر غرفة الأخبار</span><span class="lang-en">Real-life example: the newsroom editor</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>غرفة أخبار محترمة عندها قاعدة حديدية: <strong>كل معلومة في الخبر تحمل مصدرها</strong>. المراسل ما يسلّم للمحرر «الاقتصاد نما 4%» — يسلّم: «الاقتصاد نما 4% <em>بحسب بيان الهيئة العامة للإحصاء الصادر في مارس 2026</em>، والنص الحرفي عندي». ولو اختصر المحرر الخبر للنشرة، يختصر <em>الصياغة</em> — أما اسم المصدر والتاريخ فخط أحمر (خريطة الادّعاء-المصدر).</p>
+              <p>ولما تعطي وكالتان موثوقتان رقمين مختلفين للبطالة؟ المحرر المحترف ينشر: «قدّرت الوكالة الأولى النسبة بـ7% (مسح أبريل)، بينما قالت الثانية 9% (مسح يونيو)» — ينسب الرقمين لمصدريهما وتاريخيهما ويترك القارئ (والمحقق اللاحق) بصورة كاملة. اللي «يوفّق» بنفسه فينشر «8% تقريبًا» يكون لفّق رقمًا لم تقله أي وكالة. ولاحظ التاريخين: أبريل مقابل يونيو — يمكن ما فيه تعارض أصلًا، فيه <em>تطور</em>. وفي صفحة التقرير النهائية: الأرقام في جدول، والقصة نثر، والتوصيات قائمة — ما يحوّل كل شيء «فقرات».</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A serious newsroom has an iron rule: <strong>every fact in the story carries its source</strong>. The reporter doesn't hand the editor "the economy grew 4%" — they hand in: "the economy grew 4% <em>per the statistics authority's bulletin published March 2026</em>, verbatim text on file." When the editor trims the story for the bulletin, they trim the <em>wording</em> — the source name and date are untouchable (the claim-source mapping).</p>
+              <p>And when two credible agencies report different unemployment numbers? The professional editor publishes: "Agency One estimated 7% (April survey), while Agency Two reported 9% (June survey)" — both figures attributed with their dates, leaving the reader (and any later fact-checker) fully informed. An editor who "reconciles" it into "roughly 8%" has fabricated a number no agency stated. And notice the dates: April vs. June — possibly no conflict at all, just <em>movement</em>. On the final report page: numbers go in a table, the story in prose, recommendations in a list — nothing gets flattened into uniform paragraphs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-200 rounded-2xl border border-surface-700 p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i data-lucide="target" class="w-5 h-5 text-rose-400"></i>
+          <span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span>
+        </h2>
+        <div class="lang-ar text-sm leading-relaxed space-y-2">
+          <p>يظهر هذا الموضوع في سيناريو البحث متعدد الوكلاء: مصدران موثوقان بقيمتين مختلفتين، أو تقرير نهائي فقد استشهاداته، أو سؤال «كيف تصمم مخرَج الوكيل الفرعي». افحص الخيارات بثلاثة أسئلة: هل تُحفَظ خريطة الادّعاء-المصدر عبر التجميع؟ هل يُعلَّق التعارض بمصادره بدل حسمه؟ هل التواريخ إلزامية في المخرَج المنظّم؟</p>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2">
+          <p>This topic appears in the multi-agent research scenario: two credible sources with different values, a final report that lost its citations, or a "design the subagent's output" question. Test the options with three questions: are claim-source mappings preserved through synthesis? Is the conflict annotated with sources instead of resolved? Are dates mandatory in the structured output?</p>
+        </div>
+        <div class="border-t border-surface-700 pt-4 space-y-2 text-sm">
+          <p class="font-semibold text-white"><span class="lang-ar">مموِّهات تشيلها فورًا:</span><span class="lang-en">Distractors to eliminate on sight:</span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">اختيار قيمة واحدة «أحدث/أوثق» أو أخذ متوسط القيمتين.</span><span class="lang-en">Picking one "newer / more credible" value, or averaging the two.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">حذف الرقمين والاكتفاء بـ«غير مؤكد» — رمي بيانات صحيحة.</span><span class="lang-en">Dropping both numbers for "uncertain" — discarding valid data.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">تعليمة «اذكر المصادر» على وكيل التجميع وحده بعد ما ضاعت المرجعية في المنبع.</span><span class="lang-en">A "cite sources" instruction on the synthesis agent alone, after provenance already died upstream.</span></span></p>
+          <p class="flex items-start gap-2"><i data-lucide="x" class="w-4 h-4 text-rose-400 mt-0.5 shrink-0"></i><span><span class="lang-ar">صيغة موحّدة أنيقة لكل أنواع المحتوى.</span><span class="lang-en">One elegant uniform format for all content types.</span></span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-5">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-2">
+        <i data-lucide="pencil-ruler" class="w-6 h-6 text-rose-600"></i>
+        <span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span>
+      </h2>
+
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-sm text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="text-xl font-bold text-rose-600"><span id="score">0</span><span class="text-surface-300">/</span><span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2.5 grow max-w-[260px]">
+          <span class="text-xs text-surface-500 whitespace-nowrap"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="grow h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">1</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">التقارير النهائية لنظام البحث تخرج بلا استشهادات: الادّعاءات موجودة لكن مصادرها ضاعت. التحقيق يظهر أن وكلاء البحث يرسلون ملخصات نثرية حرة لوكيل التجميع. ما الإصلاح الجذري؟</span>
+            <span class="lang-en">Your research system's final reports come out citation-free: claims are there but their sources are gone. Investigation shows the search agents send free-form prose summaries to the synthesis agent. What's the root fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضِف لوكيل التجميع تعليمة صارمة: «اذكر مصدرًا لكل ادّعاء».</span><span class="lang-en">Give the synthesis agent a strict instruction: "cite a source for every claim."</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ألزِم الوكلاء الفرعيين بإخراج خرائط ادّعاء-مصدر منظّمة (رابط/اسم مستند، اقتباس، تاريخ) يحفظها وكيل التجميع ويدمجها.</span><span class="lang-en">Require subagents to output structured claim-source mappings (URL/document name, excerpt, date) that the synthesis agent preserves and merges.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أعِد تشغيل بحث ويب في نهاية التجميع للعثور على مصادر تدعم الادّعاءات المكتوبة.</span><span class="lang-en">Re-run a web search at the end of synthesis to find sources supporting the written claims.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">مرّر المستندات الخام كاملة لوكيل التجميع ليستخرج المصادر بنفسه.</span><span class="lang-en">Pass the full raw documents to the synthesis agent so it extracts sources itself.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">المرجعية تضيع في المنبع (التلخيص النثري)، فالإلزام يبدأ من مخرجات الوكلاء الفرعيين — خرائط منظّمة تُحفَظ وتُدمَج عبر التجميع.</span><span class="lang-en">Provenance dies upstream (in the prose summaries), so the requirement starts at subagent outputs — structured mappings preserved and merged through synthesis.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">تعليمة التجميع متأخرة (المصادر ضاعت قبله)، والبحث اللاحق «استشهاد بأثر رجعي» قد يجد مصادر غير اللي أنتجت الادّعاء، والمستندات الخام تفجّر ميزانية السياق. الصحيح: خرائط منظّمة من المنبع.</span><span class="lang-en">The synthesis instruction is too late (sources died before it), post-hoc search is retroactive citation that may find different sources than those behind the claim, and raw documents blow the context budget. Correct: structured mappings from upstream.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">2</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">وكيل تحليل المستندات يجد نسبتي بطالة مختلفتين لنفس الفترة من مصدرين موثوقين كليهما. حسب الدليل الرسمي، كيف يُكمِل تحليله؟</span>
+            <span class="lang-en">The document-analysis agent finds two different unemployment rates for the same period from two equally credible sources. Per the official guide, how should it complete its analysis?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يختار المصدر الأعلى مصداقية في تقديره ويعتمد رقمه وحده.</span><span class="lang-en">Pick whichever source it judges more credible and adopt its number alone.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يستبعد النسبتين معًا لأن التعارض يجعل البيانات غير موثوقة.</span><span class="lang-en">Exclude both rates since the conflict makes the data unreliable.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يُكمِل التحليل والقيمتان المتعارضتان مضمّنتان ومُعلَّمتان صراحةً بمصدريهما — والمنسّق يقرر كيفية التوفيق قبل التمرير للتجميع.</span><span class="lang-en">Complete the analysis with both conflicting values included and explicitly annotated with their sources — the coordinator decides reconciliation before passing to synthesis.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يحسب متوسط النسبتين ويقدمه كقيمة توافقية محايدة.</span><span class="lang-en">Average the two rates and present it as a neutral consensus value.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">هذا نص المهارة الرسمية: إكمال التحليل بالقيم المتعارضة مضمّنة ومعلَّمة، وقرار التوفيق للمنسّق بمعلومات كاملة — لا اختيار ولا حذف ولا متوسط ملفّق.</span><span class="lang-en">That's the official skill verbatim: complete the analysis with conflicting values included and annotated, and reconciliation belongs to the fully informed coordinator — no picking, no dropping, no fabricated average.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">الاختيار والحذف كلاهما فقدان معلومة تعسّفي، والمتوسط رقم لم يقله أي مصدر. الصحيح: تضمين القيمتين مع التعليق بالمصادر، والتوفيق قرار المنسّق.</span><span class="lang-en">Picking and excluding are both arbitrary information loss, and the average is a number no source stated. Correct: include both values annotated with sources; reconciliation is the coordinator's call.</span></div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-rose-100 text-rose-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 font-mono">3</span>
+          <p class="font-semibold leading-relaxed">
+            <span class="lang-ar">لتوحيد الشكل، عدّل أحد المطورين وكيل التقارير ليحوّل كل المحتوى — جداول مالية وأخبارًا ونتائج تقنية — إلى قوائم نقطية موحّدة. المستخدمون يشتكون أن المقارنات المالية صارت غير قابلة للقراءة. ما التوجيه الصحيح؟</span>
+            <span class="lang-en">For visual consistency, a developer changed the report agent to convert all content — financial tables, news, technical findings — into uniform bullet lists. Users complain financial comparisons became unreadable. What's the right guidance?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">حوّل كل شيء إلى جداول بدل القوائم — الجداول أدق صيغة موجودة.</span><span class="lang-en">Convert everything to tables instead of lists — tables are the most precise format there is.</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اعرض كل نوع محتوى بصيغته الملائمة: البيانات المالية جداول، الأخبار نثر، النتائج التقنية قوائم منظّمة.</span><span class="lang-en">Render each content type in its appropriate format: financial data as tables, news as prose, technical findings as structured lists.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أبقِ القوائم الموحّدة وأضِف وسيلة إيضاح تشرح كيف تُقرأ الأرقام المالية منها.</span><span class="lang-en">Keep the uniform lists and add a legend explaining how to read the financial numbers from them.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-rose-300 hover:bg-rose-50/50 transition-all text-surface-700">
+            <span class="lang-ar">حوّل كل المحتوى إلى نثر سردي متصل — الأسلوب الأدبي أسهل قراءة دائمًا.</span><span class="lang-en">Convert all content to flowing narrative prose — literary style always reads easiest.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">صحيح.</span><span class="lang-en">Correct.</span></strong> <span class="lang-ar">المهارة الرسمية: العرض حسب نوع المحتوى — مالي=جدول (مقارنة ودقة رقمية)، أخبار=نثر (سياق وتسلسل)، تقني=قائمة منظّمة (مسح وإحالة). التوحيد بأي اتجاه يفقد المعنى.</span><span class="lang-en">The official skill: render by content type — financial=tables (comparison and numeric precision), news=prose (context and sequence), technical=structured lists (scanning and reference). Uniformity in any direction loses meaning.</span></div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div><strong><span class="lang-ar">لا.</span><span class="lang-en">No.</span></strong> <span class="lang-ar">«كل شيء جداول» و«كل شيء نثر» نفس الخطأ بالعكس، ووسيلة الإيضاح ترقيع لصيغة خاطئة. الصحيح: صيغة ملائمة لكل نوع محتوى.</span><span class="lang-en">"Everything tables" and "everything prose" are the same mistake mirrored, and a legend is a patch on the wrong format. Correct: an appropriate format per content type.</span></div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-rose-200 p-8 text-center space-y-3">
+        <div class="flex justify-center mb-1"><span class="bg-rose-100 text-rose-600 rounded-2xl p-4"><i data-lucide="trophy" class="w-10 h-10"></i></span></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-rose-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-3 inline-flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعِد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-bl from-rose-600 to-rose-800 text-white rounded-2xl p-6 md:p-8 space-y-4">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="flag" class="w-5 h-5"></i>
+          <span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span>
+        </h2>
+        <ul class="space-y-2.5 text-sm text-rose-50">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">خرائط ادّعاء-مصدر منظّمة (مصدر، رابط/مستند، اقتباس، تاريخ) من الوكلاء الفرعيين — تُحفَظ وتُدمَج عبر التجميع.</span><span class="lang-en">Structured claim-source mappings (source, URL/document, excerpt, date) from subagents — preserved and merged through synthesis.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">الإحصاءات المتعارضة تُعلَّق بمصادرها — لا اختيار ولا متوسط ولا حذف؛ التوفيق قرار المنسّق.</span><span class="lang-en">Conflicting statistics get annotated with their sources — no picking, averaging, or dropping; reconciliation is the coordinator's call.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">تواريخ النشر/الجمع إلزامية — تمنع قراءة الفرق الزمني كتناقض (2023 مقابل 2026 = تطور).</span><span class="lang-en">Publication/collection dates are mandatory — they stop temporal differences reading as contradictions (2023 vs. 2026 = a trend).</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">التقرير يفصل الراسخ عن المتنازَع عليه بأقسام صريحة، ويحفظ توصيف المصدر الأصلي وسياقه المنهجي.</span><span class="lang-en">The report separates well-established from contested in explicit sections, preserving original source characterizations and methodological context.</span></p></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0 text-rose-200"></i><p><span class="lang-ar">اعرض حسب النوع: مالي=جدول، أخبار=نثر، تقني=قائمة منظّمة — لا صيغة موحّدة.</span><span class="lang-en">Render by type: financial=table, news=prose, technical=structured list — no uniform format.</span></p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid grid-cols-1 sm:grid-cols-2 gap-4" aria-label="pager">
+      <a href="5-5-human-review.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-rose-300 hover:shadow-sm p-5 flex items-center gap-4 transition-all">
+        <span class="shrink-0 text-surface-400 group-hover:text-rose-600 transition-colors">
+          <span class="lang-ar"><i data-lucide="arrow-right" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-left" class="w-6 h-6"></i></span>
+        </span>
+        <span class="text-start">
+          <span class="block text-xs text-surface-400 uppercase tracking-wider mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+          <span class="block font-bold text-surface-800 group-hover:text-surface-900"><span class="lang-ar">5.5 مراجعة البشر ومعايرة الثقة</span><span class="lang-en">5.5 Human review &amp; confidence calibration</span></span>
+        </span>
+      </a>
+      <a href="../practice-exam.html" class="group bg-gradient-to-bl from-rose-600 to-rose-700 text-white rounded-2xl border border-rose-500 hover:shadow-md p-5 flex items-center justify-end gap-4 transition-all">
+        <span class="text-end">
+          <span class="block text-xs text-rose-100/80 uppercase tracking-wider mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+          <span class="block font-bold"><span class="lang-ar">الاختبار التجريبي</span><span class="lang-en">Practice Exam</span></span>
+        </span>
+        <span class="shrink-0">
+          <span class="lang-ar"><i data-lucide="arrow-left" class="w-6 h-6"></i></span><span class="lang-en"><i data-lucide="arrow-right" class="w-6 h-6"></i></span>
+        </span>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

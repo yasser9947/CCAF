@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.4 دمج خوادم MCP — CCAF مرجع</title>
+  <meta name="description" content="الموضوع 2.4 من شهادة CCAF: نطاقات خوادم MCP (مشروع .mcp.json مقابل مستخدم ~/.claude.json)، توسيع متغيرات البيئة للأسرار، اكتشاف الأدوات وقت الاتصال، الموارد ككتالوجات محتوى، وخوادم المجتمع مقابل المخصّصة.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-4">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">خوادم MCP</span><span class="lang-en">MCP servers</span></span>
+      </nav>
+
+      <div class="flex items-start gap-4">
+        <span class="bg-white/10 border border-white/20 text-emerald-200 font-mono font-bold text-lg px-3.5 py-2 rounded-xl shrink-0">2.4</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl sm:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">دمج خوادم MCP في Claude Code وسير عمل الوكلاء</span>
+            <span class="lang-en">Integrating MCP Servers into Claude Code &amp; Agent Workflows</span>
+          </h1>
+          <p class="text-emerald-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن قرارين صغيرين — وين تحط ملف الإعداد، وكيف تمرر التوكن — يفصلان بين فريق كامل يشتغل من أول استنساخ، وسرّ مُسرّب في تاريخ Git للأبد.</span>
+            <span class="lang-en">Why it matters: two small decisions — where the config file lives, and how the token gets passed — separate a whole team working from first clone, and a secret leaked into Git history forever.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">نطاقا خوادم MCP: مستوى المشروع (<span dir="ltr" class="font-mono">.mcp.json</span>) لعدّة الفريق المشتركة، ومستوى المستخدم (<span dir="ltr" class="font-mono">~/.claude.json</span>) للخوادم الشخصية والتجريبية.</span><span class="lang-en">The two MCP server scopes: project level (<span dir="ltr" class="font-mono">.mcp.json</span>) for shared team tooling, and user level (<span dir="ltr" class="font-mono">~/.claude.json</span>) for personal/experimental servers.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">توسيع متغيرات البيئة (<span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span>) داخل <span dir="ltr" class="font-mono">.mcp.json</span> لإدارة الاعتمادات بدون إيداع أي سر في المستودع.</span><span class="lang-en">Environment-variable expansion (<span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span>) inside <span dir="ltr" class="font-mono">.mcp.json</span> for credential management without committing any secret.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">أن أدوات كل الخوادم المُعدّة تُكتشف وقت الاتصال وتتاح للوكيل في آنٍ واحد — وليش تجويد أوصاف أدوات MCP يمنع تفضيل <span dir="ltr" class="font-mono">Grep</span> المدمجة عليها.</span><span class="lang-en">That tools from all configured servers are discovered at connection time and available simultaneously — and why enhancing MCP tool descriptions stops the agent preferring built-in <span dir="ltr" class="font-mono">Grep</span> over them.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">الموارد (resources) ككتالوجات محتوى تقلّل الاستدعاءات الاستكشافية، وقاعدة "خادم المجتمع للقياسي، المخصّص لخصوصيات الفريق".</span><span class="lang-en">Resources as content catalogs that cut exploratory tool calls, and the rule "community server for the standard, custom for team-specific."</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== SECTION 1: SCOPE ===== -->
+    <section id="scope" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">1</span>
+        <span><span class="lang-ar">النطاق أولًا: مشروع أم مستخدم؟</span><span class="lang-en">Scope first: project or user?</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>أول قرار عند دمج خادم MCP هو <strong>نطاقه</strong>. القاعدة بسيطة: <strong>عدّة الفريق المشتركة</strong> توضع في <span dir="ltr" class="font-mono">.mcp.json</span> على مستوى المشروع — الملف يُدار بالإصدار (version-controlled)، فيوصل الخادم لكل من يستنسخ المستودع تلقائيًا. أما <strong>خوادمك الشخصية والتجريبية</strong> فمكانها <span dir="ltr" class="font-mono">~/.claude.json</span> على مستوى المستخدم — تشتغل لك في كل مشاريعك، وما تُشارك مع أحد ولا تلوّث مستودع الفريق بتجاربك.</p>
+          <p>وثاني قرار: <strong>كيف تمرّر الاعتمادات (credentials)؟</strong> الجواب: <strong>توسيع متغيرات البيئة</strong> داخل <span dir="ltr" class="font-mono">.mcp.json</span> — تكتب <span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span> بدل التوكن نفسه، والقيمة تُقرأ من بيئة كل مطوّر وقت التشغيل. النتيجة: ملف الإعداد يُشارك بأمان مع الفريق كله، <em>وصفر أسرار في المستودع</em>.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The first decision when integrating an MCP server is its <strong>scope</strong>. The rule is simple: <strong>shared team tooling</strong> goes in a project-level <span class="font-mono">.mcp.json</span> — the file is version-controlled, so the server reaches everyone who clones the repo automatically. Your <strong>personal and experimental servers</strong> belong in the user-level <span class="font-mono">~/.claude.json</span> — they work for you across all your projects, are shared with no one, and never pollute the team repo with your experiments.</p>
+          <p>The second decision: <strong>how do credentials get passed?</strong> Answer: <strong>environment-variable expansion</strong> inside <span class="font-mono">.mcp.json</span> — you write <span class="font-mono">${GITHUB_TOKEN}</span> instead of the token itself, and the value is read from each developer's environment at runtime. The result: the config file is safely shared with the whole team, <em>and zero secrets live in the repo</em>.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 1: project-vs-user scope stack -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="layers" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: طبقتا النطاق ومدى وصول كل واحدة</span>
+          <span class="lang-en">Diagram: the two scope layers and each one's reach</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[640px] space-y-3 font-mono text-xs">
+            <!-- project layer -->
+            <div class="border-2 border-emerald-400 bg-emerald-50 rounded-xl p-4 space-y-2">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
+                <span class="font-bold text-emerald-900 text-sm flex items-center gap-2"><i data-lucide="folder-git-2" class="w-4 h-4"></i>PROJECT SCOPE — .mcp.json (repo root)</span>
+                <span class="bg-emerald-600 text-white rounded-md px-2 py-0.5 font-bold">committed to Git</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white/80 border border-emerald-200 rounded-lg p-2 text-center text-emerald-900">github server<br><span class="text-emerald-600">${GITHUB_TOKEN}</span></div>
+                <div class="bg-white/80 border border-emerald-200 rounded-lg p-2 text-center text-emerald-900">jira server<br><span class="text-emerald-600">${JIRA_TOKEN}</span></div>
+                <div class="bg-white/80 border border-emerald-200 rounded-lg p-2 text-center text-emerald-900">db-schema server<br><span class="text-emerald-600">${DB_URL}</span></div>
+              </div>
+              <p class="text-emerald-700 flex items-center gap-1.5"><i data-lucide="users" class="w-3.5 h-3.5"></i>reach: EVERY teammate on clone — values filled from each developer's own shell</p>
+            </div>
+            <!-- user layer -->
+            <div class="border-2 border-surface-300 bg-surface-50 rounded-xl p-4 space-y-2">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
+                <span class="font-bold text-surface-800 text-sm flex items-center gap-2"><i data-lucide="user" class="w-4 h-4"></i>USER SCOPE — ~/.claude.json (home dir)</span>
+                <span class="bg-surface-500 text-white rounded-md px-2 py-0.5 font-bold">never committed</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="bg-white/80 border border-surface-200 rounded-lg p-2 text-center text-surface-700">personal notion server</div>
+                <div class="bg-white/80 border border-surface-200 rounded-lg p-2 text-center text-surface-700">experimental scraper</div>
+                <div class="bg-white/80 border border-surface-200 rounded-lg p-2 text-center text-surface-500">...</div>
+              </div>
+              <p class="text-surface-500 flex items-center gap-1.5"><i data-lucide="lock" class="w-3.5 h-3.5"></i>reach: only YOU — across all your projects, invisible to teammates</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">سؤال واحد يحسم الطبقة: "هل المفروض زملائي يحصلون على هذا الخادم تلقائيًا؟" نعم = مشروع، لا = مستخدم.</span>
+          <span class="lang-en">One question settles the layer: "should my teammates get this server automatically?" Yes = project, no = user.</span>
+        </p>
+      </div>
+
+      <!-- .mcp.json code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="server-cog" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">ملف <span dir="ltr" class="font-mono">.mcp.json</span> بنطاق المشروع مع توسيع متغيرات البيئة</span>
+          <span class="lang-en">A project-scoped .mcp.json with env-var expansion</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">// .mcp.json  (committed to the repo, shared with the whole team)
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        // Expanded from each developer's shell at runtime.
+        // No secret is ever committed to version control.
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+    "jira": {
+      // Prefer a community server for standard integrations.
+      "command": "npx",
+      "args": ["-y", "@company/mcp-jira"],
+      "env": { "JIRA_API_TOKEN": "${JIRA_TOKEN}" }
+    }
+  }
+}</code></pre>
+        </div>
+        <p class="text-xs text-surface-500 leading-relaxed">
+          <span class="lang-ar">خادم شخصي تجريبي؟ نفس البنية لكن في <span dir="ltr" class="font-mono">~/.claude.json</span>. الاثنان يشتغلان معًا في آنٍ واحد.</span>
+          <span class="lang-en">A personal experimental server? Same structure, but in <span class="font-mono">~/.claude.json</span>. Both operate together simultaneously.</span>
+        </p>
+      </div>
+
+      <!-- scope comparison table -->
+      <div class="space-y-3">
+        <!-- AR -->
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold"></th>
+                <th class="p-3 text-start font-semibold font-mono">.mcp.json (مشروع)</th>
+                <th class="p-3 text-start font-semibold font-mono">~/.claude.json (مستخدم)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">يُشارك عبر Git؟</td><td class="p-3 text-emerald-600">نعم — للفريق كله عند الاستنساخ</td><td class="p-3 text-red-500">لا — شخصي فقط</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">الاستخدام الأمثل</td><td class="p-3">عدّة فريق مشتركة (GitHub، Jira)</td><td class="p-3">خوادم شخصية وتجريبية</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">الأسرار</td><td class="p-3">عبر <span dir="ltr" class="font-mono">${VAR}</span> — لا يودَع سر أبدًا</td><td class="p-3">بيئة المستخدم المحلية</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مداه</td><td class="p-3">هذا المستودع لكل الفريق</td><td class="p-3">كل مشاريعك أنت فقط</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- EN -->
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-left font-semibold"></th>
+                <th class="p-3 text-left font-semibold font-mono">.mcp.json (project)</th>
+                <th class="p-3 text-left font-semibold font-mono">~/.claude.json (user)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Shared via Git?</td><td class="p-3 text-emerald-600">Yes — whole team on clone</td><td class="p-3 text-red-500">No — personal only</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Best for</td><td class="p-3">Shared team tooling (GitHub, Jira)</td><td class="p-3">Personal/experimental servers</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Secrets</td><td class="p-3">Via <span class="font-mono">${VAR}</span> — never committed</td><td class="p-3">Local user environment</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Reach</td><td class="p-3">This repo, for the whole team</td><td class="p-3">All your projects, just you</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- exam trap (secrets) -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"أودِع التوكن في <span dir="ltr" class="font-mono">.mcp.json</span> ليصل للفريق تلقائيًا":</strong> يبدو "عمليًا" لكنه تسريب سر في تاريخ Git. الصح دائمًا: توسيع <span dir="ltr" class="font-mono">${VAR}</span> من بيئة كل مطوّر.</span>
+              <span class="lang-en"><strong>"Commit the token into <span class="font-mono">.mcp.json</span> so the team gets it automatically":</strong> sounds "practical" but leaks a secret into Git history. Always correct: <span class="font-mono">${VAR}</span> expansion from each developer's environment.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"حط خادم الفريق في <span dir="ltr" class="font-mono">~/.claude.json</span> عند كل مطوّر يدويًا":</strong> يعمل نظريًا لكنه يفقد مزامنة الفريق — أي تحديث للخادم يتطلب تعديل كل جهاز يدويًا. نطاق المشروع وُجد بالضبط لهذا.</span>
+              <span class="lang-en"><strong>"Put the team server in every developer's <span class="font-mono">~/.claude.json</span> manually":</strong> technically works but loses team sync — any server update means touching every machine by hand. Project scope exists precisely for this.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: DISCOVERY & TOOL PREFERENCE ===== -->
+    <section id="discovery" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">2</span>
+        <span><span class="lang-ar">الاكتشاف وقت الاتصال — وليش الوكيل يفضّل Grep أحيانًا</span><span class="lang-en">Discovery at connection time — and why the agent sometimes prefers Grep</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>حقيقة يحب الاختبار يتأكد أنك تعرفها: <strong>أدوات كل الخوادم المُعدّة تُكتشف وقت الاتصال، وتصير متاحة للوكيل كلها في آنٍ واحد</strong>. ما فيه "تفعيل يدوي" لكل خادم، وما فيه ترتيب أولوية بين خادم المشروع وخادم المستخدم — الكل ينضم لنفس قائمة الأدوات.</p>
+          <p>وهنا تظهر مشكلة شائعة: أدوات MCP تدخل نفس ساحة الاختيار مع الأدوات المدمجة، والنموذج يختار — كالعادة — <strong>بالوصف</strong> (رجعنا لمنطق 2.1). فلو كان وصف أداة MCP القوية مقتضبًا ("Searches code")، بيفضّل الوكيل أداة مدمجة يعرفها زي <span dir="ltr" class="font-mono">Grep</span> على أداة الخادم الأقدر. العلاج من الدليل حرفيًا: <strong>جوّد وصف أداة MCP</strong> — فصّل قدراتها ومخرجاتها (بحث دلالي؟ يفهم بنية الكود؟ يرجّع مقاطع مرتبة بالصلة؟) حتى يعرف النموذج ليش يفضّلها. حذف <span dir="ltr" class="font-mono">Grep</span> علاج عرَضي مرفوض.</p>
+          <p>وقاعدة البناء مقابل الشراء: <strong>اختر خوادم المجتمع الجاهزة للتكاملات القياسية</strong> (Jira، GitHub، Slack...) واحتفظ بجهد الخوادم المخصّصة لسير العمل الخاص بفريقك فعلًا. بناء خادم Jira من الصفر إعادة اختراع عجلة مصانة مجانًا.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>A fact the exam loves to confirm you know: <strong>tools from all configured servers are discovered at connection time and become available to the agent simultaneously</strong>. There is no "manual activation" per server, and no priority ordering between project and user servers — everything joins the same tool list.</p>
+          <p>Which surfaces a common problem: MCP tools enter the same selection arena as the built-in tools, and the model chooses — as always — <strong>by description</strong> (back to 2.1's logic). If the powerful MCP tool's description is terse ("Searches code"), the agent will prefer a familiar built-in like <span class="font-mono">Grep</span> over the more capable server tool. The guide's remedy, verbatim: <strong>enhance the MCP tool's description</strong> — detail its capabilities and outputs (semantic search? understands code structure? returns relevance-ranked snippets?) so the model knows why to prefer it. Deleting <span class="font-mono">Grep</span> is a rejected symptom-level fix.</p>
+          <p>And the build-vs-buy rule: <strong>choose existing community servers for standard integrations</strong> (Jira, GitHub, Slack...), reserving custom-server effort for genuinely team-specific workflows. Building a Jira server from scratch reinvents a freely maintained wheel.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: MCP discovery flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="route" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: مسار اكتشاف أدوات MCP</span>
+          <span class="lang-en">Diagram: the MCP tool discovery flow</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[660px] flex flex-col items-center gap-2 font-mono text-xs">
+            <div class="bg-surface-900 text-white rounded-xl px-6 py-3 font-bold">Claude Code session starts</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="grid grid-cols-2 gap-4 w-full max-w-[560px]">
+              <div class="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 text-emerald-900 text-center">reads <span class="font-bold">.mcp.json</span><br>(project scope)</div>
+              <div class="bg-surface-50 border border-surface-300 rounded-xl px-4 py-3 text-surface-800 text-center">reads <span class="font-bold">~/.claude.json</span><br>(user scope)</div>
+            </div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl px-5 py-3 text-emerald-900 font-semibold text-center">connects to every server<br>-&gt; tools DISCOVERED at connection time</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-surface-100 border border-surface-300 rounded-xl px-5 py-3 text-surface-800 text-center w-full max-w-[560px]">
+              <p class="font-bold mb-1.5">ONE simultaneous tool list</p>
+              <div class="flex flex-wrap gap-1.5 justify-center">
+                <span class="bg-white border border-surface-300 rounded px-2 py-0.5">Grep</span>
+                <span class="bg-white border border-surface-300 rounded px-2 py-0.5">Read</span>
+                <span class="bg-white border border-surface-300 rounded px-2 py-0.5">Edit</span>
+                <span class="bg-emerald-100 border border-emerald-300 rounded px-2 py-0.5">github: search_code</span>
+                <span class="bg-emerald-100 border border-emerald-300 rounded px-2 py-0.5">jira: get_issue</span>
+                <span class="bg-emerald-100 border border-emerald-300 rounded px-2 py-0.5">notion: query_db</span>
+              </div>
+            </div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-3 text-amber-900 font-semibold text-center">agent selects BY DESCRIPTION<br><span class="font-normal">weak MCP description =&gt; built-in Grep wins</span></div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">النطاقان يلتقيان في قائمة أدوات واحدة — والمنافسة داخلها تُحسم بجودة الوصف، مو بمصدر الأداة.</span>
+          <span class="lang-en">Both scopes merge into one tool list — and competition inside it is decided by description quality, not by where the tool came from.</span>
+        </p>
+      </div>
+
+      <!-- quick insight -->
+      <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-cyan-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+            <p class="lang-ar text-cyan-800 leading-relaxed text-sm">لاحظت أن نصف مشاكل 2.4 ترجع لدرس 2.1؟ أداة MCP مهملة الوصف تخسر أمام <span dir="ltr" class="font-mono">Grep</span> لنفس السبب اللي تخسر فيه أي أداة غامضة الوصف. الدومين كله درس واحد يتكرر بأزياء مختلفة.</p>
+            <p class="lang-en text-cyan-800 leading-relaxed text-sm">Notice how half of 2.4's problems trace back to lesson 2.1? An MCP tool with a neglected description loses to <span class="font-mono">Grep</span> for the same reason any vaguely described tool loses. The whole domain is one lesson recurring in different outfits.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- enhance description code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">تجويد وصف أداة MCP لتكسب المنافسة</span>
+          <span class="lang-en">Enhancing an MCP tool description to win the competition</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">// BEFORE: terse — the agent keeps picking built-in Grep instead
+{ "name": "search_code",
+  "description": "Searches code" }
+
+// AFTER: capabilities + outputs detailed — now the agent knows
+// exactly when this beats a plain text search
+{ "name": "search_code",
+  "description": "Semantic code search across the indexed GitHub org. Understands code structure: find definitions, references, and usages by symbol name even across renames and re-exports. Returns relevance-ranked snippets with file path, line numbers, and surrounding context. Prefer this over plain text search (Grep) when the query is about code MEANING (e.g. 'where is auth handled?'); use Grep for exact literal string matches." }</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: RESOURCES AS CATALOGS ===== -->
+    <section id="resources" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">3</span>
+        <span><span class="lang-ar">الموارد: كتالوجات تُغني عن الاستكشاف</span><span class="lang-en">Resources: catalogs that replace exploration</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>MCP ما يقدّم أدوات فقط — يقدّم <strong>موارد (resources)</strong>: محتوى يُعرض للوكيل مباشرة بدون استدعاء أداة. استخدامها الذكي: <strong>كتالوجات المحتوى</strong>. ملخصات التذاكر، تسلسل صفحات التوثيق، مخطط قاعدة البيانات (schemas) — لو ما كانت معروضة كموارد، بيحرق الوكيل استدعاءات أدوات <em>استكشافية</em> فقط ليعرف "وش الموجود أصلًا؟". المورد يعطيه الخريطة مقدمًا، فيصير كل استدعاء أداة بعدها <em>موجّهًا</em> نحو هدف معروف.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>MCP does not only offer tools — it offers <strong>resources</strong>: content exposed to the agent directly, no tool call needed. Their smart use: <strong>content catalogs</strong>. Issue summaries, documentation hierarchies, database schemas — if these are not exposed as resources, the agent burns <em>exploratory</em> tool calls just to learn "what even exists?". A resource hands it the map upfront, so every subsequent tool call is <em>aimed</em> at a known target.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 3: without vs with resources -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-compare" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط مقارنة: بدون موارد مقابل بموارد</span>
+          <span class="lang-en">Comparison: without resources vs with resources</span>
+        </p>
+        <div class="grid lg:grid-cols-2 gap-4" dir="ltr">
+          <!-- without -->
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 overflow-hidden">
+            <div class="bg-red-100 border-b border-red-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="x-octagon" class="w-4 h-4 text-red-600"></i>
+              <span class="font-mono text-xs font-bold text-red-700">WITHOUT resources — blind exploration</span>
+            </div>
+            <div class="p-4 space-y-1.5 font-mono text-xs text-red-900">
+              <p>call 1: list_tables() -&gt; 42 tables</p>
+              <p>call 2: describe_table("users")</p>
+              <p>call 3: describe_table("orders")</p>
+              <p>call 4: describe_table("order_items")</p>
+              <p>call 5: describe_table("payments")...</p>
+              <p class="text-red-700 font-bold pt-1">5+ exploratory calls burned before the real question is even asked</p>
+            </div>
+          </div>
+          <!-- with -->
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 overflow-hidden">
+            <div class="bg-emerald-100 border-b border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
+              <span class="font-mono text-xs font-bold text-emerald-700">WITH resources — the map is upfront</span>
+            </div>
+            <div class="p-4 space-y-1.5 font-mono text-xs text-emerald-900">
+              <p class="font-bold">resource: db://schema (visible from the start)</p>
+              <p class="bg-white/70 border border-emerald-200 rounded-lg p-2">users(id, email...) · orders(id, user_id, status...) · payments(id, order_id, amount...)</p>
+              <p>call 1: query("SELECT ... JOIN ...")</p>
+              <p class="text-emerald-700 font-bold pt-1">one aimed call — the schema catalog eliminated the exploration phase</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">المورد يجاوب "وش المتاح؟" قبل ما يُسأل — والأداة تتفرغ للفعل نفسه.</span>
+          <span class="lang-en">The resource answers "what is available?" before it is asked — leaving tools free for the action itself.</span>
+        </p>
+      </div>
+
+      <!-- key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+            <p class="lang-ar text-brand-800 leading-relaxed text-sm"><strong>الموارد للكتالوجات، والأدوات للأفعال.</strong> لو لاحظت وكيلًا يهدر استدعاءات ليكتشف "وش الموجود" (تذاكر؟ جداول؟ صفحات توثيق؟)، فالإجابة الصحيحة في الاختبار: اعرض الكتالوج كمورد MCP — مو "أضف أداة list أخرى" ولا "خلّه يستكشف".</p>
+            <p class="lang-en text-brand-800 leading-relaxed text-sm"><strong>Resources for catalogs, tools for actions.</strong> If you spot an agent wasting calls discovering "what exists" (issues? tables? doc pages?), the correct exam answer is: expose the catalog as an MCP resource — not "add another list tool" and not "let it explore."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+            <p class="lang-ar text-amber-800 leading-relaxed text-sm">قبل ما تكتب سطر كود لخادم مخصّص، اسأل: "هل تكاملي قياسي؟" Jira وGitHub وSlack وأشباهها لها خوادم مجتمع مصانة. الخادم المخصّص استثمار مبرر فقط لسير عمل يخص فريقك فعلًا — وهذا تمييز يظهر في الاختبار.</p>
+            <p class="lang-en text-amber-800 leading-relaxed text-sm">Before writing a line of custom-server code, ask: "is my integration standard?" Jira, GitHub, Slack and their kin have maintained community servers. A custom server is justified investment only for genuinely team-specific workflows — a distinction the exam does test.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="building-2" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg">
+              <span class="lang-ar">مثال من الحياة: مبنى شركة وخدماته</span>
+              <span class="lang-en">Real-life example: an office building and its services</span>
+            </h2>
+            <p class="lang-ar text-amber-900/90 leading-loose">
+              تخيّل مبنى شركتك: الخدمات المسجّلة في <strong>استقبال المبنى</strong> (قاعات الاجتماعات، البريد، الطابعات المركزية) متاحة لكل موظف من أول يوم — هذا نطاق المشروع <span dir="ltr" class="font-mono">.mcp.json</span>. أما <strong>اشتراكاتك الشخصية</strong> (تطبيق القهوة اللي تحبه، نادي الرياضة) فتخصّك وحدك ولا تظهر في دليل الشركة — هذا <span dir="ltr" class="font-mono">~/.claude.json</span>. ودخولك للخدمات يكون <strong>ببطاقتك أنت</strong> (بصلاحياتك من بيئتك) — الاستقبال ما يعلّق كلمة مرور موحّدة على الجدار للجميع، وهذا بالضبط توسيع <span dir="ltr" class="font-mono">${VAR}</span> بدل إيداع التوكن. وأول ما تدخل المبنى تلقى <strong>لوحة الدليل في البهو</strong>: كل الطوابق والخدمات معروضة قدامك بلا ما تطرق كل باب تسأل "وش عندكم؟" — هذي هي الموارد ككتالوج. وأخيرًا: الشركة ما تبني مصعدًا من الصفر — تشتري مصعدًا قياسيًا مصانًا من مصنع معروف (خادم المجتمع)، وتفصّل فقط ديكور المدخل اللي يعبّر عن هويتها (الخادم المخصّص).
+            </p>
+            <p class="lang-en text-amber-900/90 leading-loose">
+              Picture your company's building: services registered at the <strong>building reception</strong> (meeting rooms, mail, central printers) are available to every employee from day one — that is project scope, <span class="font-mono">.mcp.json</span>. Your <strong>personal subscriptions</strong> (your favorite coffee app, your gym) are yours alone and never appear in the company directory — that is <span class="font-mono">~/.claude.json</span>. Access happens with <strong>your own badge</strong> (your credentials from your environment) — reception does not tape a shared password to the wall, which is exactly <span class="font-mono">${VAR}</span> expansion instead of committing a token. The moment you enter, the <strong>lobby directory board</strong> shows every floor and service without you knocking on doors asking "what do you offer?" — that is resources as a catalog. And finally: the company does not build an elevator from scratch — it buys a standard, maintained one from a known manufacturer (the community server), customizing only the lobby design that expresses its identity (the custom server).
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+      </div>
+      <div class="lang-ar space-y-3 text-sm leading-relaxed">
+        <p>السؤال النموذجي يجمع 2-3 قرارات في سيناريو واحد (فريق يبي خادم GitHub مشتركًا وموثّقًا وبأداة يفضّلها الوكيل). فكّكه:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>"مشترك يوصل الجميع عند الاستنساخ" = <span dir="ltr" class="font-mono">.mcp.json</span> بنطاق المشروع. "شخصي/تجريبي" = <span dir="ltr" class="font-mono">~/.claude.json</span>.</li>
+          <li>"موثّق بدون إيداع التوكن" = توسيع <span dir="ltr" class="font-mono">${VAR}</span>. أي خيار فيه توكن مكتوب في الملف = مستبعد فورًا.</li>
+          <li>"الوكيل يفضّل Grep على أداة MCP الأقدر" = جوّد وصف أداة MCP — حذف Grep مشتت علاج-العرَض.</li>
+          <li>"استدعاءات استكشافية كثيرة ليعرف المتاح" = اعرض كتالوجًا كمورد MCP.</li>
+          <li>"تكامل Jira" = خادم مجتمع جاهز؛ المخصّص فقط لما يخص الفريق.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 text-sm leading-relaxed">
+        <p>The typical question packs 2-3 decisions into one scenario (a team wants a shared, authenticated GitHub server whose tool the agent actually prefers). Decompose it:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>"Shared, reaches everyone on clone" = project-scoped <span class="font-mono">.mcp.json</span>. "Personal/experimental" = <span class="font-mono">~/.claude.json</span>.</li>
+          <li>"Authenticated without committing the token" = <span class="font-mono">${VAR}</span> expansion. Any option with a token written in the file = eliminated on sight.</li>
+          <li>"Agent prefers Grep over the more capable MCP tool" = enhance the MCP tool description — deleting Grep is the symptom-fix distractor.</li>
+          <li>"Many exploratory calls to learn what exists" = expose a catalog as an MCP resource.</li>
+          <li>"A Jira integration" = existing community server; custom only for team-specific needs.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">3 أسئلة على هذا الموضوع</span><span class="lang-en">3 questions on this topic</span></p>
+        </div>
+        <div class="ms-auto flex items-center gap-2 bg-white border border-surface-200 rounded-xl px-4 py-2 text-sm">
+          <span class="font-bold text-emerald-600"><span id="score">0</span>/<span id="total-q">3</span></span>
+          <span class="text-surface-400">·</span>
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+          <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">تبي تجرّب خادم MCP شخصيًا لقاعدة Notion الخاصة فيك، بدون ما يظهر لأي زميل ولا يدخل مستودع الفريق. وين تعرّفه؟</span>
+            <span class="lang-en">You want to try a personal MCP server for your own Notion database, without it appearing to any teammate or entering the team repo. Where do you define it?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">~/.claude.json</span> بنطاق المستخدم — شخصي، لا يُشارك، ويعمل مع خوادم المشروع في آنٍ واحد.</span>
+            <span class="lang-en">In the user-scoped <span dir="ltr" class="font-mono">~/.claude.json</span> — personal, unshared, and it runs alongside project servers simultaneously.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">.mcp.json</span> بنطاق المشروع مع تعليق يقول "شخصي — لا تستخدمونه".</span>
+            <span class="lang-en">In the project-scoped <span dir="ltr" class="font-mono">.mcp.json</span> with a comment saying "personal — do not use."</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">في <span dir="ltr" class="font-mono">.mcp.json</span> لكن داخل فرع Git منفصل ما ينضم للفرع الرئيسي.</span>
+            <span class="lang-en">In <span dir="ltr" class="font-mono">.mcp.json</span> but on a separate Git branch never merged to main.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ما يمكن تشغيل خادم شخصي وخوادم المشروع في نفس الجلسة — لازم تعطّل خوادم الفريق أولًا.</span>
+            <span class="lang-en">You cannot run a personal server and project servers in the same session — you must disable the team servers first.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> نطاق المستخدم مخصص بالضبط للخوادم الشخصية والتجريبية، وأدوات النطاقين تُكتشف وقت الاتصال وتتاح معًا — لا تعارض ولا تعطيل. حشر الشخصي في ملف المشروع (بتعليق أو بفرع) يلوّث مستودع الفريق.</span>
+            <span class="lang-en"><strong>Correct.</strong> User scope exists precisely for personal/experimental servers, and both scopes' tools are discovered at connection time and available together — no conflict, no disabling. Stuffing personal servers into the project file (via comment or branch) pollutes the team repo.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em><span dir="ltr" class="font-mono">~/.claude.json</span> بنطاق المستخدم</em> — الشخصي والتجريبي مكانه مستوى المستخدم، ويشتغل جنبًا إلى جنب مع خوادم المشروع.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is the <em>user-scoped <span dir="ltr" class="font-mono">~/.claude.json</span></em> — personal and experimental servers live at user level, running side by side with project servers.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">وكيل يتعامل مع قاعدة بيانات فيها 42 جدولًا، ويحرق 5-6 استدعاءات أدوات في بداية كل مهمة فقط ليعرف أسماء الجداول وأعمدتها. وش الحل المعماري الصحيح؟</span>
+            <span class="lang-en">An agent works against a 42-table database and burns 5-6 tool calls at the start of every task just to learn table names and columns. What is the correct architectural fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">اعرض مخطط قاعدة البيانات كمورد MCP (كتالوج) فيراه الوكيل مقدمًا بدون استدعاءات استكشافية.</span>
+            <span class="lang-en">Expose the database schema as an MCP resource (a catalog) so the agent sees it upfront with no exploratory calls.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">أضف أداة <span dir="ltr" class="font-mono">list_all_tables_with_columns</span> تجمع الاستكشاف في استدعاء واحد.</span>
+            <span class="lang-en">Add a <span dir="ltr" class="font-mono">list_all_tables_with_columns</span> tool that packs the exploration into one call.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الصق المخطط كاملًا في الـ system prompt لكل جلسة مهما كانت المهمة.</span>
+            <span class="lang-en">Paste the full schema into the system prompt of every session regardless of the task.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">خلّ الوكيل يستكشف — الاستدعاءات الاستكشافية جزء طبيعي من عمله.</span>
+            <span class="lang-en">Let the agent explore — exploratory calls are a natural part of its job.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذا الاستخدام المنصوص للموارد في الدليل: كتالوجات محتوى (ومنها مخططات قواعد البيانات) تعطي الوكيل رؤية للمتاح <em>بدون</em> استدعاءات استكشافية. أداة الجمع لا تزال استدعاءً في كل مهمة، ولصق المخطط في الـ prompt يدفع تكلفته حتى بلا حاجة، والاستكشاف المتكرر هو المشكلة نفسها.</span>
+            <span class="lang-en"><strong>Correct.</strong> This is the guide's stated use of resources: content catalogs (database schemas included) give the agent visibility into what exists <em>without</em> exploratory calls. The mega-list tool still costs a call every task, pasting the schema into the prompt pays its cost even when unneeded, and repeated exploration is the very problem.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>مورد MCP يعرض المخطط ككتالوج</em> — "الموارد للكتالوجات، والأدوات للأفعال".</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is an <em>MCP resource exposing the schema as a catalog</em> — "resources for catalogs, tools for actions."</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">فريقك يحتاج تكامل Jira قياسيًا (قراءة تذاكر، تحديث حالات) وسير عمل ترقيات داخليًا خاصًا جدًا بالشركة. وش القرار الصحيح؟</span>
+            <span class="lang-en">Your team needs a standard Jira integration (read issues, update statuses) plus a highly company-specific internal promotion workflow. What is the correct call?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">خادم مجتمع جاهز لـ Jira، وخادم مخصّص فقط لسير عمل الترقيات الخاص بالفريق.</span>
+            <span class="lang-en">An existing community server for Jira, and a custom server only for the team-specific promotion workflow.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">ابنِ الاثنين مخصّصين من الصفر لضمان تحكم كامل في كل التفاصيل.</span>
+            <span class="lang-en">Build both custom from scratch to guarantee full control over every detail.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">استخدم خادم المجتمع للاثنين وعدّل سلوكه بالـ system prompt ليغطي الترقيات.</span>
+            <span class="lang-en">Use the community server for both, bending it via the system prompt to cover promotions.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">تجاهل MCP وخلّ الوكيل يتعامل مع Jira عبر متصفح آلي.</span>
+            <span class="lang-en">Skip MCP and have the agent drive Jira through an automated browser.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> قاعدة الدليل: خوادم المجتمع للتكاملات القياسية (Jira مثالها الحرفي)، والمخصّص محفوظ لما يخص الفريق فعلًا. بناء القياسي من الصفر هدر وصيانة دائمة، ولَيّ خادم عام بالـ prompt هشاشة، والمتصفح الآلي تعقيد بلا داعٍ.</span>
+            <span class="lang-en"><strong>Correct.</strong> The guide's rule: community servers for standard integrations (Jira is its literal example), custom reserved for the genuinely team-specific. Building the standard from scratch is waste plus permanent maintenance, bending a generic server via prompt is fragile, and browser automation is needless complexity.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>مجتمع للقياسي (Jira) + مخصّص للخاص (الترقيات)</em> — التقسيم الحرفي في مهارات الدليل.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>community for the standard (Jira) + custom for the specific (promotions)</em> — the literal split in the guide's skills.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20 bg-gradient-to-bl from-emerald-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-white/10 border border-white/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 text-emerald-300"></i></span>
+        <h2 class="text-2xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+      </div>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">.mcp.json</span> (مشروع) = عدّة الفريق تُدار بالإصدار · <span dir="ltr" class="font-mono">~/.claude.json</span> (مستخدم) = الشخصي والتجريبي.</span><span class="lang-en"><span dir="ltr" class="font-mono">.mcp.json</span> (project) = version-controlled team tooling · <span dir="ltr" class="font-mono">~/.claude.json</span> (user) = personal and experimental.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">الأسرار عبر توسيع <span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span> من بيئة كل مطوّر — لا يودَع توكن في المستودع أبدًا.</span><span class="lang-en">Secrets via <span dir="ltr" class="font-mono">${GITHUB_TOKEN}</span> expansion from each developer's environment — a token is never committed.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">أدوات كل الخوادم تُكتشف وقت الاتصال وتتاح معًا — والمنافسة مع المدمجة تُحسم بجودة الوصف، فجوّد أوصاف MCP.</span><span class="lang-en">All servers' tools are discovered at connection time and available together — competition with built-ins is decided by description quality, so enhance MCP descriptions.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">الموارد كتالوجات (تذاكر، توثيق، مخططات DB) تقتل الاستدعاءات الاستكشافية.</span><span class="lang-en">Resources are catalogs (issues, docs, DB schemas) that kill exploratory calls.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">خادم المجتمع للتكامل القياسي (Jira)، والمخصّص لما يخص فريقك فقط.</span><span class="lang-en">Community server for the standard integration (Jira); custom only for what is truly team-specific.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="2-3-tool-distribution.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق · 2.3</span><span class="lang-en">Previous · 2.3</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">توزيع الأدوات وtool_choice</span><span class="lang-en">Tool distribution &amp; tool_choice</span></p>
+        </div>
+      </a>
+      <a href="2-5-builtin-tools.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · 2.5</span><span class="lang-en">Next · 2.5</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">الأدوات المدمجة</span><span class="lang-en">Built-in tools</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

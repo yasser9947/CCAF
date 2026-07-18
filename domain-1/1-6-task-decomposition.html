@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.6 استراتيجيات تفكيك المهام — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.6 — task decomposition strategies: fixed prompt chaining vs dynamic adaptive decomposition, per-file local passes plus a cross-file integration pass to avoid attention dilution, and decomposing open-ended legacy-testing tasks with adaptive prioritized plans. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">تفكيك المهام</span><span class="lang-en">Task decomposition</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.6</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">استراتيجيات تفكيك المهام المعقّدة</span>
+          <span class="lang-en">Task decomposition strategies for complex workflows</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">نفس المهمة الكبيرة: تفكيك صحيح = نتائج متّسقة وعميقة؛ تفكيك خاطئ = انتباه مشتّت وأحكام متناقضة. هنا تتعلم متى تسلسل ومتى تتكيّف.</span>
+        <span class="lang-en">Same big task: the right decomposition yields consistent depth; the wrong one yields diluted attention and contradictory verdicts. Here you learn when to chain and when to adapt.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفرّق بين الأنبوب الثابت المتسلسل (prompt chaining) والتفكيك الديناميكي التكيّفي المبني على المكتشفات الوسيطة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تختار النمط المناسب: chaining للمراجعات المتوقّعة متعددة الجوانب، والديناميكي للاستقصاء المفتوح.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تقسّم المراجعات الكبيرة: مرور محلي لكل ملف + مرور تكامل منفصل عابر للملفات — لتفادي تمييع الانتباه.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تشخّص أعراض تمييع الانتباه (عمق متفاوت، أخطاء منفلتة، أحكام متناقضة) وتعالجها بتقسيم المرورات.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفكّك مهمة مفتوحة مثل «أضف اختبارات شاملة لكود قديم»: خريطة البنية ← مناطق عالية الأثر ← خطة أولويات تتكيّف مع التبعيات المكتشفة.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Distinguish fixed sequential pipelines (prompt chaining) from dynamic adaptive decomposition built on intermediate findings.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Select the right pattern: chaining for predictable multi-aspect reviews, dynamic for open-ended investigation.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Split large reviews: a per-file local pass plus a separate cross-file integration pass — to avoid attention dilution.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Diagnose attention dilution symptoms (uneven depth, escaped bugs, contradictory verdicts) and cure them by splitting passes.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Decompose an open-ended task like "add comprehensive tests to a legacy codebase": map the structure, identify high-impact areas, build a prioritized plan that adapts as dependencies surface.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: the two patterns ===== -->
+    <section id="two-patterns" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">النمطان: سلسلة ثابتة أم خطة تتكيّف؟</span>
+        <span class="lang-en">The two patterns: fixed chain or adaptive plan?</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>عندك استراتيجيتان لتفكيك أي مهمة معقّدة. الأولى: <span class="font-semibold">prompt chaining</span> — أنبوب ثابت من خطوات محددة مسبقًا تتنفّذ بالترتيب، ومخرج كل خطوة يدخل في اللي بعدها. تختارها لما تكون المهمة <span class="font-semibold">متوقّعة البنية</span>: تعرف مسبقًا وش الجوانب اللي تحتاج فحصًا، وما يتغيّر هذا حسب النتائج.</p>
+        <p>الثانية: <span class="font-semibold">التفكيك الديناميكي التكيّفي</span> — خطة أولية تتولّد، وكل خطوة <span class="font-semibold">تولّد مهامّ فرعية جديدة بناءً على ما اكتُشف</span>. تختارها للمهام الاستقصائية المفتوحة حيث لا تعرف وش بتلقى قبل ما تبدأ. قاعدة الاختيار بسطر: <span class="font-semibold">هل تقدر تكتب كل الخطوات قبل البدء وتظل صحيحة؟ نعم ← chaining. لا ← ديناميكي</span>.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>You have two strategies for decomposing any complex task. First: <span class="font-semibold">prompt chaining</span> — a fixed pipeline of pre-defined steps executed in order, each step's output feeding the next. Choose it when the task's structure is <span class="font-semibold">predictable</span>: you know upfront which aspects need examination, and that doesn't change with the results.</p>
+        <p>Second: <span class="font-semibold">dynamic adaptive decomposition</span> — an initial plan is generated, and each step <span class="font-semibold">spawns new subtasks based on what was discovered</span>. Choose it for open-ended investigative work where you can't know what you'll find before starting. The selection rule in one line: <span class="font-semibold">can you write every step before starting and have them stay correct? Yes — chaining. No — dynamic</span>.</p>
+      </div>
+
+      <!-- Diagram 1: side-by-side patterns -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="grid sm:grid-cols-2 gap-4">
+          <div class="bg-brand-50 border-2 border-brand-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="link-2" class="w-5 h-5 text-brand-600"></i>
+              <span class="text-sm font-mono font-bold text-brand-800">PROMPT CHAINING — fixed</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+              <div class="bg-white border border-brand-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-brand-900 w-full text-center">step 1: analyze file A</div>
+              <i data-lucide="arrow-down" class="w-4 h-4 text-brand-400"></i>
+              <div class="bg-white border border-brand-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-brand-900 w-full text-center">step 2: analyze file B</div>
+              <i data-lucide="arrow-down" class="w-4 h-4 text-brand-400"></i>
+              <div class="bg-white border border-brand-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-brand-900 w-full text-center">step 3: integration pass</div>
+            </div>
+            <div class="text-[10px] font-mono text-brand-700 text-center pt-1">plan fully known upfront -- never changes</div>
+          </div>
+          <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl p-4 space-y-2">
+            <div class="flex items-center gap-2">
+              <i data-lucide="git-branch" class="w-5 h-5 text-emerald-600"></i>
+              <span class="text-sm font-mono font-bold text-emerald-800">DYNAMIC — adaptive</span>
+            </div>
+            <div class="flex flex-col items-center gap-1.5">
+              <div class="bg-white border border-emerald-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-emerald-900 w-full text-center">map structure</div>
+              <i data-lucide="arrow-down" class="w-4 h-4 text-emerald-400"></i>
+              <div class="bg-white border border-emerald-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-emerald-900 w-full text-center">discover: hidden dependency!</div>
+              <div class="flex items-center gap-1.5">
+                <i data-lucide="corner-down-left" class="w-4 h-4 text-emerald-500"></i>
+                <span class="text-[10px] font-mono font-bold text-emerald-700">plan adapts</span>
+                <i data-lucide="corner-down-right" class="w-4 h-4 text-emerald-500"></i>
+              </div>
+              <div class="bg-white border border-emerald-200 rounded-lg px-3 py-1.5 text-[11px] font-mono text-emerald-900 w-full text-center">new subtasks generated from findings</div>
+            </div>
+            <div class="text-[10px] font-mono text-emerald-700 text-center pt-1">plan emerges -- reshaped by each discovery</div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">اليسار: خطوات معروفة سلفًا تنفَّذ بالترتيب. اليمين: كل اكتشاف يعيد تشكيل الخطة.</span>
+          <span class="lang-en">One side: steps known upfront, executed in order. The other: every discovery reshapes the plan.</span>
+        </p>
+      </div>
+
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">Prompt chaining (ثابت)</th>
+              <th class="p-3 text-start font-semibold text-brand-700">تفكيك ديناميكي (تكيّفي)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">الخطة</td><td class="p-3">محددة بالكامل مسبقًا</td><td class="p-3">تتولّد من المكتشفات خطوة بخطوة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مثال نموذجي</td><td class="p-3">مراجعة كود: مرور لكل ملف + مرور تكامل</td><td class="p-3">«أضف اختبارات شاملة لكود قديم»</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">القيمة</td><td class="p-3">عمق متّسق، يمنع تمييع الانتباه</td><td class="p-3">يتعامل مع المجهول والتبعيات الناشئة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">متى يفشل؟</td><td class="p-3">لما تتغيّر المهمة حسب النتائج</td><td class="p-3">لما تكون الخطوات معروفة وبسيطة (تكلفة زائدة)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">Prompt chaining (fixed)</th>
+              <th class="p-3 text-start font-semibold text-brand-700">Dynamic decomposition (adaptive)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">The plan</td><td class="p-3">Fully specified upfront</td><td class="p-3">Generated from findings, step by step</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Canonical example</td><td class="p-3">Code review: per-file pass + integration pass</td><td class="p-3">"Add comprehensive tests to a legacy codebase"</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Value</td><td class="p-3">Consistent depth; prevents attention dilution</td><td class="p-3">Handles unknowns and emergent dependencies</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Where it fails</td><td class="p-3">When the task shifts with what's found</td><td class="p-3">When steps are known and simple (overhead)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> معيار الاختيار هو <span class="font-semibold">قابلية التنبؤ</span>، مو الحجم. مراجعة 50 ملفًا مهمة ضخمة لكنها متوقّعة ← chaining. وإضافة اختبارات لوحدة واحدة قديمة غامضة مهمة صغيرة لكنها مجهولة ← ديناميكي.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> the selection criterion is <span class="font-semibold">predictability</span>, not size. Reviewing 50 files is huge but predictable — chaining. Adding tests to one obscure legacy module is small but unknown — dynamic.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: per-file + integration passes ===== -->
+    <section id="review-passes" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">مراجعة الكود الكبيرة: مرور لكل ملف + مرور تكامل</span>
+        <span class="lang-en">Large code reviews: per-file passes plus an integration pass</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>المثال الكلاسيكي للـ chaining هو مراجعة PR يعدّل 14 ملفًا. لو حشرت الملفات كلها في مرور واحد، ظهرت أعراض <span class="font-semibold text-red-700">تمييع الانتباه (attention dilution)</span> الثلاثة: ملاحظات عميقة لبعض الملفات وسطحية لغيرها، أخطاء واضحة تنفلت، وأحكام <span class="font-semibold">متناقضة</span> — نفس النمط يُرفض في ملف ويُقبل في آخر داخل نفس المراجعة.</p>
+        <p>العلاج المنصوص: قسّم المراجعة إلى <span class="font-semibold">مرورات مركّزة</span> — (1) <span class="font-semibold">مرور محلي لكل ملف على حدة</span> يصطاد مشاكل الملف الداخلية (أخطاء منطقية، معالجة استثناءات)، ثم (2) <span class="font-semibold">مرور تكامل منفصل</span> يفحص القضايا العابرة للملفات فقط: تدفّق البيانات بين الوحدات، تطابق العقود (contracts)، والمنطق المكرر. كل مرور ياخذ انتباهًا كاملًا لنطاق ضيّق — فيثبت العمق وتختفي التناقضات. نفس المبدأ يرجع في الدومين 4 باسم multi-pass review.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The classic chaining example is reviewing a PR touching 14 files. Cram them all into a single pass and the three symptoms of <span class="font-semibold text-red-700">attention dilution</span> appear: deep feedback on some files but superficial notes on others, obvious bugs slipping through, and <span class="font-semibold">contradictory</span> verdicts — the same pattern flagged in one file and approved in another within the same review.</p>
+        <p>The prescribed cure: split the review into <span class="font-semibold">focused passes</span> — (1) a <span class="font-semibold">local pass per file</span> catching file-internal issues (logic bugs, error handling), then (2) a <span class="font-semibold">separate integration pass</span> examining only cross-file concerns: data flow between modules, contract mismatches, duplicated logic. Each pass gives full attention to a narrow scope — depth becomes consistent and the contradictions vanish. The same principle returns in Domain 4 as multi-pass review.</p>
+      </div>
+
+      <!-- Diagram 2: review flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-3">
+          <div class="text-center">
+            <div class="bg-surface-100 border border-surface-300 rounded-lg px-3 py-2 text-xs font-mono text-surface-700 inline-block">PR: 14 changed files</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="split" class="w-5 h-5 text-brand-500"></i></div>
+          <div class="grid grid-cols-4 gap-1.5 text-center">
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-1 py-1.5 text-[10px] font-mono text-brand-800">file 1<br>local pass</div>
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-1 py-1.5 text-[10px] font-mono text-brand-800">file 2<br>local pass</div>
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-1 py-1.5 text-[10px] font-mono text-brand-800">...</div>
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-1 py-1.5 text-[10px] font-mono text-brand-800">file 14<br>local pass</div>
+          </div>
+          <div class="text-center text-[10px] font-mono text-surface-500">each pass: full attention on ONE file (bugs, error handling)</div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i></div>
+          <div class="text-center">
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-lg px-3 py-2 text-[11px] font-mono font-bold text-amber-800 inline-block">separate INTEGRATION pass: cross-file data flow, contracts, duplication</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i></div>
+          <div class="text-center">
+            <div class="bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-2 text-[11px] font-mono font-bold text-emerald-800 inline-block">consistent findings -- no contradictions, no missed bugs</div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">مرورات محلية مركّزة ثم مرور تكامل واحد — بدل مرور واحد مشتّت على 14 ملفًا.</span>
+          <span class="lang-en">Focused local passes then one integration pass — instead of a single diluted pass over 14 files.</span>
+        </p>
+      </div>
+
+      <!-- Tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-emerald-900 leading-relaxed"><span class="font-bold">نصيحة:</span> احفظ التشخيص من أعراضه: «عمق متفاوت + تناقضات على نفس النمط» = تمييع انتباه، والعلاج <span class="font-semibold">تقسيم المرورات</span> — مو موديل أضخم ولا نافذة سياق أكبر. النافذة الأكبر تستوعب الملفات؛ ما تصلح جودة الانتباه عليها.</div>
+          <div class="lang-en text-emerald-900 leading-relaxed"><span class="font-bold">Tip:</span> memorize the diagnosis by its symptoms: "uneven depth + contradictions on the same pattern" = attention dilution, and the cure is <span class="font-semibold">splitting the passes</span> — not a bigger model or a larger context window. A larger window fits the files; it doesn't fix the quality of attention over them.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: open-ended decomposition ===== -->
+    <section id="open-ended" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">المهام المفتوحة: خريطة ← أثر عالٍ ← خطة تتكيّف</span>
+        <span class="lang-en">Open-ended tasks: map, high-impact, adaptive plan</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>خذ المهمة النموذجية: «أضف اختبارات شاملة لقاعدة كود قديمة». كتابة خطة كاملة مسبقًا هنا <span class="font-semibold">مستحيلة أصلًا</span> — ما تعرف البنية ولا التبعيات ولا المفاجآت المدفونة. التفكيك الديناميكي الصحيح ثلاث مراحل: (1) <span class="font-semibold">خرّط البنية</span>: وش الوحدات، كيف تترابط، وين نقاط الدخول؛ (2) <span class="font-semibold">حدّد المناطق عالية الأثر</span>: الوحدات الحرجة كثيرة الاستخدام قليلة التغطية — الاختبار فيها يشتري أعلى قيمة؛ (3) <span class="font-semibold">ابنِ خطة مرتّبة بالأولوية تتكيّف</span>: كل ما اكتشفت تبعية جديدة أثناء الشغل، تتحدّث الخطة — مهام تُضاف، وأولويات تتقدم أو تتأخر.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Take the canonical task: "add comprehensive tests to a legacy codebase." Writing a full plan upfront here is <span class="font-semibold">impossible by definition</span> — you don't know the structure, the dependencies, or the buried surprises. Correct dynamic decomposition runs in three stages: (1) <span class="font-semibold">map the structure</span>: what the modules are, how they interconnect, where the entry points sit; (2) <span class="font-semibold">identify high-impact areas</span>: critical, heavily-used, under-covered modules — testing there buys the most value; (3) <span class="font-semibold">build a prioritized plan that adapts</span>: every dependency discovered mid-work updates the plan — tasks get added, priorities move up or down.</p>
+      </div>
+
+      <!-- Code -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">النمطان جنبًا إلى جنب: chaining ثابت مقابل تفكيك تكيّفي</span>
+          <span class="lang-en">Both patterns side by side: fixed chaining vs adaptive decomposition</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python"># Pattern 1 -- PROMPT CHAINING (fixed sequence, predictable reviews)
+# Per-file local passes avoid attention dilution across 14 files...
+local_findings = {}
+for path in changed_files:
+    local_findings[path] = review_agent(
+        f"Review ONLY {path} for local issues (bugs, error handling):\n{read(path)}"
+    )
+
+# ...then ONE separate integration pass for cross-file concerns.
+integration_findings = review_agent(
+    "Given these per-file findings, analyze CROSS-FILE issues only "
+    "(data flow, contract mismatches, duplicated logic):\n"
+    + render(local_findings)
+)
+
+# Pattern 2 -- DYNAMIC ADAPTIVE DECOMPOSITION (open-ended work)
+# "Add comprehensive tests to a legacy codebase"
+plan = agent("Map the repository structure and rank modules by impact and risk.")
+while plan.has_pending_tasks():
+    task   = plan.next_highest_priority()
+    result = agent(f"Write tests for: {task.module} (context: {task.context})")
+    plan.adapt(result.discovered_dependencies)   # subtasks emerge from findings</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> لاحظ أن النمطين يتعاونان: داخل الخطة التكيّفية، كل مهمة فرعية («اختبر الوحدة X») ممكن تنفَّذ بسلسلة ثابتة صغيرة. الاختيار يتم لكل مستوى من المهمة، مو مرة واحدة للنظام كله.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> the two patterns compose: inside an adaptive plan, each subtask ("test module X") may itself run as a small fixed chain. The choice is made per level of the task, not once for the whole system.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«انتقل لموديل أعلى بنافذة سياق أكبر» لمراجعة متفاوتة الجودة — النافذة الأكبر لا تعالج جودة الانتباه؛ فخ متكرر في أسئلة المراجعات.</span><span class="lang-en">"Switch to a higher-tier model with a larger context window" for an inconsistent review — a bigger window doesn't fix attention quality; a recurring trap in review questions.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«شغّل 3 مراجعات مستقلة واعتمد ما يتكرر في اثنتين» — تصويت الإجماع يكتم الأخطاء الحقيقية التي تُكتشف أحيانًا فقط.</span><span class="lang-en">"Run 3 independent reviews and keep findings appearing in at least 2" — consensus voting suppresses real bugs that are only caught intermittently.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«ألزم المطوّرين بتقسيم الـ PRs الكبيرة» — ينقل العبء للبشر بدل إصلاح النظام.</span><span class="lang-en">"Require developers to split large PRs" — shifts the burden onto humans instead of fixing the system.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">كتابة خطة تفصيلية كاملة مسبقًا لمهمة استقصائية مفتوحة — عكس التفكيك التكيّفي الذي يطلبه الدليل.</span><span class="lang-en">Writing a complete detailed plan upfront for an open-ended investigation — the opposite of the adaptive decomposition the guide calls for.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="wrench" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: ورشة السيارات</span>
+              <span class="lang-en">Real-life example: the auto repair shop</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>الورشة الجيدة تعرف الفرق بين نوعين من الشغل. <span class="font-semibold">الفحص الدوري</span> هو الـ prompt chaining: قائمة ثابتة معروفة — زيت، فرامل، إطارات، بطارية — بنفس الترتيب لكل سيارة، لأن الجوانب المطلوب فحصها معروفة مسبقًا ولا تتغيّر. ولاحظ أن الفنّي المحترف ما يفحص السيارة «كلها مرة وحدة» — يفحص كل نظام على حدة بتركيز كامل، ثم يختم بنظرة تكامل: هل اهتزاز المقود مرتبط بوضع الإطارات؟ هذا بالضبط «مرور لكل ملف + مرور تكامل».</p>
+              <p>أما <span class="font-semibold">«فيه صوت غريب يطلع أحيانًا»</span> فهذا تفكيك ديناميكي: مستحيل يكتب الفنّي خطة الفحص كاملة قبل ما يبدأ. يفحص الأحزمة — سليمة، لكن يلاحظ بقعة زيت؛ يتتبعها للجوان — فيكتشف تآكلًا في عازل قريب... كل اكتشاف يولّد خطوة الفحص التالية. ولو أصرّ على قائمة مكتوبة سلفًا، بيفحص عشرين بندًا ما لها علاقة ويفوّت العطل الحقيقي. الورشة الشاطرة تعرف: الصيانة الدورية تمشي على checklist، والأعطال الغامضة تمشي على التتبّع التكيّفي.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>A good repair shop knows the difference between two kinds of work. The <span class="font-semibold">periodic service</span> is prompt chaining: a fixed, known checklist — oil, brakes, tires, battery — in the same order for every car, because the aspects to inspect are known upfront and never change. Notice too that a professional mechanic never inspects the car "all at once" — he checks each system separately with full focus, then finishes with an integration look: is the steering vibration related to the tire condition? That is exactly "per-file pass + integration pass."</p>
+              <p>But <span class="font-semibold">"there's a strange noise that comes and goes"</span> — that's dynamic decomposition: the mechanic cannot possibly write the full diagnostic plan before starting. He checks the belts — fine, but spots an oil stain; traces it to a gasket — and discovers worn insulation nearby... each discovery generates the next inspection step. Had he insisted on a pre-written list, he'd check twenty irrelevant items and miss the real fault. The smart shop knows: routine service runs on a checklist; mystery faults run on adaptive tracing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.6 نوعان: «مراجعة متعددة الملفات طلعت نتائجها متناقضة وسطحية — كيف تعيد الهيكلة؟» و«مهمة مفتوحة — أي استراتيجية تفكيك؟».</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>أعراض التفاوت والتناقض في مراجعة كبيرة ← الجواب دائمًا: مرورات لكل ملف + مرور تكامل منفصل.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>مهمة تحتوي «قديم / غير موثّق / استكشاف» ← الجواب: خريطة ← مناطق عالية الأثر ← خطة أولويات تتكيّف.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>المشتّتات الأربعة الجاهزة: موديل أكبر، تصويت إجماع بين مراجعات، تحميل المطوّرين تقسيم الـ PRs، وخطة كاملة مسبقة لمهمة مجهولة.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.6 questions come in two shapes: "a multi-file review produced contradictory, shallow findings — how do you restructure?" and "an open-ended task — which decomposition strategy?"</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Uneven-depth and contradiction symptoms in a big review — the answer is always: per-file passes + a separate integration pass.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>A task featuring "legacy / undocumented / exploration" — the answer: map, high-impact areas, an adaptive prioritized plan.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>The four stock distractors: a bigger model, consensus voting across reviews, making developers split PRs, and a complete upfront plan for an unknown task.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">مراجعتك الآلية لـ PR من 12 ملفًا ترجع ملاحظات عميقة لملفين وسطحية للبقية، وترفض نمطًا في ملف وتقبله في آخر. وش الإصلاح؟</span>
+            <span class="lang-en">Your automated review of a 12-file PR returns deep feedback on two files and shallow notes on the rest, and flags a pattern in one file while approving it in another. What is the fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">انتقل لموديل أعلى بنافذة سياق أوسع تستوعب الملفات كلها</span>
+            <span class="lang-en">Move to a higher-tier model with a context window that fits all the files</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">قسّم المراجعة: مرور محلي لكل ملف على حدة، ثم مرور تكامل منفصل للقضايا العابرة للملفات</span>
+            <span class="lang-en">Split the review: a local pass per file, then a separate integration pass for cross-file concerns</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">شغّل المراجعة ثلاث مرات واعتمد الملاحظات المتكررة في مرتين على الأقل</span>
+            <span class="lang-en">Run the review three times and keep findings that recur at least twice</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ألزم الفريق بحد أقصى 4 ملفات لكل PR قبل تشغيل المراجعة</span>
+            <span class="lang-en">Enforce a 4-file maximum per PR before the review runs</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> الأعراض هي تمييع الانتباه، وعلاجه الجذري تقسيم المرورات: تركيز كامل لكل ملف، ثم مرور تكامل يلتقط ما بين الملفات.</span>
+              <span class="lang-en"><strong>Correct.</strong> The symptoms are attention dilution, and its root cure is splitting the passes: full focus per file, then an integration pass catching cross-file issues.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: تقسيم المرورات. النافذة الأكبر تستوعب النص ولا تصلح الانتباه، والإجماع يكتم الأخطاء المكتشفة أحيانًا، وتحديد حجم الـ PR ينقل العبء للمطوّرين بدل إصلاح النظام.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct fix: split the passes. A bigger window fits the text but doesn't repair attention, consensus suppresses intermittently-caught bugs, and PR size limits shift the burden onto developers instead of fixing the system.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">أي المهام التالية تستدعي تفكيكًا ديناميكيًا تكيّفيًا بدل prompt chaining ثابت؟</span>
+            <span class="lang-en">Which of these tasks calls for dynamic adaptive decomposition rather than fixed prompt chaining?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">مراجعة أسبوعية معيارية لكل PR: فحص أمان، ثم أداء، ثم أسلوب — بنفس الترتيب دائمًا</span>
+            <span class="lang-en">A standard weekly review of every PR: security check, then performance, then style — always in that order</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">توليد توثيق بصيغة موحّدة لقائمة دوال معروفة</span>
+            <span class="lang-en">Generating uniformly-formatted docs for a known list of functions</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">«أضف اختبارات شاملة» لنظام قديم غير موثّق مجهول البنية والتبعيات</span>
+            <span class="lang-en">"Add comprehensive tests" to an undocumented legacy system with unknown structure and dependencies</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ترجمة عشرين ملف توثيق بنفس القالب واحدًا واحدًا</span>
+            <span class="lang-en">Translating twenty documentation files through the same template one by one</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> بنية مجهولة وتبعيات غير معروفة = لا يمكن كتابة الخطوات مسبقًا؛ لازم خريطة ثم مناطق عالية الأثر ثم خطة تتكيّف مع المكتشفات. البقية أعمال متوقّعة يناسبها الأنبوب الثابت.</span>
+              <span class="lang-en"><strong>Correct.</strong> Unknown structure and dependencies = steps can't be written upfront; you need mapping, then high-impact areas, then a plan adapting to discoveries. The rest are predictable jobs fit for a fixed pipeline.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: مهمة الاختبارات للنظام القديم المجهول. المهام ذات الخطوات المعروفة الثابتة (مراجعة معيارية، توثيق، ترجمة بقالب) هي عمل chaining نموذجي — التكيّف هناك تكلفة بلا فائدة.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct pick: the legacy-testing task with unknowns. Tasks with fixed, known steps (standard review, docs, templated translation) are textbook chaining — adaptivity there is overhead without benefit.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">بدأت مهمة «إضافة اختبارات لنظام قديم» بالتفكيك الديناميكي. وش أول خطوة صحيحة؟</span>
+            <span class="lang-en">You're starting "add tests to a legacy system" with dynamic decomposition. What is the correct first step?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ابدأ بكتابة اختبارات لأول ملف أبجديًا وامشِ بالترتيب</span>
+            <span class="lang-en">Start writing tests for the first file alphabetically and continue in order</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">اكتب اختبارات لكل الدوال العامة دفعة واحدة لضمان التغطية</span>
+            <span class="lang-en">Write tests for all public functions at once to guarantee coverage</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">خرّط بنية المشروع أولًا، ثم حدّد المناطق عالية الأثر، وابنِ خطة أولويات قابلة للتكيّف</span>
+            <span class="lang-en">Map the project structure first, then identify high-impact areas, and build an adaptable prioritized plan</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">اطلب من الوكيل تقدير نسبة تغطية مستهدفة والالتزام بها بصرامة من البداية</span>
+            <span class="lang-en">Have the agent set a strict target coverage percentage and hold to it from the start</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> الترتيب المنصوص: خريطة البنية ← مناطق عالية الأثر ← خطة أولويات تتكيّف كلما ظهرت تبعيات. تفهم قبل ما تكتب، وتستثمر جهد الاختبار حيث القيمة الأعلى.</span>
+              <span class="lang-en"><strong>Correct.</strong> The prescribed order: map the structure, find high-impact areas, then a prioritized plan that adapts as dependencies emerge. Understand before writing, and invest testing effort where it buys the most.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: الخريطة أولًا ثم الأثر ثم الخطة التكيّفية. الترتيب الأبجدي تفكيك أعمى، وكتابة كل شيء دفعة واحدة تتجاهل الأولويات والتبعيات، ونسبة التغطية الصارمة هدف شكلي يسبق الفهم.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct start: map, then impact, then the adaptive plan. Alphabetical order is blind decomposition, writing everything at once ignores priorities and dependencies, and a rigid coverage target is a vanity goal set before understanding.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>مهمة متوقّعة متعددة الجوانب ← prompt chaining؛ استقصاء مفتوح ← تفكيك ديناميكي.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>المعيار قابلية التنبؤ، مو الحجم: تقدر تكتب الخطوات مسبقًا وتظل صحيحة؟ سلسلة. لا؟ تكيّف.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>مراجعة كبيرة: مرور محلي لكل ملف + مرور تكامل منفصل — يمنع تمييع الانتباه.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>«عمق متفاوت + أحكام متناقضة» = تمييع انتباه؛ العلاج تقسيم المرورات لا موديل أكبر.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>مهمة مفتوحة: خريطة ← مناطق عالية الأثر ← خطة أولويات تتكيّف مع التبعيات المكتشفة.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Predictable multi-aspect work — prompt chaining; open-ended investigation — dynamic decomposition.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>The criterion is predictability, not size: can the steps be written upfront and stay correct? Chain. No? Adapt.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Large reviews: a local pass per file + a separate integration pass — prevents attention dilution.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>"Uneven depth + contradictory verdicts" = attention dilution; the cure is splitting passes, not a bigger model.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Open-ended tasks: map, high-impact areas, a prioritized plan adapting to discovered dependencies.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-5-hooks.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.5 خطافات الـ Agent SDK</span><span class="lang-en">1.5 Agent SDK hooks</span></span>
+          </span>
+        </a>
+        <a href="1-7-sessions.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.7 حالة الجلسة: الاستئناف والتفريع</span><span class="lang-en">1.7 Session state: resumption &amp; forking</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

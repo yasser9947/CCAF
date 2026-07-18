@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.2 استجابات الأخطاء المنظّمة — CCAF مرجع</title>
+  <meta name="description" content="الموضوع 2.2 من شهادة CCAF: نمط isError في MCP، تصنيف الأخطاء (عابر، تحقّق، عمل، صلاحية)، isRetryable، التعافي المحلي في الوكلاء الفرعية، والفرق بين فشل الوصول والنتيجة الفارغة الصالحة.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-4">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">استجابات الأخطاء</span><span class="lang-en">Error responses</span></span>
+      </nav>
+
+      <div class="flex items-start gap-4">
+        <span class="bg-white/10 border border-white/20 text-emerald-200 font-mono font-bold text-lg px-3.5 py-2 rounded-xl shrink-0">2.2</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl sm:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">استجابات الأخطاء المنظّمة لأدوات MCP</span>
+            <span class="lang-en">Structured Error Responses for MCP Tools</span>
+          </h1>
+          <p class="text-emerald-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن الخطأ الجيد يقول للوكيل وش يسوي بعده — يعيد؟ يصحّح؟ يشرح؟ يصعّد؟ — بينما "فشلت العملية" يقفل كل أبواب التعافي.</span>
+            <span class="lang-en">Why it matters: a good error tells the agent what to do next — retry? correct? explain? escalate? — while "Operation failed" slams every recovery door shut.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">نمط علم <span dir="ltr" class="font-mono">isError</span> في MCP لإبلاغ الوكيل بفشل الأداة، وليش الرسائل الموحّدة العامة تمنع قرارات التعافي.</span><span class="lang-en">The MCP <span dir="ltr" class="font-mono">isError</span> flag pattern for signaling tool failure to the agent, and why uniform generic messages block recovery decisions.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تصنيف الأخطاء الأربعة: عابر (transient)، تحقّق (validation)، عمل (business)، صلاحية (permission) — وقرار الوكيل الصحيح لكل نوع.</span><span class="lang-en">The four error categories: transient, validation, business, permission — and the correct agent action for each.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">إرجاع بيانات وصفية منظّمة (<span dir="ltr" class="font-mono">errorCategory</span>، <span dir="ltr" class="font-mono">isRetryable</span>، وصف مقروء، رسالة ودّية للعميل) تمنع المحاولات المهدورة.</span><span class="lang-en">Returning structured metadata (<span dir="ltr" class="font-mono">errorCategory</span>, <span dir="ltr" class="font-mono">isRetryable</span>, a human-readable description, a customer-friendly message) that prevents wasted retries.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">التعافي المحلي داخل الوكيل الفرعي، التصعيد بنتائج جزئية وما جرت محاولته، والتفريق بين فشل الوصول والنتيجة الفارغة الصالحة.</span><span class="lang-en">Local recovery inside the subagent, escalation with partial results and what was attempted, and distinguishing access failures from valid empty results.</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== SECTION 1: isError & WHY GENERIC FAILS ===== -->
+    <section id="iserror" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">1</span>
+        <span><span class="lang-ar">علم isError — والمحتوى اللي يجي بعده</span><span class="lang-en">The isError flag — and the content that follows it</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>في MCP، الأداة تبلّغ الوكيل بفشلها عبر علم <span dir="ltr" class="font-mono">isError: true</span> في الاستجابة — هذا هو النمط الرسمي. لكن العلم لوحده مجرد جرس إنذار؛ <strong>القيمة الحقيقية في محتوى الخطأ</strong>. رسالة موحّدة عامة مثل <span dir="ltr" class="font-mono">"Operation failed"</span> تشعل الجرس وتسكت، فيقف الوكيل حائرًا: أعيد المحاولة؟ أصحّح المدخل؟ أشرح للعميل؟ أصعّد لإنسان؟ <strong>الرسائل الموحّدة تمنع الوكيل من اتخاذ قرار التعافي المناسب</strong> — هذي عبارة الدليل حرفيًا، وهي مربط الفرس في أسئلة هذا الموضوع.</p>
+          <p>الحل: أرجِع مع كل خطأ <strong>بيانات وصفية منظّمة</strong> — <span dir="ltr" class="font-mono">errorCategory</span> يصنّف النوع، و<span dir="ltr" class="font-mono">isRetryable</span> يحسم قرار الإعادة، ووصف مقروء يشرح، ولو كان الخطأ مخالفة سياسة: رسالة ودّية جاهزة للعميل مع <span dir="ltr" class="font-mono">retriable: false</span> صريحة. البيان الصريح لقابلية الإعادة <strong>يمنع محاولات مهدورة</strong> على خطأ لن يُحل بالتكرار.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>In MCP, a tool signals failure to the agent via an <span class="font-mono">isError: true</span> flag on the response — that is the official pattern. But the flag alone is just an alarm bell; <strong>the real value is in the error's content</strong>. A uniform generic message like <span class="font-mono">"Operation failed"</span> rings the bell and goes silent, leaving the agent stuck: retry? correct the input? explain to the customer? escalate to a human? <strong>Uniform responses prevent the agent from making an appropriate recovery decision</strong> — that is the guide's phrasing verbatim, and it is the crux of this topic's questions.</p>
+          <p>The fix: return <strong>structured metadata</strong> with every error — <span class="font-mono">errorCategory</span> classifies the type, <span class="font-mono">isRetryable</span> settles the retry decision, a human-readable description explains, and for policy violations: a ready customer-friendly message with an explicit <span class="font-mono">retriable: false</span>. Explicitly stating retryability <strong>prevents wasted retry attempts</strong> on an error repetition will never fix.</p>
+        </div>
+      </div>
+
+      <!-- structured error JSON -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="file-warning" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">استجابة خطأ منظّمة: عمل مقابل عابر</span>
+          <span class="lang-en">A structured error response: business vs transient</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-json">// process_refund rejects an amount above the $500 policy cap.
+// Business rule violation -> NOT retryable, explain to the customer.
+{
+  "isError": true,
+  "content": [
+    {
+      "type": "text",
+      "text": {
+        "errorCategory": "business",
+        "isRetryable": false,
+        "code": "REFUND_LIMIT_EXCEEDED",
+        "description": "Refund of $780 exceeds the $500 auto-approval limit. Requires human approval.",
+        "customerMessage": "I can approve refunds up to $500 automatically. For $780 I'll hand this to a specialist who can help.",
+        "partialResults": null,
+        "attempted": "process_refund(order=ORD-12345, amount=780.00)"
+      }
+    }
+  ]
+}
+
+// Contrast: a transient failure the agent SHOULD retry locally.
+{
+  "isError": true,
+  "content": [{ "type": "text", "text": {
+    "errorCategory": "transient",
+    "isRetryable": true,
+    "description": "Billing service timed out after 5s.",
+    "attempted": "get_customer(email='a@b.com')"
+  }}]
+}</code></pre>
+        </div>
+        <p class="text-xs text-surface-500 leading-relaxed">
+          <span class="lang-ar">لاحظ حقلي <span dir="ltr" class="font-mono">attempted</span> و<span dir="ltr" class="font-mono">partialResults</span> — هما اللي يمكّنان المنسّق من قرار ذكي لو صُعّد الخطأ.</span>
+          <span class="lang-en">Note the <span class="font-mono">attempted</span> and <span class="font-mono">partialResults</span> fields — they are what enable an intelligent coordinator decision if the error gets escalated.</span>
+        </p>
+      </div>
+
+      <!-- quick insight -->
+      <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-cyan-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+            <p class="lang-ar text-cyan-800 leading-relaxed text-sm"><span dir="ltr" class="font-mono">isError: true</span> ما هو انهيار — هو <em>رسالة</em> للنموذج يقرأها ويتصرف بناءً عليها. عشان كذا محتواها لازم يُكتب للنموذج، مو لسجلات المطوّرين.</p>
+            <p class="lang-en text-cyan-800 leading-relaxed text-sm"><span class="font-mono">isError: true</span> is not a crash — it is a <em>message</em> the model reads and acts on. That is why its content must be written for the model, not for developer logs.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: THE ERROR TAXONOMY ===== -->
+    <section id="taxonomy" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">2</span>
+        <span><span class="lang-ar">شجرة تصنيف الأخطاء الأربعة</span><span class="lang-en">The four-category error taxonomy</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>الدليل يميّز أربعة أنواع، ولكل نوع قرار وكيل مختلف — وهذا بالضبط ما تقيسه الأسئلة: هل تعرف تربط النوع بالقرار؟</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The guide distinguishes four categories, each demanding a different agent action — and that is exactly what the questions measure: can you map the category to the action?</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 1: error taxonomy tree -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-fork" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: شجرة تصنيف أخطاء الأدوات</span>
+          <span class="lang-en">Diagram: the tool-error taxonomy tree</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[700px] flex flex-col items-center gap-0 font-mono text-xs">
+            <div class="bg-surface-900 text-white rounded-xl px-6 py-3 font-bold">Tool error (isError: true)</div>
+            <div class="w-0.5 h-4 bg-surface-300"></div>
+            <div class="w-[640px] h-0.5 bg-surface-300"></div>
+            <div class="grid grid-cols-4 gap-3 w-full max-w-[680px]">
+              <div class="flex flex-col items-center gap-0">
+                <div class="w-0.5 h-4 bg-surface-300"></div>
+                <div class="w-full bg-sky-50 border-2 border-sky-300 rounded-xl p-3 text-center space-y-1.5">
+                  <p class="font-bold text-sky-900">transient</p>
+                  <p class="text-sky-700 leading-snug">timeout,<br>service down</p>
+                  <span class="inline-block bg-emerald-600 text-white rounded px-1.5 py-0.5 font-bold">retry: YES</span>
+                  <p class="text-sky-800">retry locally<br>(backoff)</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-0">
+                <div class="w-0.5 h-4 bg-surface-300"></div>
+                <div class="w-full bg-amber-50 border-2 border-amber-300 rounded-xl p-3 text-center space-y-1.5">
+                  <p class="font-bold text-amber-900">validation</p>
+                  <p class="text-amber-700 leading-snug">invalid input<br>format</p>
+                  <span class="inline-block bg-amber-500 text-white rounded px-1.5 py-0.5 font-bold">retry: FIX FIRST</span>
+                  <p class="text-amber-800">correct input,<br>then retry</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-0">
+                <div class="w-0.5 h-4 bg-surface-300"></div>
+                <div class="w-full bg-red-50 border-2 border-red-300 rounded-xl p-3 text-center space-y-1.5">
+                  <p class="font-bold text-red-900">business</p>
+                  <p class="text-red-700 leading-snug">policy violation<br>(refund cap)</p>
+                  <span class="inline-block bg-red-600 text-white rounded px-1.5 py-0.5 font-bold">retry: NO</span>
+                  <p class="text-red-800">explain to customer<br>/ escalate</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-center gap-0">
+                <div class="w-0.5 h-4 bg-surface-300"></div>
+                <div class="w-full bg-purple-50 border-2 border-purple-300 rounded-xl p-3 text-center space-y-1.5">
+                  <p class="font-bold text-purple-900">permission</p>
+                  <p class="text-purple-700 leading-snug">not authorized</p>
+                  <span class="inline-block bg-red-600 text-white rounded px-1.5 py-0.5 font-bold">retry: NO</span>
+                  <p class="text-purple-800">escalate / request<br>authorization</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">أربعة فروع، أربعة قرارات مختلفة — التصنيف هو اللي يحوّل "خطأ" إلى "خطة".</span>
+          <span class="lang-en">Four branches, four different actions — classification is what turns "an error" into "a plan."</span>
+        </p>
+      </div>
+
+      <!-- error categories table -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="table" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">جدول مرجعي: النوع، المثال، القرار</span>
+          <span class="lang-en">Reference table: category, example, action</span>
+        </p>
+        <!-- AR table -->
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold"><span dir="ltr" class="font-mono">errorCategory</span></th>
+                <th class="p-3 text-start font-semibold">مثال</th>
+                <th class="p-3 text-center font-semibold"><span dir="ltr" class="font-mono">isRetryable</span></th>
+                <th class="p-3 text-start font-semibold">قرار الوكيل</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">transient</td><td class="p-3">مهلة، خدمة غير متاحة</td><td class="p-3 text-center text-emerald-600 font-bold">true</td><td class="p-3">أعِد المحاولة محليًا (backoff)</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">validation</td><td class="p-3">صيغة مدخل غير صالحة</td><td class="p-3 text-center text-amber-600 font-bold">بعد التصحيح</td><td class="p-3">صحّح المدخل ثم أعد — لا تكرر نفسه</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">business</td><td class="p-3">استرجاع يتجاوز الحد</td><td class="p-3 text-center text-red-600 font-bold">false</td><td class="p-3">اشرح للعميل بودّية / صعّد — لا تعيد</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">permission</td><td class="p-3">لا صلاحية للتنفيذ</td><td class="p-3 text-center text-red-600 font-bold">false</td><td class="p-3">صعّد أو اطلب تفويضًا</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- EN table -->
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-left font-semibold font-mono">errorCategory</th>
+                <th class="p-3 text-left font-semibold">Example</th>
+                <th class="p-3 text-center font-semibold font-mono">isRetryable</th>
+                <th class="p-3 text-left font-semibold">Agent action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">transient</td><td class="p-3">Timeout, service down</td><td class="p-3 text-center text-emerald-600 font-bold">true</td><td class="p-3">Retry locally (backoff)</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">validation</td><td class="p-3">Invalid input format</td><td class="p-3 text-center text-amber-600 font-bold">after fixing</td><td class="p-3">Correct the input then retry — not as-is</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">business</td><td class="p-3">Refund over limit</td><td class="p-3 text-center text-red-600 font-bold">false</td><td class="p-3">Explain kindly / escalate — do not retry</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono">permission</td><td class="p-3">Not authorized</td><td class="p-3 text-center text-red-600 font-bold">false</td><td class="p-3">Escalate or request authorization</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+            <p class="lang-ar text-brand-800 leading-relaxed text-sm">مخالفة قاعدة العمل (مثل استرجاع فوق الحد) <strong>ليست عطلًا تقنيًا</strong> — النظام اشتغل صح ورفض صح. عشان كذا ترجع <span dir="ltr" class="font-mono">retriable: false</span> مع <em>شرح ودّي جاهز للعميل</em>، فيتحول الوكيل من "يعيد المحاولة بغباء" إلى "يتواصل باحتراف".</p>
+            <p class="lang-en text-brand-800 leading-relaxed text-sm">A business rule violation (like an over-limit refund) is <strong>not a technical fault</strong> — the system worked correctly and refused correctly. That is why you return <span class="font-mono">retriable: false</span> with a <em>ready customer-friendly explanation</em>, turning the agent from "dumbly retrying" into "communicating professionally."</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: LOCAL RECOVERY & ESCALATION ===== -->
+    <section id="recovery" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">3</span>
+        <span><span class="lang-ar">التعافي المحلي والتصعيد الذكي</span><span class="lang-en">Local recovery &amp; intelligent escalation</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>في الأنظمة متعددة الوكلاء، القاعدة: <strong>عالِج الأخطاء العابرة محليًا داخل الوكيل الفرعي</strong> (إعادة محاولة بـ backoff)، ولا تصعّد للمنسّق إلا الأخطاء التي <em>ما تنحل محليًا</em>. ولما تصعّد، لا تصعّد "فشلت" — صعّد حزمة سياق كاملة: <strong>نوع الفشل، الاستعلام الذي جرت محاولته، والنتائج الجزئية</strong> التي تجمّعت قبل الفشل. بهذا يقدر المنسّق يقرر بذكاء: يعيد باستعلام معدّل، يجرّب مصدرًا بديلًا، أو يكمل بالنتائج الجزئية ويعلّم الفجوة.</p>
+          <p>وهنا النقطة اللي يحبها واضعو الأسئلة: <strong>فشل الوصول شيء، والنتيجة الفارغة الصالحة شيء آخر تمامًا</strong>. مهلة انتهت أو خدمة سقطت = فشل وصول يحتاج قرار إعادة محاولة. استعلام نجح وما لقى تطابقات = نجاح حقيقي بنتيجة فارغة. اللي يخلط بينهما — يلتقط الخطأ ويرجّع قائمة فارغة موسومة "successful" — يدفن الفشل، فيبني المنسّق تقريرًا ناقصًا وهو ما يدري.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>In multi-agent systems the rule is: <strong>handle transient errors locally inside the subagent</strong> (retry with backoff), and propagate to the coordinator only errors that <em>cannot be resolved locally</em>. And when you do escalate, do not escalate "failed" — escalate a full context package: <strong>the failure type, the query that was attempted, and the partial results</strong> accumulated before the failure. That lets the coordinator decide intelligently: retry with a modified query, try an alternative source, or proceed with partial results and annotate the gap.</p>
+          <p>And here is the point examiners love: <strong>an access failure is one thing; a valid empty result is another entirely</strong>. A timeout or downed service = an access failure needing a retry decision. A query that succeeded and found no matches = a genuine success with an empty result. Conflating them — catching the error and returning an empty list marked "successful" — buries the failure, and the coordinator unknowingly builds an incomplete report.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: error recovery flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="route" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: مسار التعافي من الخطأ داخل وكيل فرعي</span>
+          <span class="lang-en">Diagram: the error recovery flow inside a subagent</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[640px] flex flex-col items-center gap-2 font-mono text-xs">
+            <div class="bg-surface-100 border border-surface-300 rounded-xl px-5 py-3 text-surface-800 font-semibold">Tool call fails (isError: true)</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl px-5 py-3 text-emerald-900 font-semibold">Read errorCategory + isRetryable</div>
+            <i data-lucide="arrow-down" class="w-5 h-5 text-surface-400"></i>
+            <div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-3 text-amber-900 font-semibold">transient &amp;&amp; isRetryable?</div>
+            <div class="grid grid-cols-2 gap-10 w-full max-w-[600px] mt-1">
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-emerald-600 text-white rounded-md px-2.5 py-1 font-bold">YES</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-emerald-500"></i>
+                <div class="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 text-emerald-900 text-center w-full">Retry locally with backoff</div>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-emerald-500"></i>
+                <div class="bg-emerald-50 border border-emerald-300 rounded-xl px-4 py-3 text-emerald-900 text-center w-full">Resolved? -&gt; continue task<br><span class="text-emerald-600">coordinator never bothered</span></div>
+              </div>
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-red-600 text-white rounded-md px-2.5 py-1 font-bold">NO / still failing</span>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-red-500"></i>
+                <div class="bg-red-50 border border-red-300 rounded-xl px-4 py-3 text-red-900 text-center w-full">Propagate to coordinator:<br>failure type + attempted query<br>+ PARTIAL RESULTS</div>
+                <i data-lucide="arrow-down" class="w-5 h-5 text-red-500"></i>
+                <div class="bg-surface-100 border border-surface-300 rounded-xl px-4 py-3 text-surface-800 text-center w-full">Coordinator: modified retry<br>| alternative source | proceed + flag gap</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">العابر يُحل تحت — وما يصعد فوق إلا ومعه سياقه الكامل ونتائجه الجزئية.</span>
+          <span class="lang-en">Transient gets solved below — and nothing goes up without its full context and partial results.</span>
+        </p>
+      </div>
+
+      <!-- DIAGRAM 3: access failure vs valid empty result -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-compare" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط مقارنة: فشل وصول مقابل نتيجة فارغة صالحة</span>
+          <span class="lang-en">Comparison: access failure vs valid empty result</span>
+        </p>
+        <div class="grid lg:grid-cols-2 gap-4" dir="ltr">
+          <!-- access failure -->
+          <div class="rounded-xl border-2 border-red-300 bg-red-50/60 overflow-hidden">
+            <div class="bg-red-100 border-b border-red-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="wifi-off" class="w-4 h-4 text-red-600"></i>
+              <span class="font-mono text-xs font-bold text-red-700">ACCESS FAILURE — an error</span>
+            </div>
+            <div class="p-4 space-y-2 font-mono text-xs text-red-900">
+              <p class="font-bold">query: "find contracts for ACME"</p>
+              <p>-&gt; data source TIMED OUT after 5s</p>
+              <p>-&gt; we know NOTHING about matches</p>
+              <div class="bg-white/70 rounded-lg p-3 border border-red-200 mt-2">
+                <p class="font-bold text-red-700">must return:</p>
+                <p>isError: true, category: transient,</p>
+                <p>isRetryable: true, attempted: "..."</p>
+              </div>
+              <p class="text-red-700 font-bold">needs a RETRY DECISION</p>
+            </div>
+          </div>
+          <!-- valid empty -->
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50/60 overflow-hidden">
+            <div class="bg-emerald-100 border-b border-emerald-200 px-4 py-2.5 flex items-center gap-2">
+              <i data-lucide="inbox" class="w-4 h-4 text-emerald-600"></i>
+              <span class="font-mono text-xs font-bold text-emerald-700">VALID EMPTY RESULT — a success</span>
+            </div>
+            <div class="p-4 space-y-2 font-mono text-xs text-emerald-900">
+              <p class="font-bold">query: "find contracts for ACME"</p>
+              <p>-&gt; data source responded fine</p>
+              <p>-&gt; searched everything: 0 matches</p>
+              <div class="bg-white/70 rounded-lg p-3 border border-emerald-200 mt-2">
+                <p class="font-bold text-emerald-700">must return:</p>
+                <p>isError: false,</p>
+                <p>results: [], matches: 0</p>
+              </div>
+              <p class="text-emerald-700 font-bold">a real answer: "none exist"</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">نفس شكل المخرج تقريبًا (قائمة فارغة) — لكن معناهما نقيضان: "ما قدرت أشوف" مقابل "شفت وما فيه شيء".</span>
+          <span class="lang-en">Nearly identical output shape (an empty list) — but opposite meanings: "I could not look" vs "I looked and there is nothing."</span>
+        </p>
+      </div>
+
+      <!-- tip -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-emerald-900"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></p>
+            <p class="lang-ar text-emerald-800 leading-relaxed text-sm">اجعل كل استجابة خطأ تحمل حقلي <span dir="ltr" class="font-mono">attempted</span> (وش جرت محاولته بالضبط) و<span dir="ltr" class="font-mono">partialResults</span> (وش تجمّع قبل الفشل). هذان الحقلان هما الفرق بين منسّق يقرر بذكاء ومنسّق يبدأ من الصفر.</p>
+            <p class="lang-en text-emerald-800 leading-relaxed text-sm">Make every error response carry <span class="font-mono">attempted</span> (exactly what was tried) and <span class="font-mono">partialResults</span> (what accumulated before the failure). Those two fields are the difference between a coordinator that decides intelligently and one that starts from zero.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+            <p class="lang-ar text-amber-800 leading-relaxed text-sm">إعادة المحاولة الآلية ليست دائمًا حسنة: على خطأ <span dir="ltr" class="font-mono">business</span> أو <span dir="ltr" class="font-mono">permission</span> هي هدر صريح، وعلى <span dir="ltr" class="font-mono">validation</span> لازم <em>تصحّح المدخل قبل</em> الإعادة — تكرار نفس المدخل الفاسد يعطيك نفس الرفض.</p>
+            <p class="lang-en text-amber-800 leading-relaxed text-sm">Automatic retry is not always a virtue: on a <span class="font-mono">business</span> or <span class="font-mono">permission</span> error it is pure waste, and on <span class="font-mono">validation</span> you must <em>correct the input before</em> retrying — resubmitting the same broken input yields the same rejection.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"أعِد المحاولة تلقائيًا بـ backoff ثم أرجِع status عامًا":</strong> يخفي السياق عن المنسّق ويهدر محاولات على أخطاء عمل غير قابلة للإعادة.</span>
+              <span class="lang-en"><strong>"Auto-retry with backoff, then return a generic status":</strong> hides context from the coordinator and wastes retries on non-retryable business errors.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"التقط الخطأ وأرجِع نتيجة فارغة كأنها نجاح":</strong> قمع للخطأ يمنع أي تعافٍ ويخاطر بمخرجات ناقصة. فشل الوصول لا يساوي نتيجة فارغة صالحة.</span>
+              <span class="lang-en"><strong>"Catch the error and return an empty result marked successful":</strong> suppresses the error, prevents recovery, and risks incomplete outputs. An access failure does not equal a valid empty result.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"مرّر الاستثناء لمعالج علوي ينهي كامل سير العمل":</strong> إنهاء غير مبرّر بينما كان ممكنًا التعافي بنتائج جزئية.</span>
+              <span class="lang-en"><strong>"Propagate the exception to a top-level handler that terminates the whole workflow":</strong> an unnecessary termination when recovery with partial results was possible.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="stethoscope" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg">
+              <span class="lang-ar">مثال من الحياة: فرز الطوارئ في المستشفى</span>
+              <span class="lang-en">Real-life example: hospital emergency triage</span>
+            </h2>
+            <p class="lang-ar text-amber-900/90 leading-loose">
+              ممرضة الفرز في الطوارئ ما تقول للطبيب "عندنا مشكلة" وتسكت — تصنّف: هذا <strong>انتظاره ينفع</strong> (عابر: راجع بعد ساعة)، وهذا <strong>تعبئته غلط</strong> (تحقّق: ارجع عبّي النموذج صح وتعال)، وهذا <strong>التأمين ما يغطيه</strong> (عمل: ما ينفع تكرر الطلب، نشرح لك البديل بلطف)، وهذا <strong>يحتاج توقيع استشاري</strong> (صلاحية: نصعّد لصاحب القرار). ولو راجَع مريض وما وُجد ملفه في النظام، فرق كبير بين "النظام طايح ما قدرنا نبحث" (فشل وصول — نعيد المحاولة) و"بحثنا والمريض فعلًا ما عنده ملف" (نتيجة فارغة صالحة — نفتح له ملفًا جديدًا). الممرضة اللي تقول "ما فيه ملف" والنظام طايح، تسبّب قرارًا طبيًا خاطئًا — وهذا بالضبط خطر وسم الفشل كنجاح.
+            </p>
+            <p class="lang-en text-amber-900/90 leading-loose">
+              The ER triage nurse never tells the physician "we have a problem" and stops there — she classifies: this one <strong>can safely wait</strong> (transient: come back in an hour), this one <strong>filled the form wrong</strong> (validation: redo the form correctly, then return), this one <strong>is not covered by insurance</strong> (business: resubmitting will not help, we kindly explain the alternative), and this one <strong>needs a consultant's sign-off</strong> (permission: escalate to the decision-maker). And when a patient's record cannot be found, there is a world of difference between "the system is down, we could not search" (an access failure — retry) and "we searched and the patient truly has no record" (a valid empty result — open a new file). A nurse who reports "no record" while the system is down causes a wrong medical decision — exactly the danger of marking failure as success.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+      </div>
+      <div class="lang-ar space-y-3 text-sm leading-relaxed">
+        <p>سيناريوهان يتكرران: (1) أداة ترجع "Operation failed" والوكيل يتصرف غلط، (2) وكيل فرعي في نظام بحث يفشل مصدره ويرجّع فراغًا موسومًا نجاحًا. طريقة الحل:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>الجواب الصحيح دائمًا فيه ثلاثية: <strong>تصنيف</strong> (errorCategory) + <strong>قابلية إعادة</strong> (isRetryable) + <strong>سياق</strong> (وصف/attempted/نتائج جزئية).</li>
+          <li>لو الخطأ مخالفة سياسة: ابحث عن <span dir="ltr" class="font-mono">retriable: false</span> + رسالة ودّية للعميل.</li>
+          <li>لو السيناريو متعدد الوكلاء: تعافٍ محلي للعابر، وتصعيد ما عجز عنه فقط — <em>مع</em> النتائج الجزئية وما جرت محاولته.</li>
+          <li>استبعد فورًا: النتيجة الفارغة كنجاح، الإنهاء الكامل، الإعادة اللانهائية، والـ backoff الأعمى بلا تصنيف.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 text-sm leading-relaxed">
+        <p>Two recurring scenarios: (1) a tool returns "Operation failed" and the agent misbehaves, (2) a research subagent's source fails and it returns emptiness marked success. How to solve:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>The correct answer always carries the triad: <strong>classification</strong> (errorCategory) + <strong>retryability</strong> (isRetryable) + <strong>context</strong> (description / attempted / partial results).</li>
+          <li>If the error is a policy violation: look for <span class="font-mono">retriable: false</span> + a customer-friendly message.</li>
+          <li>If the scenario is multi-agent: local recovery for transient, escalate only the unresolvable — <em>with</em> partial results and what was attempted.</li>
+          <li>Eliminate on sight: empty-as-success, full termination, infinite retry, and blind backoff with no classification.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">3 أسئلة على هذا الموضوع</span><span class="lang-en">3 questions on this topic</span></p>
+        </div>
+        <div class="ms-auto flex items-center gap-2 bg-white border border-surface-200 rounded-xl px-4 py-2 text-sm">
+          <span class="font-bold text-emerald-600"><span id="score">0</span>/<span id="total-q">3</span></span>
+          <span class="text-surface-400">·</span>
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+          <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">أداة <span dir="ltr" class="font-mono">search_orders</span> ترجع خطأ منظّمًا: <span dir="ltr" class="font-mono">errorCategory:"validation"</span> مع وصف "date must be YYYY-MM-DD, got 15/03/2025". وش التصرف الصحيح للوكيل؟</span>
+            <span class="lang-en">The <span dir="ltr" class="font-mono">search_orders</span> tool returns a structured error: <span dir="ltr" class="font-mono">errorCategory:"validation"</span> with the description "date must be YYYY-MM-DD, got 15/03/2025". What is the agent's correct move?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يصحّح الصيغة إلى <span dir="ltr" class="font-mono">2025-03-15</span> ثم يعيد الاستدعاء بالمدخل المُصحَّح.</span>
+            <span class="lang-en">Correct the format to <span dir="ltr" class="font-mono">2025-03-15</span>, then retry the call with the corrected input.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يعيد نفس الاستدعاء بنفس المدخل — قد تنجح المرة الجاية.</span>
+            <span class="lang-en">Retry the same call with the same input — it might work next time.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يصعّد فورًا لموظف بشري لأن الأداة فشلت.</span>
+            <span class="lang-en">Escalate immediately to a human because the tool failed.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">يتجاهل البحث ويكمل كأن النتيجة فارغة.</span>
+            <span class="lang-en">Skip the search and continue as if the result were empty.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> خطأ التحقّق معناه: المدخل غلط، والطريق مفتوح بعد تصحيحه. الخطأ المنظّم أعطى الوكيل الصيغة المطلوبة بالضبط، فيصحّح ويعيد. التكرار بنفس المدخل يعطي نفس الرفض، والتصعيد إفراط، والتجاهل يزوّر النتيجة.</span>
+            <span class="lang-en"><strong>Correct.</strong> A validation error means: the input is wrong, and the path is open once it is fixed. The structured error gave the agent the exact required format, so it corrects and retries. Repeating the same input yields the same rejection, escalation is overkill, and skipping falsifies the result.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>صحّح المدخل ثم أعد</em>. هذا جوهر خطأ الـ validation — قابل للإعادة لكن بعد إصلاح الصيغة، لا كما هو.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>correct the input, then retry</em>. That is the essence of a validation error — retryable, but only after fixing the format, never as-is.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">في نظام بحث متعدد الوكلاء، أي الأخطاء يجب أن يُصعّدها الوكيل الفرعي إلى المنسّق؟</span>
+            <span class="lang-en">In a multi-agent research system, which errors should the subagent propagate to the coordinator?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">فقط الأخطاء التي عجز عن حلّها محليًا — مصحوبة بالنتائج الجزئية وما جرت محاولته.</span>
+            <span class="lang-en">Only the errors it could not resolve locally — accompanied by partial results and what was attempted.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">كل خطأ فور حدوثه — الشفافية الكاملة مع المنسّق أولوية.</span>
+            <span class="lang-en">Every error the moment it happens — full transparency with the coordinator comes first.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لا شيء — الوكيل الفرعي يخفي أخطاءه ويرجّع أفضل ما توفر.</span>
+            <span class="lang-en">None — the subagent hides its errors and returns whatever it managed.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">الأخطاء العابرة فقط — لأنها الأسهل حلًا عند المنسّق.</span>
+            <span class="lang-en">Only the transient ones — they are the easiest for the coordinator to solve.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> القاعدة: تعافٍ محلي من العابر، وتصعيد ما لا يُحل محليًا فقط — مع النتائج الجزئية وما جرت محاولته ليقرر المنسّق. تصعيد كل شيء يغرق المنسّق، والإخفاء الكامل يزوّر، والعابر بالذات هو ما يُحل محليًا لا ما يُصعّد.</span>
+            <span class="lang-en"><strong>Correct.</strong> The rule: recover locally from transient failures, and propagate only what cannot be resolved locally — with partial results and what was attempted so the coordinator can decide. Escalating everything floods the coordinator, hiding everything falsifies, and transient errors are precisely what gets solved locally, not escalated.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>فقط ما لا يُحل محليًا، مع نتائج جزئية وما جرت محاولته</em>. العابر يُعالج داخل الوكيل الفرعي، والتصعيد الانتقائي بسياق كامل هو النمط الصحيح.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>only what cannot be resolved locally, with partial results and what was attempted</em>. Transient errors are handled inside the subagent; selective escalation with full context is the right pattern.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">ليش تعتبر رسالة الخطأ الموحّدة "Operation failed" مشكلة معمارية وليست مجرد إزعاج؟</span>
+            <span class="lang-en">Why is the uniform "Operation failed" message an architectural problem, not just an annoyance?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لأنها تمنع الوكيل من اتخاذ قرار التعافي المناسب — ما يعرف هل يعيد أم يصحّح أم يشرح أم يصعّد.</span>
+            <span class="lang-en">Because it prevents the agent from making the appropriate recovery decision — it cannot tell whether to retry, correct, explain, or escalate.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لأنها قصيرة زيادة — الرسائل الأطول دائمًا أفضل للنموذج.</span>
+            <span class="lang-en">Because it is too short — longer messages are always better for the model.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لأنها بالإنجليزية — المفروض تكون بلغة المستخدم النهائي.</span>
+            <span class="lang-en">Because it is in English — it should be in the end user's language.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">لأنها تستهلك توكنز أكثر من الخطأ المنظّم.</span>
+            <span class="lang-en">Because it consumes more tokens than a structured error.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذي عبارة الدليل: الاستجابات الموحّدة تمنع قرارات التعافي المناسبة. كل الأنواع الأربعة تبدو متطابقة للوكيل، فيتصرف عشوائيًا — يعيد على غير القابل للإعادة، أو يصعّد ما كان يُحل محليًا. الطول واللغة والتوكنز كلها هوامش.</span>
+            <span class="lang-en"><strong>Correct.</strong> That is the guide's phrasing: uniform responses prevent appropriate recovery decisions. All four categories look identical to the agent, so it acts randomly — retrying the non-retryable, or escalating what could be solved locally. Length, language, and tokens are all side issues.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>تمنع قرار التعافي المناسب</em> — بدون تصنيف وقابلية إعادة، كل الأخطاء متشابهة والوكيل يتصرف عشوائيًا.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is that it <em>prevents the appropriate recovery decision</em> — without classification and retryability, all errors look alike and the agent acts randomly.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20 bg-gradient-to-bl from-emerald-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-white/10 border border-white/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 text-emerald-300"></i></span>
+        <h2 class="text-2xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+      </div>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">isError: true</span> يبلّغ الفشل — لكن "Operation failed" الموحّدة تمنع قرار التعافي.</span><span class="lang-en"><span dir="ltr" class="font-mono">isError: true</span> signals failure — but a uniform "Operation failed" blocks the recovery decision.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">أربعة أنواع، أربعة قرارات: عابر = أعد محليًا · تحقّق = صحّح ثم أعد · عمل = <span dir="ltr" class="font-mono">retriable:false</span> + رسالة ودّية · صلاحية = صعّد/فوّض.</span><span class="lang-en">Four categories, four actions: transient = retry locally · validation = fix then retry · business = <span dir="ltr" class="font-mono">retriable:false</span> + friendly message · permission = escalate/authorize.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">isRetryable</span> الصريح يمنع محاولات مهدورة على أخطاء لن تُحل بالتكرار.</span><span class="lang-en">An explicit <span dir="ltr" class="font-mono">isRetryable</span> prevents wasted attempts on errors repetition will never fix.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">تعافَ محليًا من العابر؛ صعّد فقط ما لا يُحل — مع النتائج الجزئية وما جرت محاولته.</span><span class="lang-en">Recover locally from transient; propagate only the unresolvable — with partial results and what was attempted.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">فشل الوصول (مهلة) ليس نتيجة فارغة صالحة (بحث ناجح بلا تطابقات) — لا توسم الفشل نجاحًا أبدًا.</span><span class="lang-en">An access failure (timeout) is not a valid empty result (a successful search with no matches) — never mark failure as success.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="2-1-tool-descriptions.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق · 2.1</span><span class="lang-en">Previous · 2.1</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">تصميم واجهات الأدوات</span><span class="lang-en">Tool interface design</span></p>
+        </div>
+      </a>
+      <a href="2-3-tool-distribution.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · 2.3</span><span class="lang-en">Next · 2.3</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">توزيع الأدوات وtool_choice</span><span class="lang-en">Tool distribution &amp; tool_choice</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

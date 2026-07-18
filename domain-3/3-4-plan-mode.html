@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.4 وضع التخطيط مقابل التنفيذ المباشر — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.4: متى تستخدم plan mode للمهام المعمارية متعددة الملفات، ومتى يكفي التنفيذ المباشر، ودور Explore subagent في عزل مخرجات الاستكشاف الطويلة.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">التخطيط مقابل التنفيذ</span><span class="lang-en">Plan vs direct</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.4</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">وضع التخطيط مقابل التنفيذ المباشر</span>
+            <span class="lang-en">Plan mode vs direct execution</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">أغلى خطأ في المهام الكبيرة هو إعادة العمل — والتخطيط قبل التنفيذ هو التأمين ضده.</span>
+            <span class="lang-en">The costliest mistake on big tasks is rework — and planning before executing is the insurance against it.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">إشارات وضع التخطيط الأربع: تغيير واسع، تعديلات متعددة الملفات، مقاربات متعددة صالحة، قرار معماري</span><span class="lang-en">The four plan-mode signals: large-scale change, multi-file modifications, multiple valid approaches, an architectural decision</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">متى يكون التنفيذ المباشر هو الصح: تغيير مفرد واضح النطاق (إصلاح بستاك تريس واضح، شرط تحقق تاريخ واحد)</span><span class="lang-en">When direct execution is right: a single well-scoped change (a clear stack-trace fix, one date-validation conditional)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">كيف يتيح التخطيط استكشافاً آمناً وتصميماً قبل الالتزام بأي تعديل — فيمنع إعادة العمل المكلفة</span><span class="lang-en">How plan mode enables safe exploration and design before committing to changes — preventing costly rework</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">استخدام <span dir="ltr" class="font-mono">Explore subagent</span> لعزل مخرجات الاستكشاف الطويلة وإرجاع ملخصات تحمي نافذة السياق</span><span class="lang-en">Using the <span class="font-mono">Explore</span> subagent to isolate verbose discovery output and return context-preserving summaries</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100 md:col-span-2">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">النمط المركّب: وضع التخطيط للتحقيق والتصميم، ثم التنفيذ المباشر لتطبيق الخطة (مثل ترحيل مكتبة عبر 45+ ملفاً)</span><span class="lang-en">The combined pattern: plan mode for investigation and design, then direct execution to apply the plan (e.g. a 45+ file library migration)</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: the decision ===== -->
+    <section id="decision" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="git-fork" class="w-5 h-5"></i></span>
+        <span class="lang-ar">القرار: كم من المجهول أمامك؟</span>
+        <span class="lang-en">The decision: how much is unknown?</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p><strong>وضع التخطيط (<span dir="ltr" class="font-mono">plan mode</span>)</strong> مصمَّم للمهام المعقّدة: تغييرات واسعة النطاق، <strong>مقاربات متعددة كلها صالحة</strong> وتحتاج مفاضلة، قرارات معمارية (حدود خدمات، اختيار بنية تكامل)، وتعديلات تمس ملفات كثيرة. فيه يستكشف Claude الكود ويفهم التبعيات ويصمم الحل <strong>قبل</strong> الالتزام بأي تعديل — فلا تكتشف بعد 30 ملفاً معدلاً أن الأساس الذي بنيت عليه خاطئ.</p>
+        <p><strong>التنفيذ المباشر (<span dir="ltr" class="font-mono">direct execution</span>)</strong> هو الصح للتغييرات البسيطة الواضحة: إصلاح خطأ في ملف واحد له <span dir="ltr" class="font-mono">stack trace</span> يشير للسطر، إضافة شرط تحقق تاريخ واحد لدالة، إعادة تسمية. التخطيط هنا بيروقراطية تبطئك بلا مقابل.</p>
+        <p>السؤال الفيصل ليس «هل المهمة كبيرة؟» بل <strong>«هل توجد قرارات تصميم لم تُحسم بعد؟»</strong> — إن وُجدت، خطّط أولاً.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p><strong>Plan mode</strong> is designed for complex tasks: large-scale changes, <strong>multiple valid approaches</strong> needing a tradeoff, architectural decisions (service boundaries, integration-approach selection), and modifications touching many files. In it, Claude explores the code, understands dependencies, and designs the solution <strong>before</strong> committing to any change — so you never discover, 30 modified files in, that the foundation was wrong.</p>
+        <p><strong>Direct execution</strong> is right for simple, well-scoped changes: a single-file bug with a <span class="font-mono">stack trace</span> pointing at the line, adding one date-validation conditional to a function, a rename. Planning there is bureaucracy that slows you down for nothing.</p>
+        <p>The deciding question is not "is the task big?" but <strong>"are there design decisions not yet settled?"</strong> — if there are, plan first.</p>
+      </div>
+
+      <!-- DIAGRAM 1: decision tree -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: شجرة قرار «أي وضع؟»</span><span class="lang-en">Diagram: the "which mode?" decision tree</span></div>
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-2">
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center">
+            <span class="font-mono text-xs font-bold text-surface-700">Architectural decision involved? (service boundaries, integration approach)</span>
+          </div>
+          <div class="flex items-center justify-center gap-8 text-[11px] font-mono">
+            <span class="text-violet-600 flex items-center gap-1">yes <i data-lucide="corner-down-right" class="w-3.5 h-3.5"></i> PLAN</span>
+            <span class="text-surface-400 flex items-center gap-1">no <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></span>
+          </div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center">
+            <span class="font-mono text-xs font-bold text-surface-700">Many files affected? (migration across 45+ files, large refactor)</span>
+          </div>
+          <div class="flex items-center justify-center gap-8 text-[11px] font-mono">
+            <span class="text-violet-600 flex items-center gap-1">yes <i data-lucide="corner-down-right" class="w-3.5 h-3.5"></i> PLAN</span>
+            <span class="text-surface-400 flex items-center gap-1">no <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></span>
+          </div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center">
+            <span class="font-mono text-xs font-bold text-surface-700">Multiple valid approaches needing tradeoffs?</span>
+          </div>
+          <div class="flex items-center justify-center gap-8 text-[11px] font-mono">
+            <span class="text-violet-600 flex items-center gap-1">yes <i data-lucide="corner-down-right" class="w-3.5 h-3.5"></i> PLAN</span>
+            <span class="text-surface-400 flex items-center gap-1">no <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i></span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="rounded-xl border-2 border-violet-400 bg-violet-50 p-3 text-center space-y-1">
+              <div class="font-mono text-sm font-bold text-violet-800 flex items-center justify-center gap-1.5"><i data-lucide="map" class="w-4 h-4"></i> PLAN MODE</div>
+              <div class="font-mono text-[11px] text-violet-600">explore + design first, then implement</div>
+            </div>
+            <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-3 text-center space-y-1">
+              <div class="font-mono text-sm font-bold text-emerald-700 flex items-center justify-center gap-1.5"><i data-lucide="zap" class="w-4 h-4"></i> DIRECT EXECUTION</div>
+              <div class="font-mono text-[11px] text-emerald-600">clear scope, one obvious path — just do it</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">أي «نعم» واحدة تكفي لدخول وضع التخطيط؛ ثلاث «لا» متتالية تعني تنفيذاً مباشراً.</span>
+          <span class="lang-en">Any single "yes" is enough for plan mode; three straight "no"s mean direct execution.</span>
+        </p>
+      </div>
+
+      <!-- Examples panels -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="columns-2" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">أمثلة من أسئلة الاختبار الفعلية</span><span class="lang-en">Examples straight from exam-style questions</span></div>
+        <div dir="ltr" class="grid md:grid-cols-2 gap-4">
+          <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-4 space-y-2">
+            <div class="font-mono font-bold text-violet-800 flex items-center gap-2"><i data-lucide="map" class="w-4 h-4"></i> plan mode</div>
+            <ul class="text-sm text-surface-700 space-y-1 list-disc ms-5">
+              <li>monolith → microservices restructuring</li>
+              <li>library migration across 45+ files</li>
+              <li>choosing between integration approaches with different infrastructure requirements</li>
+              <li>service-boundary and module-dependency decisions</li>
+            </ul>
+          </div>
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-4 space-y-2">
+            <div class="font-mono font-bold text-emerald-800 flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4"></i> direct execution</div>
+            <ul class="text-sm text-surface-700 space-y-1 list-disc ms-5">
+              <li>single-file bug fix with a clear stack trace</li>
+              <li>adding a date-validation conditional</li>
+              <li>well-understood change with clear scope</li>
+              <li>rename a variable, tweak a message</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="space-y-3">
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr><th class="p-3 text-start font-semibold">المعيار</th><th class="p-3 text-start font-semibold">plan mode</th><th class="p-3 text-start font-semibold">direct execution</th></tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">حجم التغيير</td><td class="p-3">واسع / متعدد الملفات</td><td class="p-3">صغير / ملف واحد</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">عدد المقاربات الصالحة</td><td class="p-3">متعددة (تحتاج مفاضلة)</td><td class="p-3">واحدة واضحة</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">قرار معماري</td><td class="p-3">نعم</td><td class="p-3">لا</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">خطر إعادة العمل</td><td class="p-3">مرتفع بدون تخطيط</td><td class="p-3">منخفض</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">تكلفة البدء الفوري</td><td class="p-3">اكتشاف التبعيات متأخراً</td><td class="p-3">شبه معدومة</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr><th class="p-3 text-start font-semibold">Criterion</th><th class="p-3 text-start font-semibold">plan mode</th><th class="p-3 text-start font-semibold">direct execution</th></tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Change size</td><td class="p-3">Large / multi-file</td><td class="p-3">Small / single-file</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Valid approaches</td><td class="p-3">Multiple (needs tradeoff)</td><td class="p-3">One clear path</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Architectural decision</td><td class="p-3">Yes</td><td class="p-3">No</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Rework risk</td><td class="p-3">High without planning</td><td class="p-3">Low</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Cost of starting immediately</td><td class="p-3">Dependencies discovered late</td><td class="p-3">Near zero</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></div>
+          <div class="lang-ar text-amber-900/90 text-sm leading-relaxed">لو كان التعقيد <strong>مذكوراً في المتطلبات نفسها</strong> («عشرات الملفات»، «قرارات حدود الخدمات») فخيار «ابدأ مباشراً وبدّل للتخطيط لو ظهر تعقيد غير متوقع» خاطئ منطقياً: التعقيد ليس احتمالاً قد يظهر — هو حقيقة معلنة من السطر الأول. خطّط من البداية.</div>
+          <div class="lang-en text-amber-900/90 text-sm leading-relaxed">If the complexity is <strong>stated in the requirements themselves</strong> ("dozens of files", "service-boundary decisions"), then "start direct and switch to plan mode if unexpected complexity emerges" is logically wrong: the complexity is not a possibility that might appear — it is a declared fact from line one. Plan from the start.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: Explore subagent ===== -->
+    <section id="explore" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="telescope" class="w-5 h-5"></i></span>
+        <span class="lang-ar">Explore subagent: استكشاف بلا استنزاف</span>
+        <span class="lang-en">The Explore subagent: discovery without exhaustion</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>مرحلة الاستكشاف في المهام الكبيرة (قراءة عشرات الملفات لفهم بنية النظام) تنتج مخرجات هائلة: محتويات ملفات، نتائج بحث، تتبع استدعاءات. لو صُبَّت كلها في المحادثة الرئيسية، استنزفت نافذة السياق <em>قبل أن يبدأ التنفيذ أصلاً</em> — وهي مشكلة قاتلة في المهام متعددة المراحل.</p>
+        <p>الحل هو <strong><span dir="ltr" class="font-mono">Explore subagent</span></strong>: وكيل فرعي يتولى الاستكشاف المطوّل في سياقه المعزول، ويعيد للمحادثة الرئيسية <strong>ملخصاً مركّزاً</strong> فقط (البنية، نقاط الدخول، التبعيات الحرجة). التفاصيل الخام تفنى مع سياق الوكيل الفرعي، والمعرفة المقطّرة تبقى.</p>
+        <p>وحدّه بدقة: <span dir="ltr" class="font-mono">Explore</span> <strong>للاستكشاف وإرجاع الملخصات</strong> — ليس أداة تنفيذ. سؤال يقترح «استخدم Explore subagent لتنفيذ الترحيل» يخلط الأدوار عمداً ليصطادك.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>The discovery phase of big tasks (reading dozens of files to understand a system) produces enormous output: file contents, search results, call traces. Poured into the main conversation, it exhausts the context window <em>before implementation even starts</em> — fatal in multi-phase tasks.</p>
+        <p>The answer is the <strong><span class="font-mono">Explore</span> subagent</strong>: a subagent that performs the verbose discovery in its own isolated context and returns only a <strong>focused summary</strong> (structure, entry points, critical dependencies) to the main conversation. The raw detail dies with the subagent's context; the distilled knowledge survives.</p>
+        <p>Define it precisely: <span class="font-mono">Explore</span> is <strong>for discovery and returning summaries</strong> — not an execution tool. A question proposing "use the Explore subagent to execute the migration" mixes the roles deliberately to catch you.</p>
+      </div>
+
+      <!-- DIAGRAM 2: Explore isolation -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="shield" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: عزل الاستكشاف عن السياق الرئيسي</span><span class="lang-en">Diagram: isolating discovery from the main context</span></div>
+        <div dir="ltr" class="flex flex-col md:flex-row items-stretch gap-3">
+          <div class="flex-1 rounded-xl border-2 border-violet-300 bg-violet-50 p-4 space-y-2">
+            <div class="font-mono text-xs font-bold text-violet-800 flex items-center gap-1.5"><i data-lucide="messages-square" class="w-4 h-4"></i> MAIN CONVERSATION (plan mode)</div>
+            <div class="rounded-lg bg-white border border-violet-200 p-2 font-mono text-xs text-surface-600">"map the payment module before we design"</div>
+            <div class="rounded-lg bg-white border border-emerald-300 p-2 font-mono text-xs text-emerald-700">summary: 3 entry points, 2 risky deps, auth coupled to billing</div>
+            <div class="text-xs text-surface-500">window stays free for design + implementation phases</div>
+          </div>
+          <div class="flex md:flex-col items-center justify-center gap-1 text-surface-400 px-1">
+            <i data-lucide="arrow-right" class="w-5 h-5 md:rotate-0 rotate-90"></i>
+            <span class="font-mono text-[10px]">delegate</span>
+            <i data-lucide="arrow-left" class="w-5 h-5 md:rotate-0 rotate-90"></i>
+            <span class="font-mono text-[10px]">summary only</span>
+          </div>
+          <div class="flex-1 rounded-xl border-2 border-dashed border-surface-300 bg-surface-50 p-4 space-y-2">
+            <div class="font-mono text-xs font-bold text-surface-700 flex items-center gap-1.5"><i data-lucide="telescope" class="w-4 h-4"></i> EXPLORE SUBAGENT (isolated)</div>
+            <div class="rounded-lg bg-white border border-surface-200 p-2 font-mono text-xs text-surface-500">read 60 files, grep 40 patterns</div>
+            <div class="rounded-lg bg-white border border-surface-200 p-2 font-mono text-xs text-surface-500">thousands of lines of raw output</div>
+            <div class="text-xs text-surface-500">verbose discovery dies here — never reaches main context</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">الاستكشاف الخام يعيش ويموت داخل الوكيل الفرعي؛ الرئيسية تستلم الخلاصة القابلة للبناء عليها.</span>
+          <span class="lang-en">Raw discovery lives and dies inside the subagent; the main session receives the buildable distillate.</span>
+        </p>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">عبارة «مخرجات الاستكشاف تملأ نافذة السياق قبل مرحلة التنفيذ» في أي سؤال = <span dir="ltr" class="font-mono">Explore subagent</span>. نفس منطق <span dir="ltr" class="font-mono">context: fork</span> في المهارات (درس 3.2): اعزل الطويل، أرجع الخلاصة.</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">"Discovery output filling the context window before the implementation phase" in any question = the <span class="font-mono">Explore</span> subagent. Same logic as <span class="font-mono">context: fork</span> for skills (lesson 3.2): isolate the verbose, return the distilled.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: plan then execute ===== -->
+    <section id="plan-then-execute" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="route" class="w-5 h-5"></i></span>
+        <span class="lang-ar">النمط المركّب: خطّط ثم نفّذ</span>
+        <span class="lang-en">The combined pattern: plan, then execute</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>الوضعان ليسا خصمين — أقوى نمط في المهام الكبيرة يجمعهما بالترتيب: <strong>وضع التخطيط للتحقيق والتصميم</strong> (استكشاف الكود، فهم التبعيات، اختيار المقاربة، كتابة خطة مراجعة)، ثم <strong>التنفيذ المباشر لتطبيق الخطة المعتمدة</strong> خطوة بخطوة. مثال الدليل: ترحيل مكتبة يمس 45+ ملفاً — تخطط للترحيل أولاً (أي API يتغير؟ أي الملفات أولاً؟ ما استراتيجية التراجع؟) ثم تنفّذ المقاربة المخططة بثقة وسرعة.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>The two modes are not rivals — the strongest pattern on big tasks combines them in order: <strong>plan mode for investigation and design</strong> (explore the code, map dependencies, choose the approach, write a reviewable plan), then <strong>direct execution to apply the approved plan</strong> step by step. The guide's example: a library migration touching 45+ files — plan the migration first (which APIs change? which files first? what is the rollback strategy?), then execute the planned approach fast and confidently.</p>
+      </div>
+
+      <!-- 3-step strip -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-3">
+        <div dir="ltr" class="flex items-center justify-center gap-3 flex-wrap">
+          <span class="rounded-lg bg-violet-600 text-white text-xs font-medium px-3 py-2 font-mono">1. plan mode: explore + design</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <span class="rounded-lg bg-surface-700 text-white text-xs font-medium px-3 py-2 font-mono">2. Explore subagent isolates discovery</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <span class="rounded-lg bg-emerald-600 text-white text-xs font-medium px-3 py-2 font-mono">3. direct execution: apply the plan</span>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">التسلسل الكامل لمهمة كبيرة: صمّم، اعزل الاستكشاف، ثم نفّذ الخطة مباشرة.</span>
+          <span class="lang-en">The full big-task sequence: design, isolate discovery, then execute the plan directly.</span>
+        </p>
+      </div>
+
+      <!-- Code: plan output example -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: مخرجات خطة قابلة للمراجعة قبل التنفيذ</span><span class="lang-en">Example: a reviewable plan produced before execution</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown"># Migration plan: date-utils -> temporal-lib (47 files affected)
+
+## Findings (from exploration)
+- 47 files import date-utils; 31 use only format()/parse().
+- 9 files rely on deprecated timezone behavior — need manual review.
+- Test coverage exists for 40/47 call sites.
+
+## Chosen approach (of 2 considered)
+Codemod for the 31 mechanical call sites, manual migration for the 9
+timezone-sensitive files, leave 7 low-risk files for a follow-up PR.
+Rejected: big-bang rewrite (risk concentrated, no incremental rollback).
+
+## Execution order
+1. Add temporal-lib + compatibility shim.       (low risk)
+2. Codemod the 31 mechanical sites, run tests.  (reviewable diff)
+3. Hand-migrate the 9 timezone files, one PR each.
+4. Remove shim + date-utils dependency.
+
+## Rollback: revert shim commit; both libs coexist until step 4.</code></pre>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed">قيمة وضع التخطيط ليست «التفكير البطيء» بل <strong>منع إعادة العمل</strong>: الاستكشاف الآمن قبل الالتزام يكشف التبعيات التي كانت ستفاجئك في منتصف التنفيذ. والحكم يعمل بالاتجاهين — فرض التخطيط على إصلاح سطر واحد خطأ بنفس منطق تخطي التخطيط في إعادة الهيكلة.</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed">Plan mode's value is not "thinking slowly" but <strong>preventing rework</strong>: safe exploration before commitment reveals the dependencies that would have ambushed you mid-execution. And the judgment cuts both ways — forcing plan mode onto a one-line fix is wrong by the same logic as skipping it for a restructuring.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «ابدأ التنفيذ مباشرة ودع التنفيذ يكشف حدود الخدمات طبيعياً». <strong class="text-emerald-700">الصح:</strong> مقامرة بإعادة عمل مكلفة حين تظهر التبعيات متأخرة — الاستكشاف والتصميم أولاً.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "start executing and let implementation reveal the service boundaries naturally." <strong class="text-emerald-700">Reality:</strong> a gamble on costly rework when dependencies surface late — explore and design first.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> «تنفيذ مباشر بتعليمات شاملة مسبقة تحدد بنية كل خدمة بالتفصيل». <strong class="text-emerald-700">الصح:</strong> يفترض أنك تعرف البنية الصحيحة دون أن تستكشف الكود — وهو عين ما يحتاج التحقق.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> "direct execution with comprehensive upfront instructions detailing each service's structure." <strong class="text-emerald-700">Reality:</strong> it assumes you already know the right structure without exploring the code — the very thing that needs verifying.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> استخدام <span dir="ltr" class="font-mono">Explore subagent</span> <em>لتنفيذ</em> التعديلات، أو فرض وضع التخطيط على إصلاح سطر واحد. <strong class="text-emerald-700">الصح:</strong> Explore للاستكشاف والملخصات فقط؛ والإصلاح الواضح ينفَّذ مباشرة.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> using the <span class="font-mono">Explore</span> subagent to <em>execute</em> changes, or forcing plan mode onto a one-line fix. <strong class="text-emerald-700">Reality:</strong> Explore is discovery-and-summary only; a clear fix goes straight to direct execution.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="hard-hat" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: المقاول والمخطط</span><span class="lang-en">Real-life example: the contractor and the blueprint</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>مقاول محترم لا يصبّ أساس فيلا قبل <strong>المخطط الهندسي</strong> (<span dir="ltr" class="font-mono">plan mode</span>): يدرس التربة، يحدد الأحمال، يوازن بين تصميمين — لأن اكتشاف خطأ التصميم بعد صبّ ثلاثة أدوار يعني هدماً وإعادة بناء (إعادة العمل المكلفة). لكن نفس المقاول لا يرسم مخططاً من ثلاثين صفحة <strong>لتبديل مقبض باب</strong> — يبدّله مباشرة (<span dir="ltr" class="font-mono">direct execution</span>).</p>
+              <p>وقبل الترميم الكبير يرسل <strong>مسّاحاً</strong> (<span dir="ltr" class="font-mono">Explore subagent</span>) يمشي على العقار كله ويصوّر كل زاوية — لكنه لا يرمي على طاولتك ألف صورة، بل يسلّمك <strong>تقريراً من صفحة واحدة</strong>: حالة الأساسات، ثلاث نقاط ضعف، توصيتان. المسّاح يستكشف ويلخّص — ولا يبني هو بنفسه شيئاً.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>A serious contractor never pours a villa's foundation before <strong>the blueprint</strong> (<span class="font-mono">plan mode</span>): soil study, load calculations, weighing two designs — because discovering a design flaw three floors in means demolition and rebuild (costly rework). But the same contractor does not draft a thirty-page plan <strong>to replace a door handle</strong> — he just replaces it (<span class="font-mono">direct execution</span>).</p>
+              <p>Before a major renovation he sends a <strong>surveyor</strong> (<span class="font-mono">Explore</span> subagent) to walk the whole property and photograph every corner — but the surveyor does not dump a thousand photos on your desk; he hands you a <strong>one-page report</strong>: foundation condition, three weak points, two recommendations. The surveyor explores and summarizes — he never builds anything himself.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">السؤال الرسمي النموذجي: إعادة هيكلة monolith إلى microservices عبر عشرات الملفات — الجواب دخول وضع التخطيط أولاً.</span><span class="lang-en">The canonical official question: restructuring a monolith into microservices across dozens of files — answered by entering plan mode first.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">سيناريو معكوس: إصلاح ملف واحد بستاك تريس واضح — يختبر أنك لا تبالغ بفرض التخطيط.</span><span class="lang-en">The inverted scenario: a single-file fix with a clear stack trace — testing that you do not over-apply planning.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«مخرجات الاستكشاف تستنزف السياق في مهمة متعددة المراحل» → <span dir="ltr" class="font-mono">Explore subagent</span> يعيد ملخصات.</span><span class="lang-en">"Discovery output exhausting context in a multi-phase task" → the <span class="font-mono">Explore</span> subagent returning summaries.</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«ابدأ مباشراً وبدّل لو ظهر تعقيد» بينما التعقيد معلن في المتطلبات.</span><span class="lang-en">"Start direct, switch if complexity emerges" when the complexity is declared in the requirements.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«تعليمات شاملة مسبقة» تفترض معرفة البنية بلا استكشاف.</span><span class="lang-en">"Comprehensive upfront instructions" assuming the structure is known without exploration.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">إسناد <em>التنفيذ</em> إلى Explore subagent — دوره الاستكشاف والتلخيص فقط.</span><span class="lang-en">Assigning <em>execution</em> to the Explore subagent — its role is discovery and summarization only.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">ترحيل مكتبة مصادقة قديمة إلى بديل حديث سيمس أكثر من 45 ملفاً، وأمامك مقاربتا تكامل مختلفتان لكل منهما متطلبات بنية تحتية مختلفة. كيف تبدأ المهمة في Claude Code؟</span>
+            <span class="lang-en">Migrating a legacy auth library to a modern replacement will touch 45+ files, and there are two integration approaches with different infrastructure requirements. How do you start the task in Claude Code?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">تنفيذ مباشر ملفاً بملف، والمشاكل تظهر وتُحل أولاً بأول</span>
+            <span class="lang-en">Direct execution file by file, solving problems as they appear</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">وضع التخطيط: استكشف الاستخدامات، فاضِل بين المقاربتين، واكتب خطة ترحيل قبل أي تعديل</span>
+            <span class="lang-en">Plan mode: explore the call sites, weigh the two approaches, and write a migration plan before any change</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">اطلب من <span dir="ltr" class="font-mono">Explore subagent</span> تنفيذ الترحيل في سياقه المعزول</span>
+            <span class="lang-en">Ask the <span class="font-mono">Explore</span> subagent to execute the migration in its isolated context</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">ابدأ مباشراً وبدّل لوضع التخطيط لو ظهر تعقيد غير متوقع</span>
+            <span class="lang-en">Start direct and switch to plan mode if unexpected complexity appears</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. الإشارتان حاضرتان بنص السؤال: 45+ ملفاً (متعدد الملفات) ومقاربتان بمتطلبات مختلفة (مفاضلة معمارية) — وضع التخطيط بلا تردد. الخيار A يقامر بإعادة العمل، وC يكلّف Explore بالتنفيذ وهو أداة استكشاف، وD يتجاهل أن التعقيد معلن مسبقاً.</div>
+            <div class="lang-en text-emerald-900">Correct. Both signals sit in the question's text: 45+ files (multi-file) and two approaches with differing requirements (an architectural tradeoff) — plan mode without hesitation. Option A gambles on rework, C assigns execution to Explore (a discovery tool), and D ignores that the complexity is declared upfront.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. 45+ ملفاً + مقاربات متعددة = إشارتا وضع تخطيط صريحتان. «ابدأ وبدّل لاحقاً» فخ متكرر: التعقيد ليس مفاجأة محتملة بل حقيقة مذكورة، وExplore لا ينفّذ تعديلات.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. 45+ files + multiple approaches = two explicit plan-mode signals. "Start and switch later" is the recurring trap: the complexity is a stated fact, not a possible surprise, and Explore never executes changes.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">تقرير خطأ يتضمن <span dir="ltr" class="font-mono">stack trace</span> واضحاً يشير إلى دالة واحدة في ملف واحد: قيمة تاريخ فارغة تكسر التحقق. الإصلاح معروف: إضافة شرط تحقق واحد. كيف تتعامل معه؟</span>
+            <span class="lang-en">A bug report includes a clear <span class="font-mono">stack trace</span> pointing to one function in one file: an empty date value breaks validation. The fix is known: add a single validation conditional. How do you handle it?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">ادخل وضع التخطيط واستكشف كل استخدامات الدالة قبل أي شيء</span>
+            <span class="lang-en">Enter plan mode and explore every usage of the function first</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أرسل <span dir="ltr" class="font-mono">Explore subagent</span> لمسح الوحدة كاملة وإرجاع ملخص أولاً</span>
+            <span class="lang-en">Send the <span class="font-mono">Explore</span> subagent to sweep the whole module and return a summary first</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">تنفيذ مباشر: التغيير مفرد واضح النطاق والمسار محسوم</span>
+            <span class="lang-en">Direct execution: the change is single, well-scoped, and the path is settled</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">اكتب خطة من صفحتين توثّق البدائل قبل إضافة الشرط</span>
+            <span class="lang-en">Write a two-page plan documenting alternatives before adding the conditional</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا حرفياً مثال الدليل للتنفيذ المباشر: إصلاح ملف واحد بستاك تريس واضح، وإضافة شرط تحقق تاريخ. لا قرارات تصميم معلقة، لا ملفات متعددة، لا مقاربات متنافسة — التخطيط هنا (A، D) بيروقراطية، وExplore (B) مدفع لعصفور.</div>
+            <div class="lang-en text-emerald-900">Correct. This is literally the guide's direct-execution example: a single-file fix with a clear stack trace, adding a date-validation conditional. No open design decisions, no multi-file scope, no competing approaches — planning here (A, D) is bureaucracy, and Explore (B) is a cannon for a sparrow.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. الحكم يعمل بالاتجاهين: كما أن تخطي التخطيط في إعادة الهيكلة خطأ، فرضُه على إصلاح واضح النطاق خطأ أيضاً. ستاك تريس واضح + ملف واحد + إصلاح معروف = نفّذ مباشرة.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. The judgment cuts both ways: just as skipping planning on a restructuring is wrong, forcing it onto a well-scoped fix is wrong too. Clear stack trace + one file + known fix = execute directly.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">في مهمة متعددة المراحل على نظام قديم ضخم، مرحلة الاستكشاف وحدها (قراءة عشرات الملفات) تملأ نافذة السياق قبل الوصول لمرحلتي التصميم والتنفيذ. ما المعالجة الصحيحة؟</span>
+            <span class="lang-en">In a multi-phase task on a huge legacy system, the discovery phase alone (reading dozens of files) fills the context window before you ever reach the design and implementation phases. What is the right fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">اقرأ الملفات على دفعات أصغر موزعة على جلسات متعددة منفصلة</span>
+            <span class="lang-en">Read the files in smaller batches across multiple separate sessions</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">تجاوز الاستكشاف واعتمد على معرفة Claude العامة بالأنماط الشائعة</span>
+            <span class="lang-en">Skip discovery and rely on Claude's general knowledge of common patterns</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">نفّذ التعديلات مباشرة أثناء الاستكشاف لتوفير خطوة</span>
+            <span class="lang-en">Execute changes during discovery to save a step</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">فوّض الاستكشاف إلى <span dir="ltr" class="font-mono">Explore subagent</span> يعزل المخرجات الطويلة ويعيد ملخصاً فقط</span>
+            <span class="lang-en">Delegate discovery to the <span class="font-mono">Explore</span> subagent, isolating the verbose output and returning only a summary</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. هذا هو الغرض المنصوص لـ Explore subagent: عزل مرحلة الاستكشاف المطوّلة والحفاظ على السياق الرئيسي للمراحل التالية. تقسيم الجلسات (A) يفتت المعرفة ويعقّد التسليم، وتجاوز الاستكشاف (B) يستبدل الحقائق بالتخمين، والدمج (C) يخلط مرحلتين لكل منهما مخاطرها.</div>
+            <div class="lang-en text-emerald-900">Correct. This is the Explore subagent's stated purpose: isolating the verbose discovery phase to preserve main context for later phases. Splitting sessions (A) fragments the knowledge and complicates handoff, skipping discovery (B) replaces facts with guessing, and merging (C) mixes two phases that each carry their own risks.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>D</strong>. «استكشاف طويل يستنزف السياق في مهمة متعددة المراحل» هي الإشارة المعيارية لتفويض Explore subagent — المخرجات الخام تبقى في سياقه، والملخص القابل للبناء عليه يعود لك.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>D</strong>. "Verbose discovery exhausting context in a multi-phase task" is the canonical cue for delegating to the Explore subagent — raw output stays in its context, and the buildable summary comes back to you.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">إشارات التخطيط: تغيير واسع، ملفات متعددة (45+)، مقاربات متعددة، قرار معماري — أي واحدة تكفي.</span><span class="lang-en">Plan signals: large-scale change, many files (45+), multiple approaches, an architectural decision — any one suffices.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">تغيير مفرد واضح النطاق (ستاك تريس واضح، شرط تحقق واحد) = تنفيذ مباشر بلا مراسم.</span><span class="lang-en">A single well-scoped change (clear stack trace, one validation conditional) = direct execution, no ceremony.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">التعقيد المذكور في المتطلبات يعني التخطيط من البداية — «بدّل لاحقاً» فخ.</span><span class="lang-en">Complexity stated in the requirements means planning from the start — "switch later" is a trap.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar"><span dir="ltr" class="font-mono">Explore subagent</span> يعزل الاستكشاف الطويل ويعيد ملخصاً — ولا ينفّذ تعديلات أبداً.</span><span class="lang-en">The <span class="font-mono">Explore</span> subagent isolates verbose discovery and returns a summary — it never executes changes.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">النمط الأقوى للمهام الكبيرة: خطّط (تحقيق وتصميم) ثم نفّذ مباشرة (تطبيق الخطة).</span><span class="lang-en">The strongest big-task pattern: plan (investigate and design), then execute directly (apply the plan).</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="3-3-path-rules.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.3 القواعد الخاصة بالمسارات</span>
+            <span class="lang-en">3.3 Path-specific rules</span>
+          </div>
+        </div>
+      </a>
+      <a href="3-5-iterative-refinement.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.5 التحسين التكراري</span>
+            <span class="lang-en">3.5 Iterative refinement</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

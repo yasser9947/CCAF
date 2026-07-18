@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.5 التحسين التكراري — CCAF مرجع</title>
+  <meta name="description" content="درس CCAF 3.5: التحسين التكراري مع Claude Code — أمثلة input/output الملموسة، التكرار المقاد بالاختبارات، نمط المقابلة، ومتى تجمع الإصلاحات في رسالة واحدة أو تفرّقها بالتتابع.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-violet-900 via-violet-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-4 py-8 md:py-10 space-y-4">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-violet-200 flex-wrap" aria-label="Breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <span class="text-violet-400">/</span>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 3</span><span class="lang-en">Domain 3</span></a>
+        <span class="text-violet-400">/</span>
+        <span class="text-white font-medium"><span class="lang-ar">التحسين التكراري</span><span class="lang-en">Iterative refinement</span></span>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <span class="shrink-0 w-14 h-14 rounded-2xl bg-white/10 border border-white/20 text-white font-bold font-mono flex items-center justify-center text-lg">3.5</span>
+        <div class="space-y-1 min-w-0">
+          <h1 class="text-2xl md:text-3xl font-bold text-balance leading-tight">
+            <span class="lang-ar">التحسين التكراري</span>
+            <span class="lang-en">Iterative refinement</span>
+          </h1>
+          <p class="text-violet-200 text-sm md:text-base">
+            <span class="lang-ar">النتيجة الممتازة نادراً ما تجي من أول برومبت — تجي من تكرار ذكي: أمثلة تحسم، اختبارات تقود، وأسئلة تكشف ما لم تفكر فيه.</span>
+            <span class="lang-en">Great results rarely come from the first prompt — they come from smart iteration: examples that pin down, tests that steer, and questions that surface what you had not considered.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-checks" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+        </div>
+        <ul class="grid md:grid-cols-2 gap-2.5 text-sm text-surface-700">
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">تقديم 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span> ملموسة حين يُفسَّر الوصف النثري بشكل غير متسق</span><span class="lang-en">Providing 2–3 concrete <span class="font-mono">input/output</span> examples when prose descriptions are interpreted inconsistently</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">التكرار المقاد بالاختبارات: كتابة الاختبارات أولاً (سلوك، حالات حدية، أداء) ثم مشاركة الاختبارات الفاشلة لتوجيه التحسين</span><span class="lang-en">Test-driven iteration: writing the tests first (behavior, edge cases, performance) then sharing failing tests to steer improvement</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">نمط المقابلة: جعل Claude يسألك قبل التنفيذ ليكشف اعتبارات لم تتوقعها (إبطال الكاش، أنماط الفشل)</span><span class="lang-en">The interview pattern: having Claude question you before implementing, surfacing considerations you did not anticipate (cache invalidation, failure modes)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">إصلاح الحالات الحدية بحالة اختبار محددة: مدخل مثال + مخرج متوقع (مثل قيم <span dir="ltr" class="font-mono">null</span> في سكربتات الترحيل)</span><span class="lang-en">Fixing edge cases with a specific test case: example input + expected output (e.g. <span class="font-mono">null</span> values in migration scripts)</span></div>
+          </li>
+          <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-3.5 border border-surface-100 md:col-span-2">
+            <i data-lucide="check" class="w-4 h-4 text-violet-600 shrink-0 mt-0.5"></i>
+            <div><span class="lang-ar">قرار الرسالة الواحدة مقابل التتابع: المشكلات <strong>المتشابكة</strong> في رسالة واحدة مفصّلة، و<strong>المستقلة</strong> واحدة تلو الأخرى</span><span class="lang-en">The single-message vs sequential decision: <strong>interacting</strong> problems in one detailed message, <strong>independent</strong> ones one at a time</span></div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: examples beat prose ===== -->
+    <section id="examples" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="file-input" class="w-5 h-5"></i></span>
+        <span class="lang-ar">الأمثلة تحسم ما يعجز عنه النثر</span>
+        <span class="lang-en">Examples pin down what prose cannot</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>حين تصف تحويلاً بالكلمات («نظّف الحقول بشكل معقول») ويعود التنفيذ مختلفاً كل مرة، الغريزة الشائعة هي <em>تقوية النثر</em>: «نظّف الحقول <strong>بدقة شديدة ودائماً</strong>». هذه الغريزة خاطئة — الصفات لا تحسم الغموض، <strong>الأمثلة تحسمه</strong>.</p>
+        <p>الدليل الرسمي صريح: <strong>2–3 أمثلة <span dir="ltr" class="font-mono">input → output</span> ملموسة هي أنجع وسيلة لتوصيل التحويل المتوقع</strong> حين يُفسَّر الوصف النثري بشكل غير متسق. المثال يجيب دفعة واحدة عن كل الأسئلة التي كان النثر يتركها مفتوحة: كيف تُعالج المسافات؟ ماذا عن الأرقام بصيغ مختلفة؟ وماذا نفعل بالمدخل الفارغ؟</p>
+        <p>ونفس المبدأ ينطبق على إصلاح الحالات الحدية: قيمة <span dir="ltr" class="font-mono">null</span> تكسر سكربت الترحيل؟ لا تكتفِ بـ«عالج الحالات الفارغة» — أعطِ <strong>حالة اختبار محددة</strong>: هذا المدخل بالضبط، وهذا المخرج المتوقع بالضبط.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>When you describe a transformation in words ("clean up the fields sensibly") and the implementation comes back different every time, the common instinct is to <em>strengthen the prose</em>: "clean the fields <strong>very precisely, always</strong>." That instinct is wrong — adjectives do not resolve ambiguity, <strong>examples do</strong>.</p>
+        <p>The official guide is explicit: <strong>2–3 concrete <span class="font-mono">input → output</span> examples are the most effective way to communicate an expected transformation</strong> when prose is interpreted inconsistently. One example answers, in a single stroke, every question prose left open: how is whitespace handled? What about numbers in mixed formats? And what happens to an empty input?</p>
+        <p>The same principle fixes edge cases: a <span class="font-mono">null</span> value breaking your migration script? Do not settle for "handle empty cases" — give a <strong>specific test case</strong>: exactly this input, exactly this expected output.</p>
+      </div>
+
+      <!-- Code: examples beat prose -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: تثبيت التحويل بأمثلة بدل الصفات</span><span class="lang-en">Example: pinning the transformation with examples, not adjectives</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-markdown !bg-surface-900 scrollbar-thin"><code class="language-markdown"># Task: normalize customer records
+
+Prose alone ("clean up the fields sensibly") is read inconsistently.
+Pin it down with concrete input -> output examples:
+
+## Examples
+1. "  Ahmed  Al-Otaibi "          ->  "Ahmed Al-Otaibi"
+2. "MOBILE: 0555-123-456"         ->  "+966555123456"
+3. ""             (empty input)   ->  null   # never invent a value
+
+## Edge case found later? Report it the same way:
+- Input:    {"joined": null}
+- Expected: {"joined": null}     # keep null, do NOT default to today
+- Actual:   crash in migrate.py line 41</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-sky-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></div>
+          <div class="lang-ar text-sky-900/90 text-sm leading-relaxed">سؤال فيه «نتائج غير متسقة رغم وصف مفصّل» جوابه شبه المؤكد: <strong>أضف أمثلة ملموسة</strong> — لا «أعد صياغة الوصف بحزم أكبر» ولا «كرر التعليمات».</div>
+          <div class="lang-en text-sky-900/90 text-sm leading-relaxed">A question featuring "inconsistent results despite a detailed description" is almost certainly answered by <strong>add concrete examples</strong> — never "reword the description more forcefully" or "repeat the instructions."</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: test-driven iteration ===== -->
+    <section id="test-driven" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="flask-conical" class="w-5 h-5"></i></span>
+        <span class="lang-ar">التكرار المقاد بالاختبارات</span>
+        <span class="lang-en">Test-driven iteration</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>بدل أن «تشعر» أن الحل تحسّن، اجعل التحسّن <strong>قابلاً للقياس</strong>: اكتب مجموعة اختبارات <em>قبل</em> التنفيذ تغطي السلوك المتوقع والحالات الحدية ومتطلبات الأداء، ثم كرّر بحلقة واضحة — شغّل الاختبارات، <strong>شارك الفاشل منها</strong> مع Claude، خذ الإصلاح، وأعد التشغيل حتى الأخضر الكامل. الاختبار الفاشل هو أدق «مثال ملموس» ممكن: مدخل محدد ومخرج متوقع وفجوة موثقة بينهما.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>Instead of "feeling" that the solution improved, make improvement <strong>measurable</strong>: write a test suite <em>before</em> implementation covering expected behavior, edge cases, and performance requirements, then iterate in a tight loop — run the tests, <strong>share the failing ones</strong> with Claude, take the fix, rerun until fully green. A failing test is the most precise "concrete example" possible: a specific input, an expected output, and a documented gap between them.</p>
+      </div>
+
+      <!-- DIAGRAM 1: test-driven loop -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: حلقة التكرار المقادة بالاختبارات</span><span class="lang-en">Diagram: the test-driven iteration loop</span></div>
+        <div dir="ltr" class="flex flex-wrap items-center justify-center gap-2">
+          <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-3 text-center min-w-[130px]">
+            <div class="font-mono text-xs font-bold text-violet-800">1. WRITE TESTS FIRST</div>
+            <div class="font-mono text-[10px] text-violet-600">behavior + edges + perf</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center min-w-[130px]">
+            <div class="font-mono text-xs font-bold text-surface-700">2. CLAUDE IMPLEMENTS</div>
+            <div class="font-mono text-[10px] text-surface-500">first attempt</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-red-300 bg-red-50 p-3 text-center min-w-[130px]">
+            <div class="font-mono text-xs font-bold text-red-700">3. RUN: 2 FAIL</div>
+            <div class="font-mono text-[10px] text-red-500">share FAILURES verbatim</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 text-center min-w-[130px]">
+            <div class="font-mono text-xs font-bold text-surface-700">4. CLAUDE FIXES</div>
+            <div class="font-mono text-[10px] text-surface-500">guided by failures</div>
+          </div>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400"></i>
+          <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-3 text-center min-w-[130px]">
+            <div class="font-mono text-xs font-bold text-emerald-700">5. ALL GREEN</div>
+            <div class="font-mono text-[10px] text-emerald-600">measurably done</div>
+          </div>
+        </div>
+        <div dir="ltr" class="flex items-center justify-center gap-2 text-surface-400">
+          <i data-lucide="corner-left-up" class="w-4 h-4"></i>
+          <span class="font-mono text-[11px]">steps 3-4 repeat until green — each failure steers the next fix</span>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">الاختبارات تُكتب قبل التنفيذ، والفشل يُشارك حرفياً — فيصبح كل تكرار موجّهاً لا عشوائياً.</span>
+          <span class="lang-en">Tests are written before implementation and failures are shared verbatim — every iteration is steered, never random.</span>
+        </p>
+      </div>
+
+      <!-- Code: failing test share -->
+      <div class="space-y-2">
+        <div class="text-xs font-semibold text-surface-500 uppercase tracking-wide"><span class="lang-ar">مثال: مشاركة الفشل الموجِّه للتكرار التالي</span><span class="lang-en">Example: sharing the failure that steers the next iteration</span></div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 end-2 z-10 flex items-center justify-center w-8 h-8 rounded-lg bg-surface-700/70 text-surface-200 hover:bg-surface-600 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity" aria-label="Copy code">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+          </button>
+          <pre class="language-python !bg-surface-900 scrollbar-thin"><code class="language-python"># tests written BEFORE implementation
+def test_normalize_phone():
+    assert normalize_phone("0555-123-456") == "+966555123456"
+
+def test_null_joined_date_preserved():
+    # edge case: null must stay null, never default to today
+    assert migrate_record({"joined": None})["joined"] is None
+
+# iteration message to Claude after a run:
+#   "2 tests fail. test_null_joined_date_preserved:
+#    expected None, got '2026-07-18'. Fix WITHOUT breaking
+#    test_normalize_phone (currently passing)."</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: interview pattern ===== -->
+    <section id="interview" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="messages-square" class="w-5 h-5"></i></span>
+        <span class="lang-ar">نمط المقابلة: خلّ Claude يسألك أولاً</span>
+        <span class="lang-en">The interview pattern: let Claude question you first</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>حين تبني في مجال لا تعرفه جيداً، أخطر ما في طلبك ليس ما كتبته — بل <strong>ما لم يخطر لك أن تكتبه</strong>. نمط المقابلة يقلب الاتجاه: قبل التنفيذ، اطلب من Claude أن <strong>يطرح عليك أسئلة</strong> تكشف الاعتبارات الغائبة عن ذهنك.</p>
+        <p>مثال الدليل: تطلب «طبقة كاش للاستعلامات المتكررة»، فيسألك Claude قبل كتابة أي سطر: ما <strong>استراتيجية إبطال الكاش</strong> (<span dir="ltr" class="font-mono">cache invalidation</span>) عند تغيّر البيانات؟ ماذا يحدث عند <strong>فشل مخزن الكاش</strong> — نعود للمصدر أم نفشل الطلب؟ هل النتائج المتقادمة مقبولة ولأي مدة؟ كل سؤال من هذه يوفّر عليك اكتشاف الثغرة في الإنتاج.</p>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>When building in a domain you do not know well, the most dangerous part of your request is not what you wrote — it is <strong>what never occurred to you to write</strong>. The interview pattern flips the direction: before implementing, ask Claude to <strong>interview you</strong>, surfacing the considerations missing from your head.</p>
+        <p>The guide's example: you ask for "a cache layer for repeated queries," and before writing a line Claude asks: what is the <strong>cache invalidation strategy</strong> when data changes? What happens on a <strong>cache-store failure</strong> — fall back to the source or fail the request? Are stale results acceptable, and for how long? Each of those questions saves you discovering the gap in production.</p>
+      </div>
+
+      <!-- DIAGRAM 2: interview flow -->
+      <div class="rounded-2xl border border-surface-200 bg-white p-6 space-y-4">
+        <div class="text-sm font-semibold text-surface-600 flex items-center gap-2"><i data-lucide="message-circle-question" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">المخطط: تدفق نمط المقابلة</span><span class="lang-en">Diagram: the interview pattern flow</span></div>
+        <div dir="ltr" class="space-y-2 max-w-2xl mx-auto">
+          <div class="rounded-xl border-2 border-violet-300 bg-violet-50 p-3">
+            <div class="font-mono text-xs font-bold text-violet-800">DEVELOPER BRIEF</div>
+            <div class="font-mono text-[11px] text-surface-600">"Add a caching layer for repeated queries. Interview me before implementing."</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i></div>
+          <div class="rounded-xl border-2 border-surface-300 bg-surface-50 p-3 space-y-1.5">
+            <div class="font-mono text-xs font-bold text-surface-700">CLAUDE ASKS (before any code)</div>
+            <div class="rounded-md bg-white border border-surface-200 px-2 py-1 font-mono text-[11px] text-surface-600">Q1: invalidation strategy when data changes?</div>
+            <div class="rounded-md bg-white border border-surface-200 px-2 py-1 font-mono text-[11px] text-surface-600">Q2: behavior on cache-store failure?</div>
+            <div class="rounded-md bg-white border border-surface-200 px-2 py-1 font-mono text-[11px] text-surface-600">Q3: how stale may results get?</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i></div>
+          <div class="rounded-xl border-2 border-sky-300 bg-sky-50 p-3">
+            <div class="font-mono text-xs font-bold text-sky-800">DEVELOPER ANSWERS</div>
+            <div class="font-mono text-[11px] text-surface-600">TTL 5 min + explicit purge on write; fall back to source; stale OK for reads</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i></div>
+          <div class="rounded-xl border-2 border-emerald-400 bg-emerald-50 p-3">
+            <div class="font-mono text-xs font-bold text-emerald-700">IMPLEMENTATION — informed by answers</div>
+            <div class="font-mono text-[11px] text-emerald-600">edge cases designed in from the start, not discovered in production</div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center">
+          <span class="lang-ar">الأسئلة قبل الكود: القرارات الغائبة تُحسم في المقابلة، لا في حادثة إنتاج.</span>
+          <span class="lang-en">Questions before code: the missing decisions get settled in the interview, not in a production incident.</span>
+        </p>
+      </div>
+
+      <!-- Tip -->
+      <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 flex items-start gap-3">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-emerald-900"><span class="lang-ar">نصيحة</span><span class="lang-en">Tip</span></div>
+          <div class="lang-ar text-emerald-900/90 text-sm leading-relaxed">أقوى توقيت لنمط المقابلة: <strong>مجال غير مألوف لك</strong>. لو كنت خبيراً بالكاش، غالباً كتبت المتطلبات كاملة من البداية — لكن في أرض جديدة، أسئلة Claude هي خبرتك المستعارة.</div>
+          <div class="lang-en text-emerald-900/90 text-sm leading-relaxed">The interview pattern's highest-value moment: <strong>a domain unfamiliar to you</strong>. A caching expert would have written the full requirements upfront — but on new ground, Claude's questions are your borrowed expertise.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: single vs sequential ===== -->
+    <section id="single-vs-sequential" class="scroll-mt-24 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="w-9 h-9 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="list-ordered" class="w-5 h-5"></i></span>
+        <span class="lang-ar">رسالة واحدة أم تتابع؟</span>
+        <span class="lang-en">One message or sequential?</span>
+      </h2>
+
+      <div class="lang-ar leading-relaxed text-surface-700 space-y-3">
+        <p>عندك عدة مشاكل تريد إصلاحها — هل ترميها كلها في رسالة واحدة أم تعالجها واحدة واحدة؟ المعيار هو <strong>التشابك</strong>:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>مشكلات متشابكة</strong> (إصلاح إحداها يؤثر على الأخرى — مثل خلل أداء وخلل صحة نتائج في نفس الدالة): <strong>رسالة واحدة مفصّلة</strong> تعرضها معاً، ليرى Claude التفاعل بينها ويوازن الحل بدل أن يكسر بإصلاحٍ ما أصلحه قبله.</li>
+          <li><strong>مشكلات مستقلة</strong> (لا أثر متبادل — خطأ إملائي في رسالة، وخلل في وحدة أخرى): <strong>تكرار متتابع</strong>، مشكلة فمراجعة فمشكلة — أوضح وأسهل للتحقق خطوة بخطوة.</li>
+        </ul>
+      </div>
+      <div class="lang-en leading-relaxed text-surface-700 space-y-3">
+        <p>You have several problems to fix — dump them all in one message, or handle them one at a time? The criterion is <strong>interaction</strong>:</p>
+        <ul class="list-disc ms-6 space-y-1.5">
+          <li><strong>Interacting problems</strong> (fixing one affects another — say a performance flaw and a correctness flaw in the same function): <strong>one detailed message</strong> presenting them together, so Claude sees the interplay and balances the fix instead of breaking with one repair what the previous repair achieved.</li>
+          <li><strong>Independent problems</strong> (no mutual effect — a typo in one message, a flaw in another module): <strong>sequential iteration</strong>, fix then verify then next — clearer and easier to check step by step.</li>
+        </ul>
+      </div>
+
+      <!-- Comparison table -->
+      <div class="space-y-3">
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr><th class="p-3 text-start font-semibold">نوع المشكلات</th><th class="p-3 text-start font-semibold">الأسلوب</th><th class="p-3 text-start font-semibold">لماذا</th></tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">متشابكة (إصلاح يؤثر على الآخر)</td><td class="p-3">رسالة واحدة مفصّلة</td><td class="p-3">ليرى Claude التفاعل ويوازن الحلول معاً</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مستقلة (لا تأثير متبادل)</td><td class="p-3">تكرار متتابع</td><td class="p-3">أوضح، وكل خطوة تُتحقق قبل التالية</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr><th class="p-3 text-start font-semibold">Problem type</th><th class="p-3 text-start font-semibold">Approach</th><th class="p-3 text-start font-semibold">Why</th></tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Interacting (one fix affects another)</td><td class="p-3">Single detailed message</td><td class="p-3">So Claude sees the interplay and balances the fixes together</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Independent (no cross-effect)</td><td class="p-3">Sequential iteration</td><td class="p-3">Clearer, and each step is verified before the next</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Key concept -->
+      <div class="rounded-2xl border border-brand-200 bg-brand-50 p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="font-semibold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></div>
+          <div class="lang-ar text-brand-900/90 text-sm leading-relaxed">تقنيات هذا الدرس كلها تطبيق لفكرة واحدة: <strong>حوّل الغموض إلى حقائق قابلة للفحص</strong> — مثال يثبّت التحويل، اختبار فاشل يثبّت الفجوة، سؤال مقابلة يثبّت القرار الغائب، ورسالة مجمّعة تثبّت التفاعل بين الإصلاحات.</div>
+          <div class="lang-en text-brand-900/90 text-sm leading-relaxed">Every technique in this lesson applies one idea: <strong>turn ambiguity into checkable facts</strong> — an example pins the transformation, a failing test pins the gap, an interview question pins the missing decision, and a combined message pins the interaction between fixes.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="rounded-2xl border border-red-200 bg-red-50/60 p-5 space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> نتائج التحويل غير متسقة → «أعد صياغة الوصف بكلمات أقوى وأكثر تفصيلاً». <strong class="text-emerald-700">الصح:</strong> 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span> ملموسة — الأمثلة تحسم، لا النثر.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> inconsistent transformation results → "reword the description more forcefully and in more detail." <strong class="text-emerald-700">Reality:</strong> 2–3 concrete <span class="font-mono">input/output</span> examples — examples decide it, not prose.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> رمي مشكلات متشابكة في رسائل متفرقة متتابعة (فيُصلح Claude واحدة ويكسر أخرى). <strong class="text-emerald-700">الصح:</strong> المتشابكة معاً في رسالة واحدة مفصّلة؛ المستقلة فقط تُعالج بالتتابع.</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> feeding interacting problems through separate sequential messages (so Claude fixes one and breaks another). <strong class="text-emerald-700">Reality:</strong> interacting issues go together in one detailed message; only independent ones go sequentially.</div>
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <div>
+              <div class="lang-ar text-surface-700"><strong class="text-red-700">الفخ:</strong> حالة حدية تكسر السكربت → «اطلب معالجة كل الحالات الغريبة بحذر». <strong class="text-emerald-700">الصح:</strong> حالة اختبار محددة بمدخل مثال ومخرج متوقع (قيمة <span dir="ltr" class="font-mono">null</span> بعينها وما يجب أن يحدث لها).</div>
+              <div class="lang-en text-surface-700"><strong class="text-red-700">Trap:</strong> an edge case breaks the script → "ask it to handle all strange cases carefully." <strong class="text-emerald-700">Reality:</strong> a specific test case with an example input and expected output (the exact <span class="font-mono">null</span> value and what must happen to it).</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-24">
+      <div class="bg-gradient-to-bl from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+        <div class="flex items-start gap-4">
+          <span class="shrink-0 w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center"><i data-lucide="scissors" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg"><span class="lang-ar">مثال من الحياة: الخياط الشاطر</span><span class="lang-en">Real-life example: the master tailor</span></h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>تطلب ثوباً «مريحاً وأنيقاً» — كلام فضفاض يفسّره كل خياط بمزاجه. الخياط الشاطر يطلب منك <strong>ثوبك المفضل القديم</strong> ليقيس عليه: هذا هو المثال الملموس (<span dir="ltr" class="font-mono">input/output example</span>) الذي يحسم ما عجزت الكلمات عنه.</p>
+              <p>ثم لا يخيط الثوب كاملاً ويسلّمك إياه — بل يشلّخه بالدبابيس وتجرّبه <strong>قبل</strong> الخياطة النهائية، وكل ملاحظة («الكم أطول بسنتيمترين») هي اختبار فاشل محدد يوجّه التعديل التالي (التكرار المقاد بالاختبارات). والخياط الممتاز أصلاً <strong>يسألك قبل أن يقص القماش</strong>: للصيف أم للشتاء؟ للدوام أم للمناسبات؟ تكوي بنفسك أم بالمغسلة؟ — أسئلة تكشف قرارات ما كانت في بالك (نمط المقابلة). وأخيراً: لو قلت «وسّع الصدر وضيّق الخصر» فهذان تعديلان متشابكان يُنفَّذان معاً في جلسة واحدة — لا كل واحد في زيارة منفصلة تنقض ما قبلها.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-2 text-[15px]">
+              <p>You ask for a thobe that is "comfortable and elegant" — loose words every tailor interprets his own way. The master tailor asks for <strong>your favorite old thobe</strong> to measure against: that is the concrete <span class="font-mono">input/output example</span> deciding what words never could.</p>
+              <p>He also does not sew the whole garment and hand it over — he pins it and has you try it on <strong>before</strong> final stitching, and every note ("sleeve two centimeters long") is a specific failing test steering the next adjustment (test-driven iteration). The excellent tailor even <strong>questions you before cutting the fabric</strong>: summer or winter? Office or occasions? Home-ironed or dry-cleaned? — questions surfacing decisions you had not considered (the interview pattern). Finally: "widen the chest and take in the waist" are two interacting alterations done together in one sitting — not in separate visits where each undoes the last.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-24">
+      <div class="bg-white rounded-2xl border-2 border-violet-200 p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4 text-violet-600"></i><span class="lang-ar">كيف يجي السؤال</span><span class="lang-en">How it is asked</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«الوصف مفصّل لكن النتائج غير متسقة» → أضف 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span>.</span><span class="lang-en">"The description is detailed but results are inconsistent" → add 2–3 <span class="font-mono">input/output</span> examples.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«كيف تضمن تحسناً قابلاً للقياس؟» → اختبارات أولاً ثم شارك الفشل. «مجال غير مألوف؟» → نمط المقابلة.</span><span class="lang-en">"How do you guarantee measurable improvement?" → tests first, then share failures. "Unfamiliar domain?" → the interview pattern.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="chevron-left" class="w-3.5 h-3.5 mt-1 text-violet-400 shrink-0 ltr:rotate-180"></i><div><span class="lang-ar">«عدة مشاكل — رسالة واحدة أم تتابع؟» → اسأل نفسك أولاً: هل تتفاعل الإصلاحات؟</span><span class="lang-en">"Several problems — one message or sequential?" → first ask: do the fixes interact?</span></div></li>
+            </ul>
+          </div>
+          <div class="space-y-2">
+            <div class="font-semibold text-surface-900 flex items-center gap-2"><i data-lucide="ban" class="w-4 h-4 text-red-500"></i><span class="lang-ar">إجابات فخ تستبعدها فوراً</span><span class="lang-en">Trap answers to eliminate</span></div>
+            <ul class="space-y-2 text-surface-700">
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«أعد الصياغة بحزم أكبر / أضف تحذيرات بالخط العريض» — نثر إضافي لمشكلة يحلها مثال.</span><span class="lang-en">"Reword more forcefully / add bold warnings" — extra prose for a problem an example solves.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">«اكتب الكود أولاً ثم أضف الاختبارات لاحقاً» حين يسأل عن التكرار المقاد بالاختبارات.</span><span class="lang-en">"Write the code first, add tests later" when the question targets test-driven iteration.</span></div></li>
+              <li class="flex items-start gap-2"><i data-lucide="x" class="w-3.5 h-3.5 mt-1 text-red-400 shrink-0"></i><div><span class="lang-ar">قاعدة عمياء «دائماً رسالة واحدة» أو «دائماً بالتتابع» — المعيار هو تشابك المشكلات.</span><span class="lang-en">A blind "always one message" or "always sequential" rule — the criterion is whether the problems interact.</span></div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-24 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i data-lucide="pencil" class="w-5 h-5"></i></span>
+        <h2 class="text-xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+      </div>
+
+      <!-- Compact tracker -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-4 flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2 text-sm">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+          <span class="font-bold font-mono text-surface-900"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-surface-500">
+          <span class="lang-ar">أجبت:</span><span class="lang-en">Answered:</span>
+          <span class="font-bold font-mono text-surface-900" id="answered">0</span>
+        </div>
+        <div class="flex-1 min-w-[120px] h-2 bg-surface-100 rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-violet-500 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">1</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">طلبت من Claude تحويل تواريخ من صيغ متعددة إلى <span dir="ltr" class="font-mono">ISO 8601</span> بوصف نثري مفصّل، لكن كل تشغيل يعالج الصيغ الغامضة (مثل <span dir="ltr" class="font-mono">03/04/2026</span>) بطريقة مختلفة. ما التحسين الأنجع؟</span>
+            <span class="lang-en">You asked Claude to convert dates from multiple formats to <span class="font-mono">ISO 8601</span> with a detailed prose description, but each run handles ambiguous formats (like <span class="font-mono">03/04/2026</span>) differently. What is the most effective improvement?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أعد كتابة الوصف بصياغة أكثر حزماً مع كلمات مثل «دائماً» و«بدقة»</span>
+            <span class="lang-en">Rewrite the description more forcefully with words like "always" and "precisely"</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أضف 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span> ملموسة تغطي الصيغ الغامضة تحديداً</span>
+            <span class="lang-en">Add 2–3 concrete <span class="font-mono">input/output</span> examples covering the ambiguous formats specifically</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">قسّم الطلب على عدة رسائل، صيغة واحدة في كل رسالة</span>
+            <span class="lang-en">Split the request across several messages, one format per message</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">كرر التعليمات نفسها ثلاث مرات في البرومبت للتأكيد</span>
+            <span class="lang-en">Repeat the same instructions three times in the prompt for emphasis</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. مثال واحد مثل <span dir="ltr" class="font-mono">"03/04/2026" → "2026-04-03"</span> يحسم قرار اليوم/الشهر الذي عجز عنه النثر كله. تقوية الصياغة (A) والتكرار (D) نثر إضافي لنفس الغموض، والتقسيم (C) لا يحل التفسير غير المتسق داخل كل رسالة.</div>
+            <div class="lang-en text-emerald-900">Correct. One example like <span class="font-mono">"03/04/2026" → "2026-04-03"</span> settles the day/month decision all the prose failed to. Stronger wording (A) and repetition (D) are more prose for the same ambiguity, and splitting (C) does not fix inconsistent interpretation within each message.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. «نتائج غير متسقة رغم وصف مفصّل» هي الإشارة المعيارية لتقنية الأمثلة الملموسة: 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span> تستهدف الحالات الغامضة بالذات.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. "Inconsistent results despite a detailed description" is the canonical cue for concrete examples: 2–3 <span class="font-mono">input/output</span> pairs targeting precisely the ambiguous cases.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">2</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">سكربت ترحيل بيانات ولّده Claude ينهار عند السجلات التي تحوي قيم <span dir="ltr" class="font-mono">null</span> في حقل تاريخ الانضمام. ما أفضل طريقة لطلب الإصلاح؟</span>
+            <span class="lang-en">A Claude-generated data migration script crashes on records containing <span class="font-mono">null</span> in the join-date field. What is the best way to request the fix?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">«السكربت ينهار أحياناً — عالج الحالات الغريبة بحذر أكبر من فضلك»</span>
+            <span class="lang-en">"The script crashes sometimes — please handle strange cases more carefully"</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">أعد توليد السكربت كاملاً من الصفر ببرومبت أطول</span>
+            <span class="lang-en">Regenerate the whole script from scratch with a longer prompt</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">قدّم حالة اختبار محددة: السجل المُدخل الذي يكسر السكربت، والمخرج المتوقع له بالضبط</span>
+            <span class="lang-en">Provide a specific test case: the exact input record that breaks the script, and its exact expected output</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">أضف تعليمات عامة في <span dir="ltr" class="font-mono">CLAUDE.md</span>: «انتبه دائماً للقيم الفارغة»</span>
+            <span class="lang-en">Add a general instruction to <span class="font-mono">CLAUDE.md</span>: "always watch out for empty values"</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. الدليل ينص على هذا حرفياً: إصلاح الحالات الحدية يكون بـ«حالات اختبار محددة بمدخل مثال ومخرج متوقع» — مثل: <span dir="ltr" class="font-mono">{"joined": null}</span> يجب أن يبقى <span dir="ltr" class="font-mono">null</span> لا أن يُستبدل بتاريخ اليوم. الوصف الغامض (A) لا يحدد شيئاً، وإعادة التوليد (B) تهدم الصحيح مع المكسور، وتعليمة <span dir="ltr" class="font-mono">CLAUDE.md</span> العامة (D) لا تصلح خللاً محدداً قائماً.</div>
+            <div class="lang-en text-emerald-900">Correct. The guide states this literally: edge cases are fixed with "specific test cases with example input and expected output" — e.g. <span class="font-mono">{"joined": null}</span> must stay <span class="font-mono">null</span>, not be replaced with today's date. Vague description (A) pins nothing, full regeneration (B) demolishes the working parts with the broken one, and a general <span class="font-mono">CLAUDE.md</span> instruction (D) does not repair a specific live defect.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>C</strong>. الحالة الحدية تُصلَح بأدق مثال ممكن: المدخل الكاسر بعينه + المخرج المتوقع بعينه. هذا أسرع وأضمن من أي وصف عام أو إعادة توليد شاملة.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>C</strong>. An edge case is fixed with the most precise example possible: the exact breaking input + the exact expected output. Faster and safer than any general description or full regeneration.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div data-quiz class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="shrink-0 w-8 h-8 rounded-lg bg-violet-100 text-violet-700 font-bold font-mono text-sm flex items-center justify-center">3</span>
+          <p class="font-medium text-surface-900 leading-relaxed">
+            <span class="lang-ar">مراجعتك لدالة ولّدها Claude كشفت ثلاث مشاكل: تسريب اتصالات قاعدة بيانات، ومعالجة أخطاء تبتلع الاستثناءات، ومنطق إعادة محاولة قد يضاعف التسريب لو أُصلح وحده. لاحظ أن أي إصلاح يؤثر على الاثنين الآخرين. كيف تطلب الإصلاح؟</span>
+            <span class="lang-en">Your review of a Claude-generated function found three problems: leaking database connections, error handling that swallows exceptions, and retry logic that would worsen the leak if fixed alone. You note that any fix affects the other two. How do you request the repair?</span>
+          </p>
+        </div>
+        <div class="space-y-2.5">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">A</span>
+            <span class="lang-ar">أرسل المشاكل واحدة تلو الأخرى، وتحقق من كل إصلاح قبل التالي</span>
+            <span class="lang-en">Send the problems one at a time, verifying each fix before the next</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">B</span>
+            <span class="lang-ar">اجمع المشاكل الثلاث في رسالة واحدة مفصّلة توضح كيف تتفاعل مع بعضها</span>
+            <span class="lang-en">Present all three in one detailed message explaining how they interact</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">C</span>
+            <span class="lang-ar">افتح ثلاث جلسات منفصلة، جلسة لكل مشكلة، لعزل السياق</span>
+            <span class="lang-en">Open three separate sessions, one per problem, to isolate context</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start border-2 border-surface-200 rounded-xl p-3.5 hover:border-violet-300 hover:bg-violet-50/40 transition-all text-sm">
+            <span class="font-mono text-xs text-surface-400 me-2">D</span>
+            <span class="lang-ar">أعد توليد الدالة من الصفر وتمنَّ ألا تتكرر المشاكل</span>
+            <span class="lang-en">Regenerate the function from scratch and hope the problems do not recur</span>
+          </button>
+        </div>
+        <div class="feedback-correct hidden rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-emerald-900">صحيح. السؤال ينص على التشابك («أي إصلاح يؤثر على الاثنين الآخرين») — وهذه حالة الرسالة الواحدة المفصّلة بالضبط: يرى Claude التفاعل الثلاثي ويصمم حلاً متوازناً. التتابع (A وC) يجعله يُصلح التسريب فيكسر إعادة المحاولة والعكس، وإعادة التوليد (D) مقامرة بلا توجيه.</div>
+            <div class="lang-en text-emerald-900">Correct. The question states the interaction ("any fix affects the other two") — exactly the single-detailed-message case: Claude sees the three-way interplay and designs a balanced repair. Sequencing (A and C) has it fixing the leak while breaking the retry and vice versa, and regeneration (D) is an unguided gamble.</div>
+          </div>
+        </div>
+        <div class="feedback-wrong hidden rounded-xl bg-red-50 border border-red-200 p-4 text-sm flex items-start gap-2">
+          <i data-lucide="x-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <div class="lang-ar text-red-900">الإجابة الصحيحة <strong>B</strong>. المعيار: هل تتفاعل الإصلاحات؟ نعم (منصوص في السؤال) → رسالة واحدة مفصّلة. التتابع صحيح فقط للمشكلات المستقلة التي لا يؤثر إصلاح إحداها على الأخرى.</div>
+            <div class="lang-en text-red-900">The correct answer is <strong>B</strong>. The criterion: do the fixes interact? Yes (stated in the question) → one detailed message. Sequential is right only for independent problems where one fix cannot affect another.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-violet-200 p-8 text-center space-y-4">
+        <span class="inline-flex w-14 h-14 rounded-2xl bg-violet-100 text-violet-700 items-center justify-center"><i data-lucide="trophy" class="w-7 h-7"></i></span>
+        <div class="text-3xl font-bold text-surface-900 font-mono"><span id="final-score">0/3</span></div>
+        <div class="text-surface-500 font-mono" id="final-pct">0%</div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <button onclick="quizState.reset()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-700 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span>
+          <span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-24">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <span class="w-10 h-10 rounded-xl bg-violet-500/20 text-violet-300 flex items-center justify-center shrink-0"><i data-lucide="bookmark-check" class="w-5 h-5"></i></span>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="space-y-2.5 text-sm leading-relaxed">
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">تفسير غير متسق للنثر → 2–3 أمثلة <span dir="ltr" class="font-mono">input/output</span> ملموسة، لا صياغة أقوى.</span><span class="lang-en">Inconsistent prose interpretation → 2–3 concrete <span class="font-mono">input/output</span> examples, not stronger wording.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">اكتب الاختبارات قبل التنفيذ (سلوك + حدّية + أداء) وشارك <em>الفاشل</em> منها ليقود التحسين.</span><span class="lang-en">Write tests before implementation (behavior + edges + performance) and share the <em>failing</em> ones to steer improvement.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">مجال غير مألوف؟ نمط المقابلة: أسئلة Claude تكشف القرارات الغائبة (إبطال الكاش، أنماط الفشل) قبل الكود.</span><span class="lang-en">Unfamiliar domain? The interview pattern: Claude's questions surface the missing decisions (cache invalidation, failure modes) before code.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">الحالة الحدية تُصلَح بمدخل كاسر محدد + مخرج متوقع محدد.</span><span class="lang-en">An edge case is fixed with the exact breaking input + the exact expected output.</span></div></li>
+          <li class="flex items-start gap-2.5"><i data-lucide="check" class="w-4 h-4 text-violet-400 shrink-0 mt-0.5"></i><div><span class="lang-ar">مشكلات متشابكة → رسالة واحدة مفصّلة؛ مستقلة → تتابع خطوة بخطوة.</span><span class="lang-en">Interacting problems → one detailed message; independent → step-by-step sequence.</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section class="flex flex-col sm:flex-row gap-4">
+      <a href="3-4-plan-mode.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center gap-3">
+        <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.4 وضع التخطيط مقابل التنفيذ المباشر</span>
+            <span class="lang-en">3.4 Plan mode vs direct execution</span>
+          </div>
+        </div>
+      </a>
+      <a href="3-6-cicd.html" class="group flex-1 bg-white border border-surface-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-sm transition-all flex items-center justify-end gap-3 text-end">
+        <div class="min-w-0">
+          <div class="text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></div>
+          <div class="font-bold text-surface-900 group-hover:text-violet-800 transition-colors truncate">
+            <span class="lang-ar">3.6 دمج Claude Code في CI/CD</span>
+            <span class="lang-en">3.6 Claude Code in CI/CD</span>
+          </div>
+        </div>
+        <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-violet-600 rtl:rotate-180 shrink-0"></i>
+      </a>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

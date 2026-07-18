@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2.5 الأدوات المدمجة — CCAF مرجع</title>
+  <meta name="description" content="الموضوع 2.5 من شهادة CCAF: اختيار الأداة المدمجة الصحيحة في Claude Code — Grep لبحث المحتوى، Glob لأنماط المسارات، Read/Write للملفات الكاملة، Edit للتعديل الموجّه مع بديل Read+Write، والاستكشاف التدريجي لقواعد الكود.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== COMPACT HERO ===== -->
+  <header class="bg-gradient-to-bl from-emerald-900 via-emerald-800 to-surface-900 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-4">
+      <!-- breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-emerald-200/90 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 2</span><span class="lang-en">Domain 2</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="font-semibold text-white"><span class="lang-ar">الأدوات المدمجة</span><span class="lang-en">Built-in tools</span></span>
+      </nav>
+
+      <div class="flex items-start gap-4">
+        <span class="bg-white/10 border border-white/20 text-emerald-200 font-mono font-bold text-lg px-3.5 py-2 rounded-xl shrink-0">2.5</span>
+        <div class="space-y-2">
+          <h1 class="text-2xl sm:text-4xl font-bold leading-tight text-balance">
+            <span class="lang-ar">الأدوات المدمجة: Grep وGlob وRead وWrite وEdit</span>
+            <span class="lang-en">Built-in Tools: Grep, Glob, Read, Write, Edit</span>
+          </h1>
+          <p class="text-emerald-100/90 leading-relaxed max-w-3xl">
+            <span class="lang-ar">ليش هالموضوع مهم؟ لأن نصف أسئلته تختبر تمييزًا واحدًا بسيطًا (محتوى أم مسار؟) والنصف الثاني يختبر منهجًا كاملًا: كيف تفهم قاعدة كود ضخمة بدون ما تحرق نافذة السياق.</span>
+            <span class="lang-en">Why it matters: half its questions test one simple distinction (content or path?) and the other half test a whole method: understanding a huge codebase without burning the context window.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-12 space-y-14">
+
+    <!-- ===== OBJECTIVES ===== -->
+    <section id="objectives" class="scroll-mt-20 bg-white rounded-2xl border border-surface-200 p-6 sm:p-8 space-y-5">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="target" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">وش بتتعلم</span><span class="lang-en">What you'll learn</span></h2>
+      </div>
+      <ul class="grid sm:grid-cols-2 gap-3 text-sm">
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">التمييز الحاسم: <span dir="ltr" class="font-mono">Grep</span> يبحث في <strong>محتوى</strong> الملفات (أسماء دوال، رسائل أخطاء، imports) و<span dir="ltr" class="font-mono">Glob</span> يطابق <strong>مسارات وأسماء</strong> الملفات (<span dir="ltr" class="font-mono">**/*.test.tsx</span>).</span><span class="lang-en">The decisive distinction: <span dir="ltr" class="font-mono">Grep</span> searches file <strong>contents</strong> (function names, error messages, imports) while <span dir="ltr" class="font-mono">Glob</span> matches file <strong>paths and names</strong> (<span dir="ltr" class="font-mono">**/*.test.tsx</span>).</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar"><span dir="ltr" class="font-mono">Read/Write</span> لعمليات الملف الكامل، و<span dir="ltr" class="font-mono">Edit</span> للتعديل الموجّه بمطابقة نص فريد — ولما يفشل Edit لعدم التفرّد، البديل الموثوق <span dir="ltr" class="font-mono">Read + Write</span>.</span><span class="lang-en"><span dir="ltr" class="font-mono">Read/Write</span> for full-file operations, <span dir="ltr" class="font-mono">Edit</span> for targeted changes via unique text matching — and when Edit fails on non-uniqueness, the reliable fallback is <span dir="ltr" class="font-mono">Read + Write</span>.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">بناء فهم قاعدة الكود <strong>تدريجيًا</strong>: Grep لنقاط الدخول ثم Read لتتبّع الـ imports — بدل قراءة كل الملفات مقدمًا.</span><span class="lang-en">Building codebase understanding <strong>incrementally</strong>: Grep for entry points, then Read to follow imports — instead of reading all files upfront.</span></span>
+        </li>
+        <li class="flex items-start gap-2.5 bg-surface-50 rounded-xl p-4 border border-surface-100">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+          <span><span class="lang-ar">تتبّع استخدام دالة عبر وحدات التغليف (wrapper modules): احصر الأسماء المُصدَّرة أولًا ثم ابحث عن كل اسم عبر قاعدة الكود.</span><span class="lang-en">Tracing a function's usage across wrapper modules: identify all exported names first, then search for each name across the codebase.</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ===== SECTION 1: THE FIVE TOOLS ===== -->
+    <section id="five-tools" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">1</span>
+        <span><span class="lang-ar">خمس أدوات، خمسة أدوار — والسؤال الفاصل</span><span class="lang-en">Five tools, five roles — and the deciding question</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>أدوات Claude Code المدمجة لكل واحدة دور محدد، والخلط بينها فخ الاختبار المفضل:</p>
+          <ul class="space-y-2 ps-4">
+            <li><span dir="ltr" class="font-mono">Grep</span> — <strong>بحث في المحتوى</strong>: يفتش داخل الملفات عن أنماط — اسم دالة، رسالة خطأ، عبارة <span dir="ltr" class="font-mono">import</span>.</li>
+            <li><span dir="ltr" class="font-mono">Glob</span> — <strong>مطابقة مسارات</strong>: يجد الملفات بأنماط الاسم/الامتداد مثل <span dir="ltr" class="font-mono">**/*.test.tsx</span> — ما يقرأ ولا حرف من داخلها.</li>
+            <li><span dir="ltr" class="font-mono">Read</span> — قراءة ملف <strong>كامل</strong> لفهم التدفق وتتبّع الاعتماديات.</li>
+            <li><span dir="ltr" class="font-mono">Write</span> — كتابة ملف <strong>كامل</strong> (إنشاء أو استبدال).</li>
+            <li><span dir="ltr" class="font-mono">Edit</span> — تعديل <strong>موجّه</strong> عبر مطابقة <em>نص فريد</em> داخل الملف.</li>
+          </ul>
+          <p>السؤال الفاصل اللي يحل نصف أسئلة الموضوع: <strong>"وش تدوّر بالضبط؟"</strong> — تدوّر على شيء <em>داخل</em> الملفات؟ <span dir="ltr" class="font-mono">Grep</span>. تدوّر على ملفات <em>باسمها أو امتدادها</em>؟ <span dir="ltr" class="font-mono">Glob</span>. تحتاج المحتوى الكامل بعد ما لقيت الملف؟ <span dir="ltr" class="font-mono">Read</span>. تبي تعدّل؟ يعتمد على تفرّد النص (القسم الجاي).</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>Each of Claude Code's built-in tools has a specific role, and conflating them is the exam's favorite trap:</p>
+          <ul class="space-y-2 ps-4">
+            <li><span class="font-mono">Grep</span> — <strong>content search</strong>: digs inside files for patterns — a function name, an error message, an <span class="font-mono">import</span> statement.</li>
+            <li><span class="font-mono">Glob</span> — <strong>path matching</strong>: finds files by name/extension patterns like <span class="font-mono">**/*.test.tsx</span> — it reads nothing inside them.</li>
+            <li><span class="font-mono">Read</span> — read a <strong>full</strong> file to understand flow and trace dependencies.</li>
+            <li><span class="font-mono">Write</span> — write a <strong>full</strong> file (create or replace).</li>
+            <li><span class="font-mono">Edit</span> — a <strong>targeted</strong> modification via <em>unique text</em> matching within the file.</li>
+          </ul>
+          <p>The deciding question that solves half this topic's questions: <strong>"what exactly are you looking for?"</strong> — something <em>inside</em> files? <span class="font-mono">Grep</span>. Files <em>by name or extension</em>? <span class="font-mono">Glob</span>. Need the full contents once found? <span class="font-mono">Read</span>. Want to modify? Depends on text uniqueness (next section).</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 1: tool decision tree -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="git-fork" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: شجرة قرار الأداة المدمجة</span>
+          <span class="lang-en">Diagram: the built-in tool decision tree</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[700px] flex flex-col items-center gap-2 font-mono text-xs">
+            <div class="bg-amber-50 border border-amber-300 rounded-xl px-5 py-3 text-amber-900 font-semibold">What do you need to do?</div>
+            <div class="grid grid-cols-3 gap-4 w-full max-w-[680px] mt-1">
+              <!-- search branch -->
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-surface-700 text-white rounded-md px-2.5 py-1 font-bold">FIND</span>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-amber-900 text-center w-full">searching for<br>WHAT exactly?</div>
+                <div class="grid grid-cols-1 gap-2 w-full">
+                  <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center">
+                    <p class="text-emerald-700">text INSIDE files</p>
+                    <p class="font-bold text-emerald-900 text-sm">Grep</p>
+                    <p class="text-emerald-600">"who calls processRefund?"</p>
+                  </div>
+                  <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center">
+                    <p class="text-emerald-700">files BY NAME / pattern</p>
+                    <p class="font-bold text-emerald-900 text-sm">Glob</p>
+                    <p class="text-emerald-600">**/*.test.tsx</p>
+                  </div>
+                </div>
+              </div>
+              <!-- read branch -->
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-surface-700 text-white rounded-md px-2.5 py-1 font-bold">UNDERSTAND</span>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i>
+                <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center w-full">
+                  <p class="text-emerald-700">load full contents</p>
+                  <p class="font-bold text-emerald-900 text-sm">Read</p>
+                  <p class="text-emerald-600">follow imports,<br>trace the flow</p>
+                </div>
+              </div>
+              <!-- modify branch -->
+              <div class="flex flex-col items-center gap-2">
+                <span class="bg-surface-700 text-white rounded-md px-2.5 py-1 font-bold">MODIFY</span>
+                <i data-lucide="arrow-down" class="w-4 h-4 text-surface-400"></i>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-amber-900 text-center w-full">is the anchor text<br>UNIQUE in the file?</div>
+                <div class="grid grid-cols-1 gap-2 w-full">
+                  <div class="bg-emerald-50 border-2 border-emerald-300 rounded-xl px-3 py-2.5 text-center">
+                    <p class="text-emerald-700">YES — unique</p>
+                    <p class="font-bold text-emerald-900 text-sm">Edit</p>
+                    <p class="text-emerald-600">targeted change</p>
+                  </div>
+                  <div class="bg-red-50 border-2 border-red-300 rounded-xl px-3 py-2.5 text-center">
+                    <p class="text-red-700">NO — repeats</p>
+                    <p class="font-bold text-red-900 text-sm">Read + Write</p>
+                    <p class="text-red-600">reliable fallback</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">ثلاثة أفعال (ابحث، افهم، عدّل) وسؤالان فرعيان — هذي الشجرة كاملة تقريبًا كل ما يُسأل عنه في 2.5.</span>
+          <span class="lang-en">Three verbs (find, understand, modify) and two sub-questions — this tree is nearly everything 2.5 gets asked about.</span>
+        </p>
+      </div>
+
+      <!-- reference table -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="table" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">جدول مرجعي سريع</span>
+          <span class="lang-en">Quick reference table</span>
+        </p>
+        <!-- AR -->
+        <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-start font-semibold">الأداة</th>
+                <th class="p-3 text-start font-semibold">الغرض</th>
+                <th class="p-3 text-start font-semibold">استخدمها لـ</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Grep</td><td class="p-3">بحث في المحتوى</td><td class="p-3">إيجاد مستدعي دالة، رسالة خطأ، <span dir="ltr" class="font-mono">import</span></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Glob</td><td class="p-3">مطابقة مسار/اسم</td><td class="p-3"><span dir="ltr" class="font-mono">**/*.test.tsx</span>، ملفات بامتداد معيّن</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Read</td><td class="p-3">قراءة ملف كامل</td><td class="p-3">تتبّع imports، فهم تدفّق</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Edit</td><td class="p-3">تعديل موجّه</td><td class="p-3">تغيير نص <em>فريد</em> محدد</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Write</td><td class="p-3">كتابة ملف كامل</td><td class="p-3">إنشاء ملف، أو بديل Edit مع <span dir="ltr" class="font-mono">Read</span> حين النص غير فريد</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- EN -->
+        <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+          <table class="w-full text-sm">
+            <thead class="bg-surface-100 text-surface-700">
+              <tr>
+                <th class="p-3 text-left font-semibold">Tool</th>
+                <th class="p-3 text-left font-semibold">Purpose</th>
+                <th class="p-3 text-left font-semibold">Use it for</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-100 bg-white">
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Grep</td><td class="p-3">Content search</td><td class="p-3">Find a function's callers, an error message, an <span class="font-mono">import</span></td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Glob</td><td class="p-3">Path/name match</td><td class="p-3"><span class="font-mono">**/*.test.tsx</span>, files by extension</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Read</td><td class="p-3">Full-file read</td><td class="p-3">Follow imports, understand a flow</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Edit</td><td class="p-3">Targeted edit</td><td class="p-3">Change specific <em>unique</em> text</td></tr>
+              <tr class="hover:bg-surface-50"><td class="p-3 font-mono text-emerald-700">Write</td><td class="p-3">Full-file write</td><td class="p-3">Create a file, or the Edit fallback with <span class="font-mono">Read</span> when text is not unique</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- quick insight -->
+      <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-cyan-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-cyan-900"><span class="lang-ar">لمحة سريعة</span><span class="lang-en">Quick insight</span></p>
+            <p class="lang-ar text-cyan-800 leading-relaxed text-sm">حيلة حفظ: <span dir="ltr" class="font-mono">Grep</span> فيها حرف <strong>r</strong> مثل "يقرأ داخل" (<span dir="ltr" class="font-mono">read inside</span>)، و<span dir="ltr" class="font-mono">Glob</span> مثل "globe" — تشوف الخريطة من فوق (أسماء الملفات) بدون ما تنزل لداخلها.</p>
+            <p class="lang-en text-cyan-800 leading-relaxed text-sm">Memory hook: <span class="font-mono">Grep</span> looks <strong>inside</strong> (contents), while <span class="font-mono">Glob</span> sounds like "globe" — you see the map from above (file names) without ever descending into them.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: EDIT & THE FALLBACK ===== -->
+    <section id="edit-fallback" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">2</span>
+        <span><span class="lang-ar">Edit والتفرّد: متى تتراجع إلى Read + Write</span><span class="lang-en">Edit &amp; uniqueness: when to fall back to Read + Write</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>قوة <span dir="ltr" class="font-mono">Edit</span> في دقتها: تعطيها نصًا قديمًا ونصًا جديدًا، وتستبدل الأول بالثاني. لكن شرطها الصارم أن يكون النص القديم <strong>فريدًا في الملف</strong> — لو تكرر ("String appears 4 times")، ترفض الأداة التعديل لأنها ما تعرف أي نسخة تقصد. وهنا القاعدة الرسمية: <strong>لما يفشل Edit لعدم التفرّد، البديل الموثوق هو <span dir="ltr" class="font-mono">Read + Write</span></strong> — اقرأ الملف كاملًا، طبّق التغيير في مكانه الصحيح وأنت شايف السياق كله، ثم اكتب الملف كاملًا.</p>
+          <p>ليش ما نكرر Edit بنص أطول؟ توسيع النص القديم ليشمل سياقًا مميِّزًا حل وارد عمليًا، لكن سؤال الاختبار يستهدف القاعدة المنصوصة: <span dir="ltr" class="font-mono">Read + Write</span> هو <em>الموثوق</em> الذي لا يفشل بسبب التفرّد إطلاقًا. المشتتات المعتادة: تكرار نفس الاستدعاء (بيفشل بنفس السبب)، أو حذف الملف وإعادة إنشائه من الذاكرة (مخاطرة بفقدان محتوى ما قرأته).</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p><span class="font-mono">Edit</span>'s power is its precision: you give it old text and new text, and it swaps one for the other. But its strict condition is that the old text be <strong>unique in the file</strong> — if it repeats ("String appears 4 times"), the tool refuses because it cannot know which occurrence you mean. Hence the official rule: <strong>when Edit fails on non-uniqueness, the reliable fallback is <span class="font-mono">Read + Write</span></strong> — read the whole file, apply the change in the right place with full context in view, then write the whole file back.</p>
+          <p>Why not retry Edit with a longer anchor? Widening the old text to include distinguishing context can work in practice, but the exam targets the stated rule: <span class="font-mono">Read + Write</span> is the <em>reliable</em> path that can never fail on uniqueness. The usual distractors: repeating the same call (fails for the same reason), or deleting the file and recreating it from memory (risking loss of content you never read).</p>
+        </div>
+      </div>
+
+      <!-- fallback code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="terminal" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">سيناريو الفشل والبديل</span>
+          <span class="lang-en">The failure scenario and the fallback</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-bash"># Goal: change the retry limit on ONE of the identical config lines
+# config.yaml contains "timeout: 30" FOUR times (4 services)
+
+# Attempt 1 — Edit
+#   old_string: "timeout: 30"  ->  new_string: "timeout: 60"
+#   FAILS: "String appears 4 times in the file" (not unique)
+
+# The RELIABLE fallback (per the exam guide):
+# 1. Read  config.yaml          -> full contents in context
+# 2. Apply the change at the right occurrence (you can see all 4 now)
+# 3. Write config.yaml          -> rewrite the full corrected file
+
+# Anti-patterns the exam dangles:
+#   - retry the exact same Edit  (fails again, same reason)
+#   - delete + recreate from memory without reading (content loss risk)
+#   - Glob for the text          (Glob matches paths, never contents)</code></pre>
+        </div>
+      </div>
+
+      <!-- warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-amber-900"><span class="lang-ar">تنبيه</span><span class="lang-en">Warning</span></p>
+            <p class="lang-ar text-amber-800 leading-relaxed text-sm">لا تكتب ملفًا بـ <span dir="ltr" class="font-mono">Write</span> قبل ما تقرأه بـ <span dir="ltr" class="font-mono">Read</span> — الكتابة الكاملة تستبدل الملف كله، ولو كتبت من الذاكرة بتفقد كل شيء ما كان في ذاكرتك. لهذا البديل دائمًا ثنائي: <span dir="ltr" class="font-mono">Read + Write</span> — بالترتيب.</p>
+            <p class="lang-en text-amber-800 leading-relaxed text-sm">Never <span class="font-mono">Write</span> a file you have not <span class="font-mono">Read</span> — a full write replaces the entire file, and writing from memory loses everything that was not in your memory. That is why the fallback is always a pair: <span class="font-mono">Read + Write</span> — in that order.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 3: INCREMENTAL EXPLORATION ===== -->
+    <section id="incremental" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl sm:text-3xl font-bold text-surface-900 leading-tight flex items-start gap-3">
+        <span class="bg-emerald-100 text-emerald-700 font-mono font-bold text-sm px-3 py-1.5 rounded-lg shrink-0 mt-1">3</span>
+        <span><span class="lang-ar">الاستكشاف التدريجي — وتتبّع وحدات التغليف</span><span class="lang-en">Incremental exploration — and tracing wrapper modules</span></span>
+      </h2>
+
+      <div class="space-y-4 text-[15px] leading-loose">
+        <div class="lang-ar space-y-4">
+          <p>أهم مهارة في الموضوع كله: <strong>بناء فهم قاعدة الكود تدريجيًا</strong>. المضادّ الصريح: "اقرأ كل الملفات مقدمًا ثم حلّل" — يستنزف نافذة السياق قبل ما تبدأ الشغل الحقيقي. المنهج الصحيح ثلاث خطوات تتكرر: (1) <span dir="ltr" class="font-mono">Grep</span> عن <strong>نقطة الدخول</strong> (اسم الدالة، الـ endpoint، رسالة الخطأ)، (2) <span dir="ltr" class="font-mono">Read</span> للملف اللي طلع، (3) اتبع الـ <span dir="ltr" class="font-mono">imports</span> اللي شفتها — كل import مهم يفتح لك Grep أو Read جديدًا. تمشي في القاعدة مثل ما تمشي في خيوط خريطة، مو مثل ما تصوّر كل صفحة في الأطلس.</p>
+          <p>ومهارة متقدمة عليها سؤال في الدليل: <strong>تتبّع دالة عبر وحدات التغليف (wrapper modules)</strong>. الدالة <span dir="ltr" class="font-mono">formatCurrency</span> قد تُعاد تسميتها وتصديرها من ملف <span dir="ltr" class="font-mono">utils/index.ts</span> باسم <span dir="ltr" class="font-mono">fmtMoney</span> — فلو بحثت عن الاسم الأصلي فقط، فاتك نصف المستدعين. المنهج: (1) <strong>احصر كل الأسماء المُصدَّرة</strong> (exports) من الوحدة ووحدات تغليفها، ثم (2) <span dir="ltr" class="font-mono">Grep</span> عن <strong>كل اسم</strong> عبر قاعدة الكود — فتلقى كل المستدعين حتى المتخفين خلف إعادة التصدير.</p>
+        </div>
+        <div class="lang-en space-y-4">
+          <p>The most important skill in the whole topic: <strong>building codebase understanding incrementally</strong>. The explicit anti-pattern: "read all files upfront, then analyze" — it exhausts the context window before real work begins. The correct method is three repeating steps: (1) <span class="font-mono">Grep</span> for the <strong>entry point</strong> (the function name, the endpoint, the error message), (2) <span class="font-mono">Read</span> the file that surfaced, (3) follow the <span class="font-mono">imports</span> you saw — each significant import opens your next Grep or Read. You walk the codebase like following threads on a map, not like photographing every page of the atlas.</p>
+          <p>And an advanced skill the guide names: <strong>tracing a function across wrapper modules</strong>. A function <span class="font-mono">formatCurrency</span> may be re-exported from <span class="font-mono">utils/index.ts</span> under the name <span class="font-mono">fmtMoney</span> — search only the original name and you miss half the callers. The method: (1) <strong>identify all exported names</strong> from the module and its wrappers, then (2) <span class="font-mono">Grep</span> for <strong>each name</strong> across the codebase — surfacing every caller, even those hiding behind re-exports.</p>
+        </div>
+      </div>
+
+      <!-- DIAGRAM 2: incremental exploration flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="route" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">مخطط: حلقة الاستكشاف التدريجي مقابل القراءة الشاملة</span>
+          <span class="lang-en">Diagram: the incremental exploration loop vs reading everything</span>
+        </p>
+        <div dir="ltr" class="overflow-x-auto scrollbar-thin">
+          <div class="min-w-[700px] grid grid-cols-[1fr_auto_1fr] gap-4 font-mono text-xs items-start">
+            <!-- incremental loop -->
+            <div class="border-2 border-emerald-300 bg-emerald-50/60 rounded-xl p-4 space-y-2">
+              <p class="font-bold text-emerald-800 text-center mb-1 flex items-center gap-1.5 justify-center"><i data-lucide="check-circle-2" class="w-4 h-4"></i>INCREMENTAL (correct)</p>
+              <div class="bg-white/80 border border-emerald-300 rounded-xl px-3 py-2.5 text-center text-emerald-900 font-semibold">1. Grep the entry point<br><span class="font-normal text-emerald-600">"export function createOrder"</span></div>
+              <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-emerald-500"></i></div>
+              <div class="bg-white/80 border border-emerald-300 rounded-xl px-3 py-2.5 text-center text-emerald-900 font-semibold">2. Read that ONE file<br><span class="font-normal text-emerald-600">see its imports</span></div>
+              <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-emerald-500"></i></div>
+              <div class="bg-white/80 border border-emerald-300 rounded-xl px-3 py-2.5 text-center text-emerald-900 font-semibold">3. Follow each import<br><span class="font-normal text-emerald-600">Grep / Read the next link</span></div>
+              <div class="flex justify-center items-center gap-1.5 text-emerald-700 pt-1"><i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i><span>repeat until the flow is clear</span></div>
+              <p class="text-center text-emerald-700 font-bold pt-1">context spent ONLY on relevant files</p>
+            </div>
+            <div class="self-center text-surface-400 font-bold">VS</div>
+            <!-- read-all anti-pattern -->
+            <div class="border-2 border-red-300 bg-red-50/60 rounded-xl p-4 space-y-2">
+              <p class="font-bold text-red-800 text-center mb-1 flex items-center gap-1.5 justify-center"><i data-lucide="x-octagon" class="w-4 h-4"></i>READ-ALL-UPFRONT (anti-pattern)</p>
+              <div class="bg-white/80 border border-red-300 rounded-xl px-3 py-2.5 text-center text-red-900">Read file 1... Read file 2...<br>Read file 3... Read file 40...</div>
+              <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-red-500"></i></div>
+              <div class="bg-white/80 border border-red-300 rounded-xl px-3 py-2.5 text-center text-red-900">context window exhausted<br>by mostly IRRELEVANT files</div>
+              <div class="flex justify-center"><i data-lucide="arrow-down" class="w-4 h-4 text-red-500"></i></div>
+              <div class="bg-white/80 border border-red-300 rounded-xl px-3 py-2.5 text-center text-red-900 font-bold">analysis starts with<br>no room left to think</div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-surface-500 text-center leading-relaxed">
+          <span class="lang-ar">اليسار يمشي خيطًا بخيط فيصرف السياق على الملفات المهمة فقط؛ اليمين يصوّر الأطلس كاملًا ويخنق نفسه.</span>
+          <span class="lang-en">One side follows thread by thread, spending context only on files that matter; the other photographs the whole atlas and chokes itself.</span>
+        </p>
+      </div>
+
+      <!-- wrapper tracing code -->
+      <div class="space-y-3">
+        <p class="font-semibold text-surface-900 flex items-center gap-2">
+          <i data-lucide="search-code" class="w-5 h-5 text-emerald-600"></i>
+          <span class="lang-ar">عمليًا: الاستكشاف التدريجي وتتبّع التغليف</span>
+          <span class="lang-en">In practice: incremental exploration &amp; wrapper tracing</span>
+        </p>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 px-2 py-1 text-xs bg-surface-700 hover:bg-surface-600 text-surface-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity font-mono">copy</button>
+          <pre class="!bg-surface-900 !rounded-xl !p-4 overflow-x-auto scrollbar-thin"><code class="language-bash"># Q: "Find every file that CONTAINS a call to processRefund"
+#    -> searching file CONTENT -> Grep
+grep -rn "processRefund(" src/
+
+# Q: "Find every TEST FILE, wherever it lives in the tree"
+#    -> matching a file-NAME pattern -> Glob: **/*.test.tsx
+
+# Incremental understanding (never read everything upfront):
+grep -rn "export function createOrder" src/   # 1. entry point
+# 2. Read src/orders/create.ts  -> note its imports
+# 3. Follow each import with the next Grep/Read
+
+# Tracing usage across WRAPPER modules:
+# 1. list every exported name (original + re-exports)
+grep -n "export" src/utils/currency.ts src/utils/index.ts
+#    -> formatCurrency, fmtMoney (re-export alias)
+# 2. Grep EACH exported name across the codebase
+grep -rn "formatCurrency\|fmtMoney" src/
+#    -> every caller found, even behind the alias</code></pre>
+        </div>
+      </div>
+
+      <!-- key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <p class="font-bold text-brand-900"><span class="lang-ar">مفهوم أساسي</span><span class="lang-en">Key concept</span></p>
+            <p class="lang-ar text-brand-800 leading-relaxed text-sm">نافذة السياق مورد تصميمي مثل الذاكرة والوقت. "اقرأ كل شيء ثم حلّل" مو خيارًا بطيئًا فقط — هو خيار <strong>يفشل</strong>: تمتلئ النافذة بملفات لا علاقة لها قبل الوصول للمهم. التدرّج (Grep ثم Read بالتتبّع) هو الإجابة الصحيحة كل مرة يظهر فيها هذا التقابل.</p>
+            <p class="lang-en text-brand-800 leading-relaxed text-sm">The context window is a design resource like memory and time. "Read everything, then analyze" is not merely slow — it <strong>fails</strong>: the window fills with irrelevant files before reaching what matters. Incrementality (Grep, then Read along the trace) is the correct answer every time this contrast appears.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <p class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></p>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>استخدام <span dir="ltr" class="font-mono">Glob</span> للبحث عن محتوى:</strong> Glob يطابق المسارات، لا النصوص داخل الملفات. "أين تُستدعى الدالة؟" جوابها <span dir="ltr" class="font-mono">Grep</span> دائمًا.</span>
+              <span class="lang-en"><strong>Using <span class="font-mono">Glob</span> for content search:</strong> Glob matches paths, never text inside files. "Where is the function called?" is always answered by <span class="font-mono">Grep</span>.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>الإصرار على <span dir="ltr" class="font-mono">Edit</span> مع نص متكرر:</strong> بيفشل كل مرة لعدم التفرّد. البديل المنصوص: <span dir="ltr" class="font-mono">Read + Write</span>.</span>
+              <span class="lang-en"><strong>Insisting on <span class="font-mono">Edit</span> with repeated text:</strong> it fails every time on non-uniqueness. The stated fallback: <span class="font-mono">Read + Write</span>.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>"اقرأ كل ملفات المشروع أولًا لفهم شامل":</strong> يبدو "دقيقًا وحريصًا" لكنه استنزاف للسياق — المشتت المفضل في أسئلة الاستكشاف. التدرّج هو الصح.</span>
+              <span class="lang-en"><strong>"Read every project file first for full understanding":</strong> sounds "thorough and careful" but exhausts context — the favorite distractor in exploration questions. Incremental is correct.</span>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i>
+            <span>
+              <span class="lang-ar"><strong>البحث عن الاسم الأصلي فقط عند التغليف:</strong> يفوّت المستدعين عبر أسماء إعادة التصدير. احصر الـ exports أولًا ثم Grep لكل اسم.</span>
+              <span class="lang-en"><strong>Searching only the original name across wrappers:</strong> misses callers using re-export aliases. List the exports first, then Grep each name.</span>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== REAL-LIFE EXAMPLE ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 text-amber-700 w-12 h-12 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="library" class="w-6 h-6"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-lg">
+              <span class="lang-ar">مثال من الحياة: باحث في مكتبة ضخمة</span>
+              <span class="lang-en">Real-life example: a researcher in a huge library</span>
+            </h2>
+            <p class="lang-ar text-amber-900/90 leading-loose">
+              باحث دخل مكتبة فيها مليون كتاب يبي يفهم موضوعًا محددًا. <strong>فهرس العناوين</strong> على الحاسوب يطلّع له الكتب باسمها وتصنيفها — هذا <span dir="ltr" class="font-mono">Glob</span>: تلقى الكتاب بدون ما تفتحه. أما <strong>الفهرس النصّي</strong> اللي يقول "مصطلحك مذكور في صفحة كذا من كتاب كذا" فهذا <span dir="ltr" class="font-mono">Grep</span>: بحث في المحتوى نفسه. لما يسحب كتابًا <strong>ويقرأ فصلًا كاملًا</strong> فهذا <span dir="ltr" class="font-mono">Read</span>، ولما يحتاج يصحح سطرًا في مسودته: لو العبارة فريدة يحط <strong>ملاحظة لاصقة</strong> مكانها بالضبط (<span dir="ltr" class="font-mono">Edit</span>)، ولو العبارة متكررة في الصفحة أربع مرات ما ينفع اللصق الأعمى — <strong>ينسخ الصفحة كاملة من جديد</strong> بالتصحيح (<span dir="ltr" class="font-mono">Read + Write</span>). والباحث الشاطر ما "يصوّر كل رفوف المكتبة" قبل ما يبدأ — يبدأ بمدخل واحد من الفهرس، يقرأ، يتتبّع المراجع في الحواشي (الـ imports)، وينتقل خيطًا بخيط. ولو اكتشف أن المؤلف ينشر أحيانًا باسم مستعار، يحصر كل أسمائه أولًا ثم يبحث عن كل اسم — هذا تتبّع وحدات التغليف.
+            </p>
+            <p class="lang-en text-amber-900/90 leading-loose">
+              A researcher enters a million-book library to understand one specific topic. The <strong>title catalog</strong> on the terminal surfaces books by name and classification — that is <span class="font-mono">Glob</span>: finding the book without opening it. The <strong>full-text index</strong> that says "your term appears on page N of book X" is <span class="font-mono">Grep</span>: a search through the content itself. Pulling a book and <strong>reading a full chapter</strong> is <span class="font-mono">Read</span>. Correcting a line in his draft: if the phrase is unique, he places a <strong>sticky note</strong> exactly there (<span class="font-mono">Edit</span>); if the phrase repeats four times on the page, blind sticking will not do — he <strong>recopies the whole page</strong> with the correction (<span class="font-mono">Read + Write</span>). And a good researcher never "photographs every shelf" before starting — he begins at one catalog entry, reads, follows the footnote references (the imports), moving thread by thread. And on discovering the author sometimes publishes under a pen name, he lists all the names first, then searches each one — that is wrapper-module tracing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ON THE EXAM ===== -->
+    <section id="on-the-exam" class="scroll-mt-20 bg-surface-900 rounded-2xl p-6 sm:p-8 text-surface-200 space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-500/20 text-emerald-400 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="clipboard-check" class="w-5 h-5"></i></span>
+        <h2 class="text-2xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+      </div>
+      <div class="lang-ar space-y-3 text-sm leading-relaxed">
+        <p>أسئلة 2.5 من أسرع ما يمكن حله لو ثبّتّ التمييزات:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>اقرأ <em>موضوع البحث</em> في السؤال حرفيًا: "كل الملفات اللي <strong>تحتوي</strong>..." = <span dir="ltr" class="font-mono">Grep</span> · "كل الملفات <strong>بامتداد/باسم</strong>..." = <span dir="ltr" class="font-mono">Glob</span>.</li>
+          <li>ذكر السؤال فشل <span dir="ltr" class="font-mono">Edit</span> بعبارة مثل "appears N times"؟ الجواب الجاهز: <span dir="ltr" class="font-mono">Read + Write</span>.</li>
+          <li>سيناريو "افهم قاعدة كود ضخمة غير مألوفة"؟ الصح دائمًا التدرّج: Grep نقاط الدخول ثم Read بالتتبّع — واستبعد "اقرأ كل شيء أولًا" مهما بدا حريصًا.</li>
+          <li>"الدالة مُعاد تصديرها بأسماء مختلفة"؟ احصر الـ exports أولًا ثم Grep كل اسم.</li>
+        </ul>
+      </div>
+      <div class="lang-en space-y-3 text-sm leading-relaxed">
+        <p>2.5 questions are among the fastest to solve once the distinctions are locked in:</p>
+        <ul class="space-y-2 ps-4 list-disc marker:text-emerald-400">
+          <li>Read the question's <em>search object</em> literally: "all files that <strong>contain</strong>..." = <span class="font-mono">Grep</span> · "all files <strong>by extension/name</strong>..." = <span class="font-mono">Glob</span>.</li>
+          <li>Does the question mention <span class="font-mono">Edit</span> failing with "appears N times"? The ready answer: <span class="font-mono">Read + Write</span>.</li>
+          <li>A "understand a large unfamiliar codebase" scenario? Incremental is always right: Grep entry points, then Read along the trace — and eliminate "read everything first" however careful it sounds.</li>
+          <li>"The function is re-exported under different names"? List the exports first, then Grep each name.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== QUICK CHECK ===== -->
+    <section id="quick-check" class="scroll-mt-20 space-y-6">
+      <div class="flex items-center gap-3">
+        <span class="bg-emerald-100 text-emerald-700 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="brain-circuit" class="w-5 h-5"></i></span>
+        <div>
+          <h2 class="text-2xl font-bold text-surface-900"><span class="lang-ar">فحص سريع</span><span class="lang-en">Quick check</span></h2>
+          <p class="text-sm text-surface-500"><span class="lang-ar">3 أسئلة على هذا الموضوع</span><span class="lang-en">3 questions on this topic</span></p>
+        </div>
+        <div class="ms-auto flex items-center gap-2 bg-white border border-surface-200 rounded-xl px-4 py-2 text-sm">
+          <span class="font-bold text-emerald-600"><span id="score">0</span>/<span id="total-q">3</span></span>
+          <span class="text-surface-400">·</span>
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">done</span></span>
+          <div class="w-16 h-1.5 bg-surface-200 rounded-full overflow-hidden"><div id="progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">مطلوب من الوكيل: "اعثر على كل الملفات التي تستدعي الدالة <span dir="ltr" class="font-mono">processPayment</span> في المشروع". أي أداة يبدأ بها؟</span>
+            <span class="lang-en">The agent is asked: "find every file that calls the <span dir="ltr" class="font-mono">processPayment</span> function in the project." Which tool does it start with?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Grep</span> — البحث عن نص داخل محتوى الملفات هو تعريفها الحرفي.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Grep</span> — searching for text inside file contents is its literal definition.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Glob</span> بنمط <span dir="ltr" class="font-mono">**/processPayment*</span>.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Glob</span> with the pattern <span dir="ltr" class="font-mono">**/processPayment*</span>.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Read</span> لكل ملفات المشروع واحدًا واحدًا ثم البحث يدويًا.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Read</span> on every project file one by one, then search manually.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Edit</span> بنص بحث <span dir="ltr" class="font-mono">processPayment</span> لمعرفة أماكن وجوده.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Edit</span> with <span dir="ltr" class="font-mono">processPayment</span> as the search text to discover its locations.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> "ملفات <em>تستدعي</em> دالة" = بحث في المحتوى = <span dir="ltr" class="font-mono">Grep</span>. أما Glob فيطابق أسماء الملفات (والدالة نادرًا ما تكون اسم ملف عند مستدعيها)، وقراءة كل الملفات استنزاف للسياق، وEdit أداة تعديل لا بحث.</span>
+            <span class="lang-en"><strong>Correct.</strong> "Files that <em>call</em> a function" = content search = <span dir="ltr" class="font-mono">Grep</span>. Glob matches file names (and callers rarely name their files after the function), reading everything wastes context, and Edit is a modification tool, not a search.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em><span dir="ltr" class="font-mono">Grep</span></em> — استدعاء الدالة نص <em>داخل</em> الملفات، وهذا مجال Grep الحصري بين الأدوات المدمجة.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em><span dir="ltr" class="font-mono">Grep</span></em> — a function call is text <em>inside</em> files, Grep's exclusive territory among the built-ins.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">المطلوب الآن: "احصر كل ملفات الاختبار في المستودع أيًا كان مكانها" — الملفات تنتهي بـ <span dir="ltr" class="font-mono">.test.tsx</span>. وش الأداة الصح؟</span>
+            <span class="lang-en">Now the ask is: "list every test file in the repo wherever it lives" — the files end with <span dir="ltr" class="font-mono">.test.tsx</span>. Which tool is right?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Glob</span> بالنمط <span dir="ltr" class="font-mono">**/*.test.tsx</span> — مطابقة أسماء الملفات عبر الشجرة كلها.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Glob</span> with the pattern <span dir="ltr" class="font-mono">**/*.test.tsx</span> — matching file names across the whole tree.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Grep</span> عن كلمة "test" داخل محتوى كل الملفات.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Grep</span> for the word "test" inside every file's contents.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Read</span> على مجلد الجذر لعرض بنية المشروع كاملة.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Read</span> on the root directory to dump the whole project structure.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar"><span dir="ltr" class="font-mono">Write</span> لإنشاء قائمة بالملفات المتوقعة حسب العرف.</span>
+            <span class="lang-en"><span dir="ltr" class="font-mono">Write</span> to create a list of the files expected by convention.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> نمط اسم/امتداد عبر الشجرة = <span dir="ltr" class="font-mono">Glob</span> بالضبط، و<span dir="ltr" class="font-mono">**/*.test.tsx</span> هو مثال الدليل الحرفي. Grep عن "test" بيرجّع كل ملف فيه الكلمة حتى لو مو ملف اختبار، وRead ما يسرد المجلدات، وWrite تأليف لا حصر.</span>
+            <span class="lang-en"><strong>Correct.</strong> A name/extension pattern across the tree = exactly <span dir="ltr" class="font-mono">Glob</span>, and <span dir="ltr" class="font-mono">**/*.test.tsx</span> is the guide's literal example. Grepping "test" returns every file containing the word even when it is not a test file, Read does not list directories, and Write invents rather than enumerates.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em><span dir="ltr" class="font-mono">Glob</span> بنمط <span dir="ltr" class="font-mono">**/*.test.tsx</span></em> — المطلوب ملفات <em>باسمها/امتدادها</em>، لا بحث في محتواها.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em><span dir="ltr" class="font-mono">Glob</span> with <span dir="ltr" class="font-mono">**/*.test.tsx</span></em> — the ask is files <em>by name/extension</em>, not a content search.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-emerald-100 text-emerald-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold text-lg leading-relaxed">
+            <span class="lang-ar">وكيل أمام قاعدة كود ضخمة غير مألوفة، ومطلوب منه فهم "كيف يمر الطلب من الـ API إلى قاعدة البيانات". وش المنهج الصحيح؟</span>
+            <span class="lang-en">An agent faces a huge unfamiliar codebase and must understand "how a request flows from the API to the database." What is the correct method?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">Grep عن نقطة الدخول (مسار الـ endpoint)، ثم Read للملف اللي طلع، ثم تتبّع الـ imports خطوة خطوة حتى تتضح السلسلة.</span>
+            <span class="lang-en">Grep for the entry point (the endpoint route), then Read the surfaced file, then follow the imports step by step until the chain is clear.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">Read لكل ملفات المشروع أولًا لبناء صورة شاملة قبل أي تحليل.</span>
+            <span class="lang-en">Read every project file first to build a comprehensive picture before any analysis.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">Glob عن <span dir="ltr" class="font-mono">**/*.ts</span> وقراءة النتائج بترتيب أبجدي.</span>
+            <span class="lang-en">Glob for <span dir="ltr" class="font-mono">**/*.ts</span> and read the results in alphabetical order.</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all text-surface-700">
+            <span class="lang-ar">طلب مخطط معماري جاهز من المستخدم قبل لمس أي ملف.</span>
+            <span class="lang-en">Ask the user for a ready architecture diagram before touching any file.</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800">
+          <div class="flex items-start gap-2"><i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>صحيح.</strong> هذا الاستكشاف التدريجي بنصه: Grep لنقاط الدخول ثم Read بالتتبّع — يصرف السياق على الملفات ذات الصلة فقط. قراءة كل شيء تستنزف النافذة، والقراءة الأبجدية عشوائية بلا خيط، وطلب المخطط تهرّب من مهمة الوكيل نفسها.</span>
+            <span class="lang-en"><strong>Correct.</strong> This is incremental exploration verbatim: Grep for entry points, then Read along the trace — spending context only on relevant files. Reading everything exhausts the window, alphabetical reading is threadless wandering, and requesting a diagram dodges the agent's own task.</span>
+          </div></div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
+          <div class="flex items-start gap-2"><i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i><div>
+            <span class="lang-ar"><strong>غير دقيق.</strong> الإجابة الصحيحة: <em>التدرّج — Grep نقطة الدخول ثم Read بتتبّع الـ imports</em>. "اقرأ كل شيء أولًا" هو المشتت الكلاسيكي اللي يستنزف نافذة السياق.</span>
+            <span class="lang-en"><strong>Not quite.</strong> The correct answer is <em>incremental — Grep the entry point, then Read following imports</em>. "Read everything first" is the classic distractor that exhausts the context window.</span>
+          </div></div>
+        </div>
+      </div>
+
+      <!-- results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-emerald-200 p-8 text-center space-y-3">
+        <div class="mx-auto w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="trophy" class="w-8 h-8"></i></div>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-emerald-600" id="final-score"></div>
+        <div class="text-surface-500" id="final-pct"></div>
+        <button onclick="quizState.reset()" class="mt-4 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-colors font-medium inline-flex items-center gap-2">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== TAKEAWAY ===== -->
+    <section id="takeaway" class="scroll-mt-20 bg-gradient-to-bl from-emerald-800 to-emerald-950 rounded-2xl p-6 sm:p-8 text-white space-y-4">
+      <div class="flex items-center gap-3">
+        <span class="bg-white/10 border border-white/20 w-10 h-10 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="flag" class="w-5 h-5 text-emerald-300"></i></span>
+        <h2 class="text-2xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+      </div>
+      <ul class="space-y-2.5 text-sm leading-relaxed">
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">Grep</span> = ما <strong>داخل</strong> الملفات (دوال، أخطاء، imports) · <span dir="ltr" class="font-mono">Glob</span> = ملفات <strong>باسمها</strong> (<span dir="ltr" class="font-mono">**/*.test.tsx</span>).</span><span class="lang-en"><span dir="ltr" class="font-mono">Grep</span> = what is <strong>inside</strong> files (functions, errors, imports) · <span dir="ltr" class="font-mono">Glob</span> = files <strong>by name</strong> (<span dir="ltr" class="font-mono">**/*.test.tsx</span>).</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar"><span dir="ltr" class="font-mono">Read/Write</span> للملف الكامل · <span dir="ltr" class="font-mono">Edit</span> لنص فريد فقط.</span><span class="lang-en"><span dir="ltr" class="font-mono">Read/Write</span> for full files · <span dir="ltr" class="font-mono">Edit</span> for unique text only.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">فشل <span dir="ltr" class="font-mono">Edit</span> بعدم التفرّد ("appears N times")؟ البديل الموثوق: <span dir="ltr" class="font-mono">Read + Write</span>.</span><span class="lang-en"><span dir="ltr" class="font-mono">Edit</span> failed on non-uniqueness ("appears N times")? The reliable fallback: <span dir="ltr" class="font-mono">Read + Write</span>.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">افهم تدريجيًا: <span dir="ltr" class="font-mono">Grep</span> نقاط الدخول ثم <span dir="ltr" class="font-mono">Read</span> بتتبّع الـ imports — "اقرأ كل شيء مقدمًا" مضادّ نمط يستنزف السياق.</span><span class="lang-en">Understand incrementally: <span dir="ltr" class="font-mono">Grep</span> entry points, then <span dir="ltr" class="font-mono">Read</span> following imports — "read everything upfront" is a context-exhausting anti-pattern.</span></span></li>
+        <li class="flex items-start gap-2.5"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-300 shrink-0 mt-1"></i><span><span class="lang-ar">وحدات التغليف: احصر كل الأسماء المُصدَّرة أولًا، ثم <span dir="ltr" class="font-mono">Grep</span> عن كل اسم — فلا يفوتك مستدعٍ خلف إعادة تصدير.</span><span class="lang-en">Wrapper modules: list all exported names first, then <span dir="ltr" class="font-mono">Grep</span> each one — no caller hides behind a re-export.</span></span></li>
+      </ul>
+    </section>
+
+    <!-- ===== PAGER ===== -->
+    <nav class="grid sm:grid-cols-2 gap-4" aria-label="pagination">
+      <a href="2-4-mcp-servers.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4">
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-start">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">السابق · 2.4</span><span class="lang-en">Previous · 2.4</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">دمج خوادم MCP</span><span class="lang-en">MCP server integration</span></p>
+        </div>
+      </a>
+      <a href="../domain-3/index.html" class="group bg-white rounded-2xl border border-surface-200 p-6 hover:border-emerald-300 hover:shadow-md transition-all flex items-center gap-4 sm:flex-row-reverse">
+        <i data-lucide="arrow-left" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-ar"></i>
+        <i data-lucide="arrow-right" class="w-6 h-6 text-surface-400 group-hover:text-emerald-600 transition-colors shrink-0 lang-en"></i>
+        <div class="text-end sm:text-start w-full">
+          <p class="text-xs text-surface-400 font-mono mb-0.5"><span class="lang-ar">التالي · الدومين 3</span><span class="lang-en">Next · Domain 3</span></p>
+          <p class="font-semibold text-surface-900 group-hover:text-emerald-700 transition-colors"><span class="lang-ar">إعداد Claude Code وسير العمل</span><span class="lang-en">Claude Code Configuration &amp; Workflows</span></p>
+        </div>
+      </a>
+    </nav>
+
+  </main>
+
+  <!-- ===== Footer (identical on every page) ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>

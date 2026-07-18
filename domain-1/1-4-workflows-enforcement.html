@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.4 سير العمل: الفرض والتسليم — CCAF مرجع</title>
+  <meta name="description" content="CCAF Task 1.4 — multi-step workflows with enforcement and handoff: programmatic prerequisite gates vs prompt guidance, blocking process_refund until get_customer verifies identity, multi-concern decomposition, and structured handoff summaries for human escalation. Bilingual AR/EN lesson.">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            arabic: ['IBM Plex Sans Arabic', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {50:'#f0f7ff',100:'#e0effe',200:'#bae0fd',300:'#7ccbfc',400:'#36b3f8',500:'#0c99e9',600:'#0079c7',700:'#0060a1',800:'#055285',900:'#0a446e',950:'#072b49'},
+            surface: {50:'#f8fafc',100:'#f1f5f9',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1e293b',900:'#0f172a',950:'#020617'}
+          }
+        }
+      }
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .text-balance { text-wrap: balance; }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+    }
+    pre[class*="language-"] { border-radius: 0.75rem; font-size: 0.85rem; margin: 0; direction: ltr; text-align: left; }
+    code[class*="language-"] { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Bilingual visibility rules (DO NOT CHANGE) ===== */
+    html[data-lang="ar"] .lang-en { display: none !important; }
+    html[data-lang="en"] .lang-ar { display: none !important; }
+
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body class="bg-surface-50 font-arabic text-surface-800 antialiased min-h-screen">
+
+  <!-- ===== Reading progress bar ===== -->
+  <div id="reading-progress" class="fixed top-0 left-0 h-1 bg-brand-500 z-50 transition-all duration-150" style="width:0%"></div>
+
+  <!-- ===== Sticky Nav ===== -->
+  <nav class="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <a href="../index.html" class="flex items-center gap-2 shrink-0">
+        <span class="bg-gradient-to-br from-brand-500 to-brand-700 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg font-mono">CCAF</span>
+        <span class="font-bold text-surface-900 hidden sm:inline"><span class="lang-ar">مرجع المعماري المعتمد</span><span class="lang-en">Architect Reference</span></span>
+      </a>
+      <div class="flex items-center gap-1 overflow-x-auto scrollbar-thin text-sm">
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <a href="../domain-1/index.html" aria-current="page" class="px-3 py-1.5 rounded-lg bg-surface-100 text-surface-900 font-semibold whitespace-nowrap font-mono transition-colors">D1</a>
+        <a href="../domain-2/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D2</a>
+        <a href="../domain-3/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D3</a>
+        <a href="../domain-4/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D4</a>
+        <a href="../domain-5/index.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap font-mono transition-colors">D5</a>
+        <a href="../practice-exam.html" class="px-3 py-1.5 rounded-lg hover:bg-surface-100 text-surface-600 whitespace-nowrap transition-colors"><span class="lang-ar">اختبار تجريبي</span><span class="lang-en">Practice</span></a>
+      </div>
+      <button onclick="toggleLang()" class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface-300 hover:border-brand-400 hover:bg-brand-50 text-sm font-medium transition-all">
+        <i data-lucide="languages" class="w-4 h-4 text-brand-600"></i>
+        <span class="lang-ar font-mono">EN</span>
+        <span class="lang-en">عربي</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ===== Compact hero ===== -->
+  <header class="bg-gradient-to-bl from-brand-900 via-brand-800 to-surface-900 text-white">
+    <div class="max-w-4xl mx-auto px-4 py-8 sm:py-10">
+      <nav class="flex items-center gap-2 text-brand-200 text-sm mb-5 flex-wrap" aria-label="breadcrumb">
+        <a href="../index.html" class="hover:text-white transition-colors"><span class="lang-ar">الرئيسية</span><span class="lang-en">Home</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <a href="index.html" class="hover:text-white transition-colors"><span class="lang-ar">الدومين 1</span><span class="lang-en">Domain 1</span></a>
+        <i data-lucide="chevron-left" class="w-4 h-4 lang-ar"></i>
+        <i data-lucide="chevron-right" class="w-4 h-4 lang-en"></i>
+        <span class="text-white font-medium"><span class="lang-ar">الفرض والتسليم</span><span class="lang-en">Enforcement &amp; handoff</span></span>
+      </nav>
+      <div class="flex items-center gap-3 mb-3">
+        <span class="bg-white/15 border border-white/20 font-mono font-bold text-lg px-3 py-1.5 rounded-xl shrink-0">1.4</span>
+        <h1 class="text-2xl sm:text-3xl font-bold text-balance">
+          <span class="lang-ar">سير العمل متعدد الخطوات: الفرض والتسليم</span>
+          <span class="lang-en">Multi-step workflows: enforcement &amp; handoff</span>
+        </h1>
+      </div>
+      <p class="text-brand-100 leading-relaxed max-w-3xl">
+        <span class="lang-ar">لما تكون الغلطة بفلوس أو هوية عميل، «البرومبت قال له» ما هي حجة. هنا تتعلم متى تفرض الترتيب بالكود، وكيف تسلّم الحالة للبشر تسليمًا محترمًا.</span>
+        <span class="lang-en">When the mistake costs money or a customer's identity, "the prompt told it to" is no defense. Here you learn when to enforce ordering in code, and how to hand a case to humans properly.</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-12">
+
+    <!-- ===== Objectives ===== -->
+    <section id="objectives" class="scroll-mt-20">
+      <div class="bg-white rounded-2xl border border-surface-200 border-s-4 border-s-brand-500 p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="target" class="w-6 h-6 text-brand-600"></i>
+          <h2 class="text-xl font-bold text-surface-900">
+            <span class="lang-ar">وش بتتعلم</span>
+            <span class="lang-en">What you'll learn</span>
+          </h2>
+        </div>
+        <ul class="lang-ar space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفرّق بين الفرض البرمجي (hooks وبوابات مسبقة) والتوجيه بالبرومبت لترتيب خطوات سير العمل.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تعرف أن تعليمات البرومبت وحدها لها نسبة فشل غير صفرية حين يكون الامتثال الحتمي مطلوبًا (مثل التحقق من الهوية قبل العمليات المالية).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تبني بوابة مسبقة تحجب <span dir="ltr" class="font-mono text-brand-700">process_refund</span> حتى يُرجع <span dir="ltr" class="font-mono text-brand-700">get_customer</span> هوية عميل متحقَّقة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تفكّك الطلب متعدد الهموم لعناصر منفصلة، تحقّق فيها بالتوازي بسياق مشترك، ثم توحّد الحل.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>تجهّز ملخّص تسليم منظّمًا للتصعيد أثناء العملية: هوية العميل، السبب الجذري، المبلغ، والإجراء الموصى به.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2.5 text-surface-700 leading-relaxed list-none">
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Distinguish programmatic enforcement (hooks and prerequisite gates) from prompt-based guidance for workflow ordering.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Know that prompt instructions alone carry a non-zero failure rate when deterministic compliance is required (e.g. identity verification before financial operations).</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Build a prerequisite gate that blocks <span dir="ltr" class="font-mono text-brand-700">process_refund</span> until <span dir="ltr" class="font-mono text-brand-700">get_customer</span> returns a verified customer ID.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Decompose multi-concern requests into distinct items, investigate each in parallel with shared context, then synthesize a unified resolution.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="check" class="w-5 h-5 text-brand-500 shrink-0 mt-0.5"></i><span>Compile a structured handoff summary for mid-process escalation: customer ID, root cause, amount, and recommended action.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Section 1: enforcement vs guidance ===== -->
+    <section id="enforcement-vs-guidance" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">01</span>
+        <span class="lang-ar">فرض برمجي أم توجيه بالبرومبت؟</span>
+        <span class="lang-en">Programmatic enforcement or prompt guidance?</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الفكرة المحورية في هذا الموضوع كله: تعليمة البرومبت — مهما كانت واضحة ومكرّرة — هي <span class="font-semibold">«رجاء» موجّه للموديل</span>، والموديل كيان احتمالي. يعني حتى لو التزم 99% من المرات، تظل هناك <span class="font-semibold text-red-700">نسبة فشل غير صفرية</span>. في نبرة الرد أو أسلوب الشرح، الـ 1% ما تضرّ. لكن في التحقق من هوية العميل قبل عملية مالية؟ الـ 1% تعني استردادات لحسابات خاطئة ومشكلة امتثال حقيقية.</p>
+        <p>القاعدة اللي يبنى عليها نصف هذا الدومين: <span class="font-semibold">إذا كان الامتثال الحتمي مطلوبًا، انقل القاعدة من البرومبت إلى الكود</span> — بوابة مسبقة (prerequisite gate) أو hook. البرومبت يبقى للتوجيه السلوكي اللي يُحتمل فيه الخطأ النادر. الاختبار يعيد صياغة هذي الفكرة بعشر طرق، وكل مرة الجواب نفسه.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The pivotal idea behind this whole topic: a prompt instruction — however clear and however often repeated — is <span class="font-semibold">a "please" addressed to the model</span>, and the model is a probabilistic system. Even at 99% compliance, there remains a <span class="font-semibold text-red-700">non-zero failure rate</span>. For tone of voice or explanation style, that 1% is harmless. For verifying a customer's identity before a financial operation? That 1% means refunds to the wrong accounts and a genuine compliance problem.</p>
+        <p>The rule half this domain is built on: <span class="font-semibold">when deterministic compliance is required, move the rule from the prompt into code</span> — a prerequisite gate or a hook. Prompts remain for behavioral guidance where a rare miss is tolerable. The exam rephrases this idea ten different ways, and the answer is the same every time.</p>
+      </div>
+
+      <div class="lang-ar overflow-x-auto rounded-xl border border-surface-200" dir="rtl">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">فرض برمجي (بوابة / hook)</th>
+              <th class="p-3 text-start font-semibold text-surface-600">توجيه بالبرومبت</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">طبيعة الامتثال</td><td class="p-3">حتمي — يتنفّذ 100% من المرات</td><td class="p-3 text-surface-600">احتمالي — نسبة فشل غير صفرية</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">أين يعيش؟</td><td class="p-3">في الكود، خارج اجتهاد الموديل</td><td class="p-3 text-surface-600">داخل اجتهاد الموديل</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">مثال مناسب</td><td class="p-3">تحقق الهوية قبل الاسترداد، حدود المبالغ</td><td class="p-3 text-surface-600">النبرة، ترتيب الشرح، التفضيلات العامة</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">متى تختاره؟</td><td class="p-3">عواقب مالية / قانونية / هوية</td><td class="p-3 text-surface-600">سلوك يُحتمل فيه الخطأ النادر</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="lang-en overflow-x-auto rounded-xl border border-surface-200" dir="ltr">
+        <table class="w-full text-sm">
+          <thead class="bg-surface-100">
+            <tr>
+              <th class="p-3 text-start font-semibold text-surface-700"></th>
+              <th class="p-3 text-start font-semibold text-brand-700">Programmatic (gate / hook)</th>
+              <th class="p-3 text-start font-semibold text-surface-600">Prompt guidance</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-100">
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Compliance</td><td class="p-3">Deterministic — fires 100% of the time</td><td class="p-3 text-surface-600">Probabilistic — non-zero failure rate</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Where it lives</td><td class="p-3">In code, outside the model's judgment</td><td class="p-3 text-surface-600">Inside the model's judgment</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Good fit</td><td class="p-3">Identity before refunds, amount limits</td><td class="p-3 text-surface-600">Tone, explanation order, soft preferences</td></tr>
+            <tr class="hover:bg-surface-50"><td class="p-3 font-medium">Choose it when</td><td class="p-3">Financial / legal / identity stakes</td><td class="p-3 text-surface-600">Behavior where a rare miss is tolerable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Key concept -->
+      <div class="bg-brand-50 border border-brand-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="key" class="w-5 h-5 text-brand-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-brand-900 leading-relaxed"><span class="font-bold">مفهوم أساسي:</span> لو السؤال فيه فلوس أو هوية، والخيارات تقابل «حسّن البرومبت» بـ «افرضها بوابةً/هوكًا» — <span class="font-semibold">الفرض البرمجي هو الجواب دائمًا</span>. البرومبت احتمالي، والبوابة حتمية.</div>
+          <div class="lang-en text-brand-900 leading-relaxed"><span class="font-bold">Key concept:</span> if the question involves money or identity, and the options pit "improve the prompt" against "enforce it with a gate/hook" — <span class="font-semibold">programmatic enforcement is always the answer</span>. The prompt is probabilistic; the gate is deterministic.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 2: prerequisite gate ===== -->
+    <section id="prerequisite-gate" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">02</span>
+        <span class="lang-ar">البوابة المسبقة: احجب الأداة حتى يكتمل شرطها</span>
+        <span class="lang-en">The prerequisite gate: block the tool until its precondition holds</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>الحالة النموذجية من سيناريو 1: بيانات الإنتاج تكشف أن الوكيل أحيانًا يتخطّى <span dir="ltr" class="font-mono text-brand-700">get_customer</span> ويستدعي <span dir="ltr" class="font-mono text-brand-700">lookup_order</span> بالاسم المنطوق فقط — والنتيجة حسابات مُشخّصة غلط واستردادات خاطئة. الحل المعماري: <span class="font-semibold">بوابة مسبقة</span> في الكود تحجب النداءات اللاحقة (<span dir="ltr" class="font-mono text-brand-700">lookup_order</span> و<span dir="ltr" class="font-mono text-brand-700">process_refund</span>) إلى أن يكون <span dir="ltr" class="font-mono text-brand-700">get_customer</span> قد أرجع فعلًا معرّف عميل <span class="font-semibold">متحقَّقًا منه</span>.</p>
+        <p>لاحظ أن البوابة <span class="font-semibold">تفحص حالة فعلية</span> («هل رجعت هوية متحقَّقة؟») مو نية الموديل. الموديل ممكن «يعتقد» أنه تحقق؛ البوابة لا تهتم بالاعتقاد — تفتح فقط عند تحقق الشرط في البيانات. وهذا الفرق بينها وبين أي تحسين برومبتي.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>The canonical case from Scenario 1: production data shows the agent sometimes skips <span dir="ltr" class="font-mono text-brand-700">get_customer</span> and calls <span dir="ltr" class="font-mono text-brand-700">lookup_order</span> using only the customer's stated name — yielding misidentified accounts and incorrect refunds. The architectural fix: a <span class="font-semibold">prerequisite gate</span> in code that blocks the downstream calls (<span dir="ltr" class="font-mono text-brand-700">lookup_order</span> and <span dir="ltr" class="font-mono text-brand-700">process_refund</span>) until <span dir="ltr" class="font-mono text-brand-700">get_customer</span> has actually returned a <span class="font-semibold">verified</span> customer ID.</p>
+        <p>Note that the gate <span class="font-semibold">checks actual state</span> ("did a verified ID come back?"), not the model's intent. The model may "believe" it verified; the gate doesn't care about beliefs — it opens only when the condition holds in the data. That is the difference between it and any prompt improvement.</p>
+      </div>
+
+      <!-- Diagram 1: gate flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-3">
+          <div class="flex flex-wrap items-center justify-center gap-2 text-center">
+            <div class="bg-surface-100 border border-surface-300 rounded-lg px-3 py-2 text-xs font-mono font-medium text-surface-700">customer message</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-brand-600 text-white rounded-lg px-3 py-2 text-xs font-mono font-bold">get_customer</div>
+            <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 shrink-0"></i>
+            <div class="bg-brand-100 border-2 border-brand-300 rounded-lg px-3 py-2 text-xs font-mono font-bold text-brand-800">verified ID?</div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="bg-emerald-50 border border-emerald-300 rounded-xl p-3 space-y-2">
+              <div class="flex items-center justify-center gap-1.5">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+                <span class="text-xs font-mono font-bold text-emerald-800">yes -- gate opens</span>
+              </div>
+              <div class="flex items-center justify-center gap-1.5">
+                <span class="bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-emerald-900">lookup_order</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-emerald-500"></i>
+                <span class="bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-emerald-900">process_refund</span>
+              </div>
+            </div>
+            <div class="bg-red-50 border border-red-300 rounded-xl p-3 space-y-2">
+              <div class="flex items-center justify-center gap-1.5">
+                <i data-lucide="shield-x" class="w-4 h-4 text-red-600"></i>
+                <span class="text-xs font-mono font-bold text-red-800">no -- gate stays shut</span>
+              </div>
+              <div class="text-center">
+                <span class="bg-white border border-red-200 rounded-lg px-2.5 py-1.5 text-[11px] font-mono text-red-900 inline-block">order/refund tools BLOCKED -- ask for identifiers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">بوابة في الكود: أدوات الطلبات والاسترداد لا تنفتح إلا بعد هوية متحقَّقة — بغضّ النظر عن «قناعة» الموديل.</span>
+          <span class="lang-en">A gate in code: order and refund tools open only after a verified identity — regardless of the model's "confidence."</span>
+        </p>
+      </div>
+
+      <!-- Code: gate -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">بوابة مسبقة: امنع الاسترداد قبل التحقق من الهوية</span>
+          <span class="lang-en">A prerequisite gate: block refunds until identity is verified</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-python"># Deterministic gate: identity MUST be verified before any order/refund tool runs.
+GATED_TOOLS = {"lookup_order", "process_refund"}
+verified_customer_id = None
+
+def before_tool(name, args):
+    """Runs before every tool call (enforced in code, not by a prompt)."""
+    if name in GATED_TOOLS and verified_customer_id is None:
+        # Do NOT let the model proceed on a stated name alone.
+        raise PrerequisiteError(
+            "get_customer must return a verified customer_id before this tool."
+        )
+
+def after_tool(name, result):
+    """Record the verified identity so the gate opens exactly when satisfied."""
+    global verified_customer_id
+    if name == "get_customer" and result.get("verified") is True:
+        verified_customer_id = result["customer_id"]</code></pre>
+        </div>
+      </div>
+
+      <!-- Quick insight -->
+      <div class="bg-sky-50 border border-sky-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="zap" class="w-5 h-5 text-sky-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-sky-900 leading-relaxed"><span class="font-bold">لمحة سريعة:</span> البوابة تعالج مشكلة <span class="font-semibold">ترتيب</span> («تحقق قبل ما تسترد»)، بينما مصنّف التوجيه يعالج مشكلة <span class="font-semibold">توفّر</span> («أي أدوات تُعرض لهذا الطلب»). سؤال الدليل الرسمي الأول يميّز بينهما بالضبط — لا تخلطهما.</div>
+          <div class="lang-en text-sky-900 leading-relaxed"><span class="font-bold">Quick insight:</span> a gate solves an <span class="font-semibold">ordering</span> problem ("verify before refunding"), while a routing classifier solves an <span class="font-semibold">availability</span> problem ("which tools are exposed for this request"). The guide's first official sample question hinges on exactly that distinction — don't conflate them.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Section 3: multi-concern requests ===== -->
+    <section id="multi-concern" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">03</span>
+        <span class="lang-ar">الطلبات متعددة الهموم: فكّك، حقّق بالتوازي، وحّد</span>
+        <span class="lang-en">Multi-concern requests: decompose, investigate in parallel, unify</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>رسالة عميل واقعية نادرًا ما تحمل همًّا واحدًا: «طلبي وصل ناقص، وانخصم مني مرتين، وأبغى أغيّر عنوان التوصيل الجاي». التعامل معها كسؤال واحد يعني إجابة تلمّ أطرافها وتفوّت التفاصيل. النمط الصحيح ثلاث خطوات: (1) <span class="font-semibold">فكّك</span> الرسالة إلى عناصر منفصلة (نقص بالشحنة / خصم مكرر / تحديث عنوان)؛ (2) <span class="font-semibold">حقّق في كل عنصر بالتوازي</span> مستفيدًا من <span class="font-semibold">سياق مشترك</span> — هوية العميل المتحقَّقة وسجل الطلب يُجلبان مرة واحدة ويخدمان التحقيقات الثلاثة؛ (3) <span class="font-semibold">وحّد الحل</span> في رد واحد متماسك يعالج كل همّ بنتيجته.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>A real customer message rarely carries one concern: "my order arrived incomplete, I was charged twice, and I want to change my next delivery address." Treating it as a single question produces an answer that skims all three and nails none. The correct pattern has three steps: (1) <span class="font-semibold">decompose</span> the message into distinct items (short shipment / duplicate charge / address update); (2) <span class="font-semibold">investigate each in parallel</span> over <span class="font-semibold">shared context</span> — the verified identity and order record are fetched once and serve all three investigations; (3) <span class="font-semibold">synthesize a unified resolution</span>: one coherent reply addressing every concern with its outcome.</p>
+      </div>
+
+      <!-- Diagram 2: multi-concern flow -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6">
+        <div dir="ltr" class="max-w-2xl mx-auto space-y-3">
+          <div class="text-center">
+            <div class="bg-surface-100 border border-surface-300 rounded-lg px-3 py-2 text-[11px] font-mono text-surface-700 inline-block">"missing item + double charge + address change"</div>
+          </div>
+          <div class="flex justify-center"><i data-lucide="split" class="w-5 h-5 text-brand-500"></i></div>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-2 py-2 text-[10px] font-mono text-brand-800">concern 1<br>missing item</div>
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-2 py-2 text-[10px] font-mono text-brand-800">concern 2<br>double charge</div>
+            <div class="bg-brand-50 border border-brand-200 rounded-lg px-2 py-2 text-[10px] font-mono text-brand-800">concern 3<br>address change</div>
+          </div>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 text-center text-[10px] font-mono text-amber-800">parallel investigation over SHARED context (verified customer + order record)</div>
+          <div class="flex justify-center"><i data-lucide="merge" class="w-5 h-5 text-emerald-500"></i></div>
+          <div class="text-center">
+            <div class="bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-2 text-[11px] font-mono font-bold text-emerald-800 inline-block">one unified resolution reply</div>
+          </div>
+        </div>
+        <p class="text-center text-xs text-surface-500 mt-4">
+          <span class="lang-ar">تفكيك ← تحقيق متوازٍ بسياق مشترك ← توحيد: كل همّ يُعالج، والعميل يستلم ردًا واحدًا متكاملًا.</span>
+          <span class="lang-en">Decompose, investigate in parallel over shared context, unify: every concern handled, one complete reply.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== Section 4: structured handoff ===== -->
+    <section id="handoff" class="scroll-mt-20 space-y-6">
+      <h2 class="text-2xl font-bold text-surface-900 flex items-center gap-3">
+        <span class="bg-brand-100 text-brand-700 font-mono text-sm font-bold px-2.5 py-1 rounded-lg">04</span>
+        <span class="lang-ar">التسليم المنظّم: صعّد بملف، لا بلغز</span>
+        <span class="lang-en">Structured handoff: escalate with a file, not a riddle</span>
+      </h2>
+
+      <div class="lang-ar space-y-4 text-surface-700 leading-relaxed">
+        <p>أحيانًا يجب التصعيد في منتصف العملية — استثناء سياسة، حد صلاحيات، أو طلب صريح من العميل. المشكلة: الموظف البشري المستلم <span class="font-semibold text-red-700">لا يملك وصولًا لنص المحادثة</span>. لو صعّدت بـ «عميل غاضب يحتاج مساعدة»، أجبرت الموظف يبدأ من الصفر ويعيد على العميل نفس الأسئلة — أسوأ تجربة ممكنة.</p>
+        <p>بروتوكول التسليم المنظّم يرسل ملفًا مكتملًا: <span class="font-semibold">هوية العميل</span> (متحقَّقة)، <span class="font-semibold">تحليل السبب الجذري</span> (وش صار فعلًا)، <span class="font-semibold">تفاصيل مالية</span> (مبلغ الاسترداد المطلوب)، و<span class="font-semibold">الإجراء الموصى به</span> (وش يحتاج قرار بشري بالضبط وليش). الموظف يفتح الملف ويقرّر خلال ثوانٍ — والعميل ما يعيد قصته.</p>
+      </div>
+      <div class="lang-en space-y-4 text-surface-700 leading-relaxed">
+        <p>Sometimes you must escalate mid-process — a policy exception, an authority limit, or an explicit customer request. The problem: the receiving human agent <span class="font-semibold text-red-700">has no access to the conversation transcript</span>. Escalate with "angry customer needs help" and you force the human to start over and re-ask the customer everything — the worst possible experience.</p>
+        <p>A structured handoff protocol ships a complete file: the <span class="font-semibold">customer ID</span> (verified), a <span class="font-semibold">root cause analysis</span> (what actually happened), <span class="font-semibold">financial details</span> (the refund amount at stake), and the <span class="font-semibold">recommended action</span> (exactly what needs a human decision and why). The human opens the file and decides in seconds — and the customer never repeats their story.</p>
+      </div>
+
+      <!-- Code: handoff JSON -->
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-sm font-semibold text-surface-600">
+          <i data-lucide="code" class="w-4 h-4"></i>
+          <span class="lang-ar">ملخّص تسليم منظّم عند التصعيد لموظف بشري</span>
+          <span class="lang-en">A structured handoff summary for human escalation</span>
+        </div>
+        <div class="group relative" dir="ltr">
+          <button onclick="copyCode(this)" class="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-surface-700 hover:bg-surface-600 text-surface-100 text-xs px-2 py-1 rounded-md">Copy</button>
+          <pre class="!bg-surface-900 !p-4 overflow-x-auto"><code class="language-json">{
+  "escalation_reason": "policy_gap: competitor price match not covered by policy",
+  "customer_id": "CUS-84213",
+  "identity_verified": true,
+  "root_cause": "Customer wants a price match vs a competitor; policy only covers own-site drops within 14 days.",
+  "concerns": [
+    { "order_id": "ORD-55190", "issue": "price_match_request", "amount_requested": 42.00 },
+    { "order_id": "ORD-55190", "issue": "late_delivery_credit", "amount_requested": 10.00 }
+  ],
+  "refund_amount_at_stake": 52.00,
+  "recommended_action": "Human decides on a one-time goodwill credit; no policy precedent exists.",
+  "summary_for_human": "Verified customer, 1 order, 2 concerns; agent lacks authority on the price match."
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- Warning -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+        <div class="space-y-1">
+          <div class="lang-ar text-amber-900 leading-relaxed"><span class="font-bold">تنبيه:</span> صمّم الملخّص على افتراض أن قارئه <span class="font-semibold">ما شاف أي شيء</span> من المحادثة. أي معلومة «بديهية عندك» وغير مكتوبة في الملخّص = معلومة ضائعة عند الموظف.</div>
+          <div class="lang-en text-amber-900 leading-relaxed"><span class="font-bold">Warning:</span> design the summary assuming its reader <span class="font-semibold">saw none</span> of the conversation. Any fact that is "obvious to you" but unwritten in the summary is a fact the human never receives.</div>
+        </div>
+      </div>
+
+      <!-- Exam trap -->
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="alert-octagon" class="w-5 h-5 text-red-600"></i>
+          <h3 class="font-bold text-red-800"><span class="lang-ar">فخ الاختبار</span><span class="lang-en">Exam trap</span></h3>
+        </div>
+        <ul class="space-y-2.5 text-sm text-red-900/90">
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">«12% من الحالات يتخطّى الوكيل <span dir="ltr" class="font-mono">get_customer</span>» ← الجواب بوابة برمجية؛ «شدّد البرومبت» و«أضف few-shot» و«مصنّف توجيه» ثلاثتها مشتّتات (الأولان احتماليان، والثالث يحل مشكلة توفّر لا ترتيب).</span><span class="lang-en">"In 12% of cases the agent skips <span dir="ltr" class="font-mono">get_customer</span>" — the answer is a programmatic gate; "strengthen the prompt," "add few-shot," and "a routing classifier" are all distractors (the first two are probabilistic; the third solves availability, not ordering).</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">التصعيد بجملة عامة أو برسالة «راجع المحادثة» — الموظف لا يرى المحادثة أصلًا؛ الصحيح ملخّص منظّم بالحقول الأربعة.</span><span class="lang-en">Escalating with a vague line or "see the conversation" — the human can't see the conversation at all; correct is a structured summary with the four fields.</span></span></li>
+          <li class="flex gap-2"><i data-lucide="x" class="w-4 h-4 text-red-500 shrink-0 mt-0.5"></i><span><span class="lang-ar">معالجة رسالة متعددة الهموم همًّا تلو الآخر بردود منفصلة، أو تجاهل بعض الهموم — الصحيح: تفكيك، تحقيق متوازٍ بسياق مشترك، رد موحّد.</span><span class="lang-en">Handling a multi-concern message one concern at a time with separate replies, or dropping concerns — correct: decompose, parallel investigation over shared context, one unified reply.</span></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Real-life example ===== -->
+    <section id="real-life" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <span class="bg-amber-100 border border-amber-300 rounded-xl p-3 shrink-0"><i data-lucide="plane" class="w-6 h-6 text-amber-700"></i></span>
+          <div class="space-y-3">
+            <h2 class="font-bold text-amber-900 text-xl">
+              <span class="lang-ar">مثال من الحياة: بوابة صعود الطائرة</span>
+              <span class="lang-en">Real-life example: the airport boarding gate</span>
+            </h2>
+            <div class="lang-ar text-amber-900/90 leading-relaxed space-y-3">
+              <p>في المطار نوعان من «القواعد». اللوحة المكتوب عليها «جهّزوا جوازاتكم وبطاقات الصعود» — هذا <span class="font-semibold">البرومبت</span>: توجيه مفيد، وأغلب الناس يلتزمون به، لكن دائمًا فيه واحد واصل البوابة وجوازه في قاع الشنطة. أما <span class="font-semibold">بوابة الصعود نفسها فما تفتح إلا بمسح بطاقة صالحة</span> — هذي البوابة المسبقة: ما تهتم كم أنت متأكد أنك «على هذي الرحلة»، ولا تقبل الرجاء ولا الاستعجال. الشرط يتحقق في النظام، أو ما تعدّي. صفر استثناءات، صفر ركاب على الرحلة الغلط.</p>
+              <p>ولما تنكشف مشكلة في جوازك، موظف البوابة ما يقول لك «روح لمكتب الجوازات واشرح لهم من الأول» — يطبع <span class="font-semibold">قسيمة تحويل منظّمة</span>: اسمك، رقم رحلتك، المشكلة بالضبط، والإجراء المطلوب. موظف المكتب — اللي ما حضر شيئًا مما جرى عند البوابة — يفتح القسيمة ويعرف كل شيء خلال ثوانٍ. هذا هو ملخّص التسليم المنظّم: المستلم يقرّر بسرعة لأن الملف كامل، مو لأنه سمع القصة.</p>
+            </div>
+            <div class="lang-en text-amber-900/90 leading-relaxed space-y-3">
+              <p>An airport runs on two kinds of "rules." The sign reading "have your passports and boarding passes ready" — that's <span class="font-semibold">the prompt</span>: useful guidance, and most people comply, but there's always someone at the gate with their passport at the bottom of a bag. The <span class="font-semibold">boarding gate itself, though, opens only on a valid scan</span> — that's the prerequisite gate: it doesn't care how certain you are that you're "on this flight," and accepts neither pleading nor urgency. The condition verifies in the system, or you don't pass. Zero exceptions, zero passengers on the wrong plane.</p>
+              <p>And when a problem surfaces with your passport, the gate agent doesn't say "go to the immigration desk and explain from the top" — they print a <span class="font-semibold">structured transfer slip</span>: your name, flight number, the exact problem, and the required action. The desk officer — who witnessed nothing at the gate — opens the slip and knows everything in seconds. That is the structured handoff summary: the receiver decides fast because the file is complete, not because they heard the story.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== On the exam ===== -->
+    <section id="on-exam" class="scroll-mt-20">
+      <div class="bg-surface-900 text-surface-100 rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="clipboard-check" class="w-6 h-6 text-brand-400"></i>
+          <h2 class="text-xl font-bold text-white"><span class="lang-ar">في الاختبار</span><span class="lang-en">On the exam</span></h2>
+        </div>
+        <div class="lang-ar text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">أسئلة 1.4 تعطيك نسبة فشل من الإنتاج («في X% من الحالات يتخطّى الوكيل خطوة إلزامية») أو موقف تصعيد، وتطلب الحل الأضمن.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>كلمات مثل «إلزامي»، «دائمًا»، «لا يفشل أبدًا»، «عواقب مالية» = المطلوب فرض برمجي (بوابة/hook)، واستبعد كل الخيارات البرومبتية فورًا.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>سؤال التصعيد الصحيح جوابه يذكر الحقول: هوية متحقَّقة، سبب جذري، مبلغ، إجراء موصى به — لأن المستلم بلا وصول للمحادثة.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>انتبه لمشتّت «مصنّف التوجيه»: يبدو تقنيًا مقنعًا لكنه يحل مشكلة توفّر الأدوات، والسؤال غالبًا عن ترتيب الخطوات.</span></li>
+          </ul>
+        </div>
+        <div class="lang-en text-sm leading-relaxed space-y-2.5">
+          <p class="text-surface-300">Task 1.4 questions hand you a production failure rate ("in X% of cases the agent skips a mandatory step") or an escalation situation, and ask for the most reliable fix.</p>
+          <ul class="space-y-2">
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>Words like "mandatory," "always," "never fails," "financial consequences" = programmatic enforcement (gate/hook) is required; eliminate every prompt-side option on sight.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i><span>The right escalation answer names the fields: verified ID, root cause, amount, recommended action — because the receiver has no transcript access.</span></li>
+            <li class="flex gap-2.5"><i data-lucide="x" class="w-4 h-4 text-red-400 shrink-0 mt-0.5"></i><span>Watch the "routing classifier" distractor: it sounds technically convincing but solves tool availability, while the question is usually about step ordering.</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Quick check ===== -->
+    <section id="quiz" class="scroll-mt-20 space-y-5">
+      <div class="flex items-center gap-3">
+        <i data-lucide="list-checks" class="w-6 h-6 text-brand-600"></i>
+        <h2 class="text-2xl font-bold text-surface-900">
+          <span class="lang-ar">فحص سريع</span>
+          <span class="lang-en">Quick check</span>
+        </h2>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-200 p-4 flex items-center justify-between gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <span class="text-surface-500"><span class="lang-ar">النتيجة</span><span class="lang-en">Score</span></span>
+          <span class="font-bold text-brand-700 font-mono" dir="ltr"><span id="score">0</span>/<span id="total-q">3</span></span>
+        </div>
+        <div class="flex items-center gap-3 flex-1 justify-end">
+          <span class="text-surface-500"><span id="answered">0</span> <span class="lang-ar">مُجاب</span><span class="lang-en">answered</span></span>
+          <div class="w-28 h-2 bg-surface-200 rounded-full overflow-hidden">
+            <div id="progress-bar" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q1">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">1</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">عميل يكتب: «الشحنة ناقصة قطعة، وانخصم مني مرتين، وأبغى أأجّل التوصيل الجاي أسبوعًا». وش النمط الصحيح للتعامل؟</span>
+            <span class="lang-en">A customer writes: "my shipment is missing an item, I was charged twice, and I want to postpone the next delivery a week." What is the correct handling pattern?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">عالج الهمّ الأول فقط واطلب من العميل فتح تذكرة لكل همّ آخر</span>
+            <span class="lang-en">Handle the first concern only and ask the customer to open a ticket per remaining concern</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">فكّك الرسالة لثلاثة عناصر، حقّق فيها بالتوازي بسياق مشترك، ثم وحّد النتائج في رد واحد</span>
+            <span class="lang-en">Decompose the message into three items, investigate them in parallel over shared context, then unify the outcomes in one reply</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">صعّد مباشرة لموظف بشري لأن الرسالة معقّدة ومتعددة المواضيع</span>
+            <span class="lang-en">Escalate straight to a human because the message is complex and multi-topic</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أجب على الرسالة كوحدة واحدة بإجابة عامة تلمّ المواضيع الثلاثة</span>
+            <span class="lang-en">Answer the message as a single unit with one general reply skimming all three topics</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> هذا نصّ المهارة في الدليل: تفكيك الهموم لعناصر، تحقيق متوازٍ يستفيد من سياق مشترك (هوية وسجل يُجلبان مرة)، ثم حل موحّد.</span>
+              <span class="lang-en"><strong>Correct.</strong> That is the guide's skill verbatim: decompose the concerns into items, investigate in parallel over shared context (identity and record fetched once), then a unified resolution.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: فكّك ← حقّق بالتوازي بسياق مشترك ← وحّد. تجاهل الهموم ينقل العبء للعميل، والتصعيد الفوري تنازل عن حالة قابلة للحل، والرد العام يفوّت التفاصيل المالية الدقيقة.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct pattern: decompose, investigate in parallel over shared context, unify. Dropping concerns shifts work onto the customer, instant escalation surrenders a solvable case, and a general reply misses the precise financial details.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q2">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">2</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">سياسة الشركة: «لا عملية استرداد قبل تحقق هوية». أي تنفيذ يحقق التزامًا حتميًا 100%؟</span>
+            <span class="lang-en">Company policy: "no refund operation before identity verification." Which implementation achieves 100% deterministic compliance?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">تعليمة صريحة في برومبت النظام مع تحذير من مخالفتها</span>
+            <span class="lang-en">An explicit system prompt instruction with a stern warning against violating it</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">أمثلة few-shot تُظهر التحقق أولًا في خمس حالات متنوعة</span>
+            <span class="lang-en">Few-shot examples showing verification first across five varied cases</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">تكرار التعليمة في كل رسالة مستخدم آليًا</span>
+            <span class="lang-en">Auto-appending the instruction to every user message</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">فحص برمجي يعترض نداء <span dir="ltr" class="font-mono text-[0.9em]">process_refund</span> ويمنعه ما لم توجد هوية متحقَّقة في الحالة</span>
+            <span class="lang-en">A programmatic check intercepting the <span dir="ltr" class="font-mono text-[0.9em]">process_refund</span> call and blocking it unless a verified identity exists in state</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> الالتزام الحتمي 100% لا يأتي إلا من الكود: البوابة تفحص حالة فعلية وتُنفَّذ في كل نداء بلا استثناء. كل الخيارات البرومبتية تحسّن الاحتمال ولا تضمنه.</span>
+              <span class="lang-en"><strong>Correct.</strong> 100% deterministic compliance only comes from code: the gate checks actual state and runs on every call without exception. Every prompt-side option improves the odds but guarantees nothing.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: الاعتراض البرمجي. التعليمات والأمثلة والتكرار كلها «رجاء» احتمالي بنسبة فشل غير صفرية — والسؤال يطلب حتمية 100%.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct answer: programmatic interception. Instructions, examples, and repetition are all probabilistic "pleases" with a non-zero failure rate — and the question demands 100% determinism.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="bg-white rounded-2xl border border-surface-200 p-6 space-y-4" data-quiz="q3">
+        <div class="flex items-start gap-3">
+          <span class="bg-brand-100 text-brand-700 font-bold w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0">3</span>
+          <p class="font-semibold leading-relaxed text-surface-900">
+            <span class="lang-ar">وكيلك سيصعّد حالة استرداد خارج صلاحياته لموظف بشري لا يرى المحادثة. وش يجب أن يحمله التصعيد؟</span>
+            <span class="lang-en">Your agent is escalating a refund case beyond its authority to a human who cannot see the conversation. What must the escalation carry?</span>
+          </p>
+        </div>
+        <div class="space-y-2 ms-11">
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">إشعار مقتضب: «حالة تحتاج تدخلًا بشريًا عاجلًا»</span>
+            <span class="lang-en">A terse notice: "case needs urgent human intervention"</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">نسخة كاملة من نص المحادثة ليقرأها الموظف من أولها</span>
+            <span class="lang-en">A full transcript dump for the human to read from the top</span>
+          </button>
+          <button onclick="checkAnswer(this, true)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">ملخّص منظّم: هوية العميل المتحقَّقة، السبب الجذري، مبلغ الاسترداد، والإجراء الموصى به</span>
+            <span class="lang-en">A structured summary: verified customer ID, root cause, refund amount, and the recommended action</span>
+          </button>
+          <button onclick="checkAnswer(this, false)" class="quiz-option w-full text-start p-4 rounded-xl border-2 border-surface-200 hover:border-brand-300 hover:bg-brand-50/50 transition-all text-surface-700 text-sm leading-relaxed">
+            <span class="lang-ar">رقم العميل فقط، والموظف يتواصل معه ويسمع القصة من جديد</span>
+            <span class="lang-en">Just the customer number, letting the human call and hear the story again</span>
+          </button>
+        </div>
+        <div class="hidden feedback-correct ms-11 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="check-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>صحيح.</strong> هذي الحقول الأربعة المنصوصة في الدليل — تعطي المستلم قرارًا جاهز التجهيز خلال ثوانٍ دون أن يعيد العميل قصته.</span>
+              <span class="lang-en"><strong>Correct.</strong> Those are the four fields the guide names — giving the receiver a decision-ready file in seconds without the customer repeating their story.</span>
+            </div>
+          </div>
+        </div>
+        <div class="hidden feedback-wrong ms-11 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm leading-relaxed">
+          <div class="flex items-start gap-2">
+            <i data-lucide="x-circle" class="w-5 h-5 shrink-0 mt-0.5"></i>
+            <div>
+              <span class="lang-ar"><strong>خطأ.</strong> الصحيح: الملخّص المنظّم بالحقول الأربعة. الإشعار المقتضب بلا معلومات، والنص الكامل يستهلك وقت الموظف بحثًا عن الجوهر (وقد لا يكون متاحًا أصلًا)، وإعادة سؤال العميل أسوأ تجربة ممكنة.</span>
+              <span class="lang-en"><strong>Not quite.</strong> The correct payload: the structured summary with the four fields. A terse notice carries no information, a raw transcript burns the human's time hunting for the essentials (and may not even be available), and re-interviewing the customer is the worst possible experience.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results panel -->
+      <div id="results-panel" class="hidden bg-white rounded-2xl border-2 border-brand-200 p-8 text-center space-y-3">
+        <i data-lucide="trophy" class="w-12 h-12 text-brand-500 mx-auto"></i>
+        <div id="result-message" class="text-xl font-bold"></div>
+        <div class="text-4xl font-bold text-brand-600 font-mono" id="final-score" dir="ltr"></div>
+        <div class="text-surface-500 font-mono" id="final-pct" dir="ltr"></div>
+        <button onclick="quizState.reset()" class="mt-2 inline-flex items-center gap-2 px-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl transition-colors font-medium">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="lang-ar">أعد المحاولة</span><span class="lang-en">Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===== Takeaway ===== -->
+    <section id="takeaway" class="scroll-mt-20">
+      <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <i data-lucide="bookmark-check" class="w-6 h-6"></i>
+          <h2 class="text-xl font-bold"><span class="lang-ar">خلاصة</span><span class="lang-en">Takeaway</span></h2>
+        </div>
+        <ul class="lang-ar space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>برومبت = احتمالي بنسبة فشل غير صفرية؛ بوابة/hook = حتمي 100%. القواعد الملزمة للكود.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>احجب <span dir="ltr" class="font-mono">process_refund</span> (و<span dir="ltr" class="font-mono">lookup_order</span>) حتى يرجع <span dir="ltr" class="font-mono">get_customer</span> هوية متحقَّقة.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>البوابة تحل «الترتيب»، والمصنّف يحل «التوفّر» — لا تخلط بينهما.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>الطلب متعدد الهموم: فكّك ← حقّق بالتوازي بسياق مشترك ← وحّد الرد.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-left" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>التصعيد = ملخّص منظّم (هوية، سبب جذري، مبلغ، توصية) — المستلم لا يرى المحادثة.</span></li>
+        </ul>
+        <ul class="lang-en space-y-2 text-brand-50 leading-relaxed">
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Prompt = probabilistic with a non-zero failure rate; gate/hook = 100% deterministic. Binding rules go in code.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Block <span dir="ltr" class="font-mono">process_refund</span> (and <span dir="ltr" class="font-mono">lookup_order</span>) until <span dir="ltr" class="font-mono">get_customer</span> returns a verified ID.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Gates solve ordering; classifiers solve availability — never conflate the two.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Multi-concern requests: decompose, investigate in parallel over shared context, unify the reply.</span></li>
+          <li class="flex gap-2.5"><i data-lucide="chevron-right" class="w-4 h-4 shrink-0 mt-1 text-brand-300"></i><span>Escalation = a structured summary (ID, root cause, amount, recommendation) — the receiver can't see the transcript.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Pager ===== -->
+    <section aria-label="pager">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="1-3-subagents-context.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3">
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">السابق</span><span class="lang-en">Previous</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.3 الوكلاء الفرعيون وتمرير السياق</span><span class="lang-en">1.3 Subagents &amp; context passing</span></span>
+          </span>
+        </a>
+        <a href="1-5-hooks.html" class="group bg-white rounded-2xl border border-surface-200 hover:border-brand-300 hover:shadow-md transition-all p-5 flex items-center gap-3 text-end">
+          <span class="flex-1 min-w-0">
+            <span class="block text-xs text-surface-500 mb-0.5"><span class="lang-ar">التالي</span><span class="lang-en">Next</span></span>
+            <span class="block font-semibold text-surface-900 group-hover:text-brand-700 truncate"><span class="lang-ar">1.5 خطافات الـ Agent SDK</span><span class="lang-en">1.5 Agent SDK hooks</span></span>
+          </span>
+          <i data-lucide="arrow-left" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-ar"></i>
+          <i data-lucide="arrow-right" class="w-5 h-5 text-surface-400 group-hover:text-brand-600 shrink-0 lang-en"></i>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="bg-surface-900 text-surface-400 py-10 px-6 mt-16">
+    <div class="max-w-6xl mx-auto text-center space-y-3 text-sm">
+      <p class="font-semibold text-surface-300">
+        <span class="lang-ar">مرجع دراسي شامل لشهادة <span dir="ltr" class="font-mono">Claude Certified Architect – Foundations</span></span>
+        <span class="lang-en">Complete study reference for the Claude Certified Architect – Foundations certification</span>
+      </p>
+      <p>
+        <span class="lang-ar">مرجع غير رسمي أُعدّ لأغراض الدراسة — المصدر الرسمي هو دليل الاختبار من Anthropic</span>
+        <span class="lang-en">Unofficial study material — the official source is Anthropic's Exam Guide</span>
+      </p>
+      <p class="text-surface-500"><span class="lang-ar">أُعدّ هذا المرجع بأسلوب معلم التعليمي</span><span class="lang-en">Built in the Mu3allim educational style</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== Language toggle (identical on every page — DO NOT CHANGE) ===== */
+    function applyLang(l) {
+      document.documentElement.dataset.lang = l;
+      document.documentElement.lang = l;
+      document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+      try { localStorage.setItem('ccaf-lang', l); } catch (e) {}
+    }
+    function toggleLang() {
+      applyLang(document.documentElement.dataset.lang === 'ar' ? 'en' : 'ar');
+    }
+    (function () {
+      let saved = 'ar';
+      try { saved = localStorage.getItem('ccaf-lang') || 'ar'; } catch (e) {}
+      applyLang(saved);
+    })();
+
+    /* ===== Reading progress ===== */
+    window.addEventListener('scroll', function () {
+      const h = document.documentElement;
+      const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+      document.getElementById('reading-progress').style.width = pct + '%';
+    }, { passive: true });
+
+    /* ===== Copy code ===== */
+    function copyCode(btn) {
+      const code = btn.closest('.group').querySelector('code').textContent;
+      navigator.clipboard.writeText(code);
+      const prev = btn.innerHTML;
+      btn.innerHTML = '✓';
+      setTimeout(() => { btn.innerHTML = prev; }, 2000);
+    }
+
+    /* ===== Quiz ===== */
+    const quizState = {
+      currentScore: 0, totalAnswered: 0, totalQuestions: 0,
+      init() {
+        this.totalQuestions = document.querySelectorAll('[data-quiz]').length;
+        const t = document.getElementById('total-q'); if (t) t.textContent = this.totalQuestions;
+      },
+      answer(isCorrect) {
+        this.totalAnswered++;
+        if (isCorrect) this.currentScore++;
+        this.updateUI();
+      },
+      updateUI() {
+        const s = document.getElementById('score'), a = document.getElementById('answered'), p = document.getElementById('progress-bar');
+        if (s) s.textContent = this.currentScore;
+        if (a) a.textContent = this.totalAnswered;
+        if (p) p.style.width = Math.round((this.totalAnswered / this.totalQuestions) * 100) + '%';
+        if (this.totalAnswered === this.totalQuestions) this.showResults();
+      },
+      showResults() {
+        const results = document.getElementById('results-panel');
+        if (!results) return;
+        const pct = Math.round((this.currentScore / this.totalQuestions) * 100);
+        results.classList.remove('hidden');
+        document.getElementById('final-score').textContent = this.currentScore + '/' + this.totalQuestions;
+        document.getElementById('final-pct').textContent = pct + '%';
+        const msg = document.getElementById('result-message');
+        const isAr = document.documentElement.dataset.lang === 'ar';
+        if (pct >= 80) { msg.textContent = isAr ? 'ممتاز! جاهز للاختبار' : 'Excellent! Exam-ready'; msg.className = 'text-xl font-bold text-emerald-600'; }
+        else if (pct >= 50) { msg.textContent = isAr ? 'جيد، راجع النقاط اللي فاتتك' : 'Good — review what you missed'; msg.className = 'text-xl font-bold text-amber-600'; }
+        else { msg.textContent = isAr ? 'تحتاج مراجعة أعمق، لا تستسلم' : 'Needs deeper review — keep going'; msg.className = 'text-xl font-bold text-red-600'; }
+        results.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      reset() {
+        this.currentScore = 0; this.totalAnswered = 0;
+        const r = document.getElementById('results-panel'); if (r) r.classList.add('hidden');
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+          btn.disabled = false;
+          btn.classList.remove('opacity-50', '!border-emerald-500', '!bg-emerald-50', '!border-red-500', '!bg-red-50');
+        });
+        document.querySelectorAll('.feedback-correct, .feedback-wrong').forEach(el => el.classList.add('hidden'));
+        this.updateUI();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    function checkAnswer(btn, isCorrect) {
+      const card = btn.closest('[data-quiz]');
+      card.querySelectorAll('.quiz-option').forEach(o => { o.disabled = true; o.classList.add('opacity-50'); });
+      btn.classList.remove('opacity-50');
+      if (isCorrect) {
+        btn.classList.add('!border-emerald-500', '!bg-emerald-50');
+        card.querySelector('.feedback-correct').classList.remove('hidden');
+      } else {
+        btn.classList.add('!border-red-500', '!bg-red-50');
+        card.querySelector('.feedback-wrong').classList.remove('hidden');
+      }
+      quizState.answer(isCorrect);
+      lucide.createIcons();
+    }
+
+    lucide.createIcons();
+    quizState.init();
+  </script>
+</body>
+</html>
